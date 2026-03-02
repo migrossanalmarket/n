@@ -9,9 +9,7 @@
 <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;Tariktanta&quot;,&quot;short_name&quot;:&quot;Tariktanta&quot;,&quot;start_url&quot;:&quot;/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#08090d&quot;,&quot;theme_color&quot;:&quot;#08090d&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Font async yükle — ilk render'ı bloklamasın -->
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"></noscript>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
 :root {
  --theme-bg: #08090d;
@@ -22,22 +20,43 @@
  --theme-accent: #c8f135;
 }
 [data-theme="light"] {
- --theme-bg: #f5f5f0;
+ --theme-bg: #f0f0eb;
  --theme-surface: #ffffff;
- --theme-border: #e0e0d8;
- --theme-text: #1a1a1a;
- --theme-muted: #888;
- --theme-accent: #5a7a00;
+ --theme-border: #d0d0c8;
+ --theme-text: #111111;
+ --theme-muted: #555555;
+ --theme-accent: #4a6800;
 }
+[data-theme="light"] p,
+[data-theme="light"] li,
+[data-theme="light"] td,
+[data-theme="light"] th,
+[data-theme="light"] .card p,
+[data-theme="light"] .diff-block p,
+[data-theme="light"] .section-source,
+[data-theme="light"] .drop-item,
+[data-theme="light"] .drop-week-label,
+[data-theme="light"] .dash-subtitle,
+[data-theme="light"] .today-day,
+[data-theme="light"] .session-desc,
+[data-theme="light"] .session-name,
+[data-theme="light"] .wod-def,
+[data-theme="light"] .placeholder-sub { color: #222222; }
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] .card h4,
+[data-theme="light"] .diff-block h4,
+[data-theme="light"] .section-title,
+[data-theme="light"] .pomo-time { color: #080808; }
+[data-theme="light"] .app-logo,
+[data-theme="light"] .drop-label { color: #1a1a1a; }
+[data-theme="light"] .search-btn { color: #333333; border-color: #c0c0b8; }
+[data-theme="light"] .theme-toggle { color: #333333; border-color: #c0c0b8; }
+[data-theme="light"] kbd { background: #e8e8e0; color: #333333; border-color: #c0c0b8; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-/* Performans: GPU katmanları ve paint optimizasyonu */
-.app-panel { contain: layout style; }
-.app-switcher { contain: layout style; will-change: transform; }
-.course-card { contain: layout style paint; }
-.drop-menu { will-change: transform, opacity; }
-.app-panel.visible { will-change: auto; }
-img { loading: lazy; decoding: async; }
 body { background: var(--theme-bg); transition: background 0.3s, color 0.3s; }
 .app-switcher {
  position: fixed;
@@ -361,6 +380,10 @@ body { background: var(--theme-bg); transition: background 0.3s, color 0.3s; }
  transition: background 0.3s;
 }
 .pomo-dot.done { background: var(--theme-accent); }
+.app-link-btn { display:flex !important; align-items:center; gap:10px; }
+.app-link-btn img { border-radius:4px; flex-shrink:0; }
+[data-theme="dark"] .icon-invert-light { filter: invert(1); }
+[data-theme="light"] .icon-invert-light { filter: none; }
 @media (max-width: 768px) {
  .pomodoro-widget { margin: 16px 20px 0; padding: 16px 20px; }
 }
@@ -741,45 +764,54 @@ mark { background: rgba(200,241,53,0.25); color: var(--theme-text); border-radiu
  .schedule-section{padding:0 20px 32px}
  .shortcuts-bar{padding:12px 20px;display:none}
 }
- .course-card { position:relative; }
+/* ═══ GRADIENT BORDER KARTLAR ═══ */
+/* ═══ GRADIENT BORDER KARTLAR — JS ile döndürülür ═══ */
+.course-card { position:relative; }
 .course-card::after { content:''; position:absolute; inset:-1.5px; border-radius:17px; background:conic-gradient(#c8f135,#38bdf8,#a78bfa,#f97316,#c8f135); z-index:-1; opacity:0; transition:opacity 0.3s; }
 .course-card:hover::after { opacity:1; }
- .skeleton { background:linear-gradient(90deg,var(--theme-border) 25%,var(--theme-surface) 50%,var(--theme-border) 75%); background-size:200% 100%; animation:skelAnim 1.4s infinite; border-radius:6px; }
+/* ═══ SKELETON ═══ */
+.skeleton { background:linear-gradient(90deg,var(--theme-border) 25%,var(--theme-surface) 50%,var(--theme-border) 75%); background-size:200% 100%; animation:skelAnim 1.4s infinite; border-radius:6px; }
 @keyframes skelAnim { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
- .word-of-day { margin:0 20px 16px; padding:18px 24px; background:linear-gradient(135deg,rgba(200,241,53,0.06),rgba(56,189,248,0.06)); border:1px solid rgba(200,241,53,0.2); border-radius:14px; cursor:pointer; transition:all 0.2s; }
+/* ═══ GÜNÜN TERİMİ ═══ */
+.word-of-day { margin:0 20px 16px; padding:18px 24px; background:linear-gradient(135deg,rgba(200,241,53,0.06),rgba(56,189,248,0.06)); border:1px solid rgba(200,241,53,0.2); border-radius:14px; cursor:pointer; transition:all 0.2s; }
 .word-of-day:hover { border-color:rgba(200,241,53,0.5); transform:translateY(-1px); }
 .wod-label { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--theme-muted); margin-bottom:8px; }
 .wod-term { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; color:var(--theme-accent); margin-bottom:4px; }
 .wod-def { font-size:13px; color:var(--theme-muted); line-height:1.5; }
- .pwa-banner { display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--theme-surface); border:1px solid var(--theme-border); border-radius:14px; padding:14px 20px; z-index:9000; box-shadow:0 8px 32px rgba(0,0,0,0.4); align-items:center; gap:14px; max-width:340px; width:90%; }
+/* ═══ PWA BANNER ═══ */
+.pwa-banner { display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--theme-surface); border:1px solid var(--theme-border); border-radius:14px; padding:14px 20px; z-index:9000; box-shadow:0 8px 32px rgba(0,0,0,0.4); align-items:center; gap:14px; max-width:340px; width:90%; }
 .pwa-banner.show { display:flex; animation:panelFadeIn 0.3s ease; }
 .pwa-text { font-size:13px; color:var(--theme-text); line-height:1.4; }
 .pwa-text strong { color:var(--theme-accent); font-family:'Syne',sans-serif; }
 .pwa-btn { padding:8px 16px; background:var(--theme-accent); color:#08090d; border:none; border-radius:8px; font-family:'Syne',sans-serif; font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; }
 .pwa-close { background:none; border:none; color:var(--theme-muted); font-size:18px; cursor:pointer; padding:0 4px; }
- .ptr-indicator { position:fixed; top:52px; left:50%; transform:translateX(-50%) translateY(-60px); background:var(--theme-surface); border:1px solid var(--theme-border); border-radius:50px; padding:8px 18px; font-size:12px; color:var(--theme-accent); font-family:'Syne',sans-serif; font-weight:700; z-index:8000; transition:transform 0.25s; pointer-events:none; }
+/* ═══ PULL TO REFRESH ═══ */
+.ptr-indicator { position:fixed; top:52px; left:50%; transform:translateX(-50%) translateY(-60px); background:var(--theme-surface); border:1px solid var(--theme-border); border-radius:50px; padding:8px 18px; font-size:12px; color:var(--theme-accent); font-family:'Syne',sans-serif; font-weight:700; z-index:8000; transition:transform 0.25s; pointer-events:none; }
 .ptr-indicator.ptr-ready { transform:translateX(-50%) translateY(10px); }
- .pomo-sound-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+/* ═══ SES SEÇENEKLERİ ═══ */
+.pomo-sound-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
 .sound-opt { padding:5px 12px; border-radius:20px; border:1px solid var(--theme-border); background:none; color:var(--theme-muted); font-size:12px; cursor:pointer; transition:all 0.2s; font-family:'Syne',sans-serif; }
 .sound-opt.active { border-color:var(--theme-accent); color:var(--theme-accent); background:rgba(200,241,53,0.08); }
 .wave-canvas { display:block; width:100%; height:36px; margin-top:6px; opacity:0.5; }
- .dash-greeting { background:linear-gradient(135deg,var(--theme-accent),#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
- #cursor-glow { pointer-events:none; position:fixed; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle,rgba(200,241,53,0.07) 0%,transparent 70%); transform:translate(-50%,-50%); z-index:99998; transition:opacity 0.4s; opacity:0; }
+/* ═══ DİNAMİK SELAM GRADİENT ═══ */
+.dash-greeting { background:linear-gradient(135deg,var(--theme-accent),#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+/* ═══ CURSOR GLOW ═══ */
+#cursor-glow { pointer-events:none; position:fixed; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle,rgba(200,241,53,0.07) 0%,transparent 70%); transform:translate(-50%,-50%); z-index:99998; transition:opacity 0.4s; opacity:0; }
 [data-theme="light"] #cursor-glow { background:radial-gradient(circle,rgba(90,122,0,0.04) 0%,transparent 70%); }
 </style>
 </head>
 <body>
 <div id="cursor-glow"></div>
-
+<!-- UYGULAMALAR POPUP MENÜ - fixed pozisyon, overflow sorununu aşar -->
 <div id="apps-popup" style="display:none;position:fixed;top:52px;right:12px;background:var(--theme-surface);border:1px solid var(--theme-border);border-radius:10px;padding:6px;min-width:190px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.5);flex-direction:column;gap:2px">
   <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--theme-muted);padding:8px 14px 4px;border-bottom:1px solid var(--theme-border);margin-bottom:4px">📱 Hızlı Aç</div>
-  <button class="drop-item" onclick="openApp('instagram')">📸 Instagram</button>
-  <button class="drop-item" onclick="openApp('x')">𝕏 X (Twitter)</button>
-  <button class="drop-item" onclick="openApp('youtube')">▶️ YouTube</button>
-  <button class="drop-item" onclick="openApp('tiktok')">🎵 TikTok</button>
-  <button class="drop-item" onclick="openApp('spotify')">🎧 Spotify</button>
-  <button class="drop-item" onclick="openApp('github')">🐙 GitHub</button>
-  <button class="drop-item" onclick="openApp('coc')">⚔️ Clash of Clans</button>
+  <button class="drop-item app-link-btn" onclick="openApp('instagram')"><img src="https://cdn.simpleicons.org/instagram/E1306C" width="18" height="18" alt=""> Instagram</button>
+  <button class="drop-item app-link-btn" onclick="openApp('x')"><img src="https://cdn.simpleicons.org/x/000000" width="18" height="18" alt="" class="icon-invert-light"> X (Twitter)</button>
+  <button class="drop-item app-link-btn" onclick="openApp('youtube')"><img src="https://cdn.simpleicons.org/youtube/FF0000" width="18" height="18" alt=""> YouTube</button>
+  <button class="drop-item app-link-btn" onclick="openApp('tiktok')"><img src="https://cdn.simpleicons.org/tiktok/000000" width="18" height="18" alt="" class="icon-invert-light"> TikTok</button>
+  <button class="drop-item app-link-btn" onclick="openApp('spotify')"><img src="https://cdn.simpleicons.org/spotify/1DB954" width="18" height="18" alt=""> Spotify</button>
+  <button class="drop-item app-link-btn" onclick="openApp('github')"><img src="https://cdn.simpleicons.org/github/181717" width="18" height="18" alt="" class="icon-invert-light"> GitHub</button>
+  <button class="drop-item app-link-btn" onclick="openApp('coc')"><img src="https://cdn.simpleicons.org/supercell/0A3CFF" width="18" height="18" alt=""> Clash of Clans</button>
 </div>
 
 <style>
@@ -894,13 +926,17 @@ window.addEventListener('load',function(){
       Ara <kbd>⌘K</kbd>
     </button>
     <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Tema değiştir">🌙</button>
+    <div style="display:flex;gap:2px;align-items:center">
+      <button onclick="setLang('tr')" id="flag-tr" title="Türkçe" style="background:none;border:none;cursor:pointer;font-size:18px;padding:2px;border-radius:4px;opacity:1;transition:opacity 0.2s">🇹🇷</button>
+      <button onclick="setLang('en')" id="flag-en" title="English" style="background:none;border:none;cursor:pointer;font-size:18px;padding:2px;border-radius:4px;opacity:0.4;transition:opacity 0.2s">🇬🇧</button>
+    </div>
   </div>
 </div>
 
 <div class="app-panel visible" id="panel-dashboard">
   <div class="dash-hero">
     <div class="dash-greeting" id="dash-greeting">MERHABA TARIK</div>
-    <div class="dash-title">Çevirmen<br><span>İstasyonu</span></div>
+    <div class="dash-title">Привет,<br><span>мальчик</span></div>
     <div class="dash-subtitle" id="dash-subtitle">Son sınıf — 8 ders, 1 hedef.</div>
   </div>
   <div class="today-banner" id="today-banner">
@@ -1371,24 +1407,16 @@ function toggleDrop(id) {
 // ════════════════════════════════════════════════
 // Ardıl nav scroll gizle/göster
 (function(){
-  let lastY = 0, ticking = false;
+  let lastY = 0;
   window.addEventListener('scroll', function(){
-    if (!ticking) {
-      requestAnimationFrame(function() {
-        const nav = document.querySelector('#panel-davos nav');
-        if(nav) {
-          const panel = document.getElementById('panel-davos');
-          if(panel && panel.classList.contains('visible')) {
-            const y = window.scrollY;
-            if(y > lastY && y > 100) nav.classList.add('nav-hidden');
-            else nav.classList.remove('nav-hidden');
-            lastY = y;
-          }
-        }
-        ticking = false;
-      });
-      ticking = true;
-    }
+    const nav = document.querySelector('#panel-davos nav');
+    if(!nav) return;
+    const panel = document.getElementById('panel-davos');
+    if(!panel || !panel.classList.contains('visible')) return;
+    const y = window.scrollY;
+    if(y > lastY && y > 100) nav.classList.add('nav-hidden');
+    else nav.classList.remove('nav-hidden');
+    lastY = y;
   }, {passive:true});
 })();
 
@@ -1429,7 +1457,8 @@ function restoreLastPanel() {
     const saved = localStorage.getItem('tariktanta-lastpanel');
     if (saved) {
       const {app, dropId} = JSON.parse(saved);
-      if (app && app !== 'dashboard') { switchApp(app, '', dropId); return; }
+      // Her zaman dashboard'da başla
+      // if (app && app !== 'dashboard') { switchApp(app, '', dropId); return; }
     }
   } catch(e) {}
 }
@@ -1526,7 +1555,7 @@ function pomoReset() {
 // ════════════════════════════════════════════════
 function initDashboard() {
   const hour = new Date().getHours();
-  const greet = hour < 12 ? 'GÜNAYDИН TARIK' : hour < 18 ? 'MERHABA TARIK' : 'İYİ AKŞAMLAR TARIK';
+  const greet = hour < 12 ? 'Good morning, my lord' : hour < 18 ? 'Good afternoon, my lord' : 'Good evening, my lord';
   document.getElementById('dash-greeting').textContent = greet;
   const days = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
   const today = days[new Date().getDay()];
@@ -1588,6 +1617,25 @@ function toggleAppsMenu() {
       });
     }, 10);
   }
+}
+
+
+// ── DİL SEÇİCİ ──
+let _currentLang = 'tr';
+function setLang(lang) {
+  _currentLang = lang;
+  document.getElementById('flag-tr').style.opacity = lang === 'tr' ? '1' : '0.4';
+  document.getElementById('flag-en').style.opacity = lang === 'en' ? '1' : '0.4';
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning, my lord' : hour < 18 ? 'Good afternoon, my lord' : 'Good evening, my lord';
+  const greetEl = document.getElementById('dash-greeting');
+  if (greetEl) greetEl.textContent = greet;
+  const sub = document.getElementById('dash-subtitle');
+  if (sub) sub.textContent = lang === 'en' ? 'Final year — 8 courses, 1 goal.' : 'Son sınıf — 8 ders, 1 hedef.';
+  const todayLabel = document.querySelector('.today-label');
+  if (todayLabel) todayLabel.textContent = lang === 'en' ? '📅 Today\u2019s Classes' : '📅 Bugünün Dersleri';
+  const appsLabel = document.querySelector('#drop-apps .drop-label');
+  if (appsLabel) appsLabel.textContent = lang === 'en' ? 'APPS' : 'UYGULAMALAR';
 }
 
 // ── UYGULAMA AÇICI ──
@@ -1844,73 +1892,7 @@ function dToggleTracked(key,elId){if(dIsTracked(key))sessionStorage.removeItem('
 // ════════════════════════════════════════════════
 // PWA
 // ════════════════════════════════════════════════
-function registerSW(){
-  if(!('serviceWorker' in navigator)) return;
-  const swCode = `
-const CACHE = 'tariktanta-v4';
-const FONTS = 'tariktanta-fonts-v1';
-
-// Uygulama shell — her zaman cache'den sun
-const SHELL = [
-  self.location.pathname.replace('sw.js','') || '/',
-];
-
-// Font URL'leri — ayrı cache
-const FONT_URLS = [
-  'https://fonts.googleapis.com',
-  'https://fonts.gstatic.com',
-];
-
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())
-  );
-});
-
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE && k !== FONTS).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
-
-  // YouTube/external API — cache'leme
-  if (url.hostname.includes('youtube') || url.hostname.includes('googleapis.com') && !url.hostname.includes('fonts')) return;
-
-  // Font istekleri — cache-first
-  if (url.hostname.includes('fonts.gstatic.com') || url.hostname.includes('fonts.googleapis.com')) {
-    e.respondWith(
-      caches.open(FONTS).then(cache =>
-        cache.match(e.request).then(hit =>
-          hit || fetch(e.request).then(res => { cache.put(e.request, res.clone()); return res; })
-        )
-      ).catch(() => new Response(''))
-    );
-    return;
-  }
-
-  // Ana sayfa — network-first, offline fallback
-  e.respondWith(
-    fetch(e.request)
-      .then(res => {
-        if (res.ok) {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return res;
-      })
-      .catch(() => caches.match(e.request).then(r => r || caches.match('/')))
-  );
-});
-`;
-  const blob = new Blob([swCode], {type:'application/javascript'});
-  const url = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(url).catch(()=>{});
-}
+function registerSW(){if('serviceWorker' in navigator){const swCode=`const CACHE='tariktanta-v2';const ASSETS=['/'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const clone=res.clone();caches.open(CACHE).then(c=>c.put(e.request,clone));return res;}).catch(()=>caches.match('/')))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));`;const blob=new Blob([swCode],{type:'application/javascript'});const url=URL.createObjectURL(blob);navigator.serviceWorker.register(url).catch(()=>{});}}
 
 // ════════════════════════════════════════════════
 // INIT
@@ -1969,28 +1951,42 @@ function initCursorGlow() {
 
 // ── GÜNÜN TERİMİ ──
 const WOD_LIST = [
-  {term:'Force Majeure', def:'Mücbir sebep — tarafların kontrolü dışındaki olaylar'},
-  {term:'Simultane Çeviri', def:'Konuşmayla eş zamanlı yapılan sözlü çeviri'},
-  {term:'Habeas Corpus', def:'Kişi özgürlüğünü güvence altına alan hukuki ilke'},
-  {term:'Terminoloji', def:'Bir bilim ya da sanat dalının özel söz varlığı'},
-  {term:'Konsekütif', def:'Art arda — konuşmacı durduktan sonra yapılan çeviri'},
-  {term:'Sözleşme', def:'Taraflar arasında hukuki bağ kuran yazılı anlaşma'},
-  {term:'Kaynak Metin', def:'Çevirinin yapıldığı özgün dildeki metin'},
-  {term:'Erek Metin', def:'Çeviri sonucu elde edilen hedef dildeki metin'},
-  {term:'Yeminli Çeviri', def:'Resmi onay gerektiren hukuki belge çevirileri'},
-  {term:'Register', def:'Dil kullanımındaki resmiyet düzeyi ve bağlam'},
-  {term:'Eşdeğerlik', def:'Kaynak ve erek metin arasındaki anlam dengesi'},
-  {term:'Lokalizasyon', def:'İçeriği hedef kültüre uyarlama süreci'},
+  {term:'Break down', def:'🔤 Phrasal Verb — Çökmek · "The negotiations broke down." → Müzakereler çöktü.', type:'phrasal'},
+  {term:'Carry out', def:'🔤 Phrasal Verb — Yürütmek · "Carry out the terms of the contract." → Sözleşmeyi uygulamak.', type:'phrasal'},
+  {term:'Draw up', def:'🔤 Phrasal Verb — Taslak hazırlamak · "Draw up an agreement." → Anlaşma taslağı hazırlamak.', type:'phrasal'},
+  {term:'Back out', def:'🔤 Phrasal Verb — Caymak · "Back out of a deal." → Anlaşmadan caymak.', type:'phrasal'},
+  {term:'Set out', def:'🔤 Phrasal Verb — Belirtmek · "Set out the conditions." → Koşulları belirtmek.', type:'phrasal'},
+  {term:'Come into force', def:'🔤 Phrasal Verb — Yürürlüğe girmek · "The law came into force." → Kanun yürürlüğe girdi.', type:'phrasal'},
+  {term:'Rule out', def:'🔤 Phrasal Verb — Dışlamak · "Rule out any ambiguity." → Her türlü belirsizliği elemek.', type:'phrasal'},
+  {term:'Stand by', def:'🔤 Phrasal Verb — Uymak · "Stand by the agreement." → Anlaşmaya uymak.', type:'phrasal'},
+  {term:'Phase out', def:'🔤 Phrasal Verb — Aşamalı kaldırmak · "Phase out fossil fuels." → Fosil yakıtları kaldırmak.', type:'phrasal'},
+  {term:'Look into', def:'🔤 Phrasal Verb — İncelemek · "Look into the matter." → Konuyu incelemek.', type:'phrasal'},
+  {term:'Put forward', def:'🔤 Phrasal Verb — Öne sürmek · "Put forward a proposal." → Teklif sunmak.', type:'phrasal'},
+  {term:'Call off', def:'🔤 Phrasal Verb — İptal etmek · "Call off the negotiations." → Müzakereleri iptal etmek.', type:'phrasal'},
+  {term:'Force Majeure', def:'📚 Terminoloji — Mücbir sebep · Tarafların kontrolü dışındaki olağanüstü olaylar.', type:'term'},
+  {term:'Habeas Corpus', def:'📚 Terminoloji — Kişi özgürlüğü güvencesi · Yasadışı tutukluluğa karşı hukuki ilke.', type:'term'},
+  {term:'Simultaneous Interpreting', def:'📚 Terminoloji — Simultane çeviri · Konuşmayla eş zamanlı sözlü çeviri.', type:'term'},
+  {term:'Net-zero Emissions', def:'📚 Terminoloji — Net sıfır emisyon · Atmosfere salınan karbonu dengeleyerek sıfıra indirmek.', type:'term'},
+  {term:'Due Diligence', def:'📚 Terminoloji — Gerekli özen · İşlem öncesi risklerin kapsamlı araştırılması.', type:'term'},
+  {term:'Consecutive Interpreting', def:'📚 Terminoloji — Konsekütif çeviri · Konuşmacı duraksadıktan sonra yapılan çeviri.', type:'term'},
+  {term:'Localization', def:'📚 Terminoloji — Yerelleştirme · İçeriği hedef kitlenin kültürüne uyarlama.', type:'term'},
+  {term:'Source Text', def:'📚 Terminoloji — Kaynak metin · Çevirinin yapıldığı özgün dildeki metin.', type:'term'},
+  {term:'Target Text', def:'📚 Terminoloji — Erek metin · Çeviri sonucu elde edilen hedef dildeki metin.', type:'term'},
+  {term:'Sworn Translation', def:'📚 Terminoloji — Yeminli çeviri · Resmi makamlarca onaylanan hukuki çeviri.', type:'term'},
+  {term:'Register', def:'📚 Terminoloji — Dil kullanım düzeyi · Bağlama göre değişen resmiyet biçimi.', type:'term'},
+  {term:'Equivalence', def:'📚 Terminoloji — Eşdeğerlik · Kaynak ve erek metin arasındaki anlam-işlev dengesi.', type:'term'},
 ];
 function initWordOfDay() {
   const el = document.getElementById('word-of-day-widget');
   if (!el) return;
-  const idx = Math.floor(Date.now() / 86400000) % WOD_LIST.length;
+  const idx = Math.floor(Math.random() * WOD_LIST.length);
   const w = WOD_LIST[idx];
+  const labelEl = document.querySelector('#word-of-day-widget .wod-label');
+  if (labelEl) labelEl.textContent = w.type === 'phrasal' ? '🔤 Günün Phrasal Verbi' : '📚 Günün Terimi';
   setTimeout(() => {
     document.getElementById('wod-term').innerHTML = w.term;
     document.getElementById('wod-def').innerHTML = w.def;
-  }, 600);
+  }, 300);
 }
 
 // ── PWA BANNER ──
@@ -2130,6 +2126,7 @@ function setSound(btn) {
 }
 
 function initSoundEngine() { loadYTApi(); }
+
 
 // ── 3D KART TİLT ──
 function init3DTilt() {
