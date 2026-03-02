@@ -221,6 +221,9 @@
       white-space: nowrap;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      /* iOS tıklanabilirlik fix */
+      -webkit-user-select: none;
+      display: block;
     }
 
     .drop-label:hover {
@@ -5031,6 +5034,17 @@
         });
       });
     }
+
+    // iOS'ta div onclick çalışmaz — touchend ile fix
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.drop-label').forEach(function(el) {
+        el.addEventListener('touchend', function(e) {
+          e.preventDefault();
+          var onclick = el.getAttribute('onclick');
+          if (onclick) eval(onclick);
+        }, { passive: false });
+      });
+    });
 
     function toggleDrop(id) {
       var dd = document.getElementById(id);
