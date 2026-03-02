@@ -1917,47 +1917,45 @@ const SOUND_VIDEOS = {
 const SOUND_ICONS = { rain:'🌧️', forest:'🐦', wind:'💨', fire:'🔥', piano:'🎹', ocean:'🌊' };
 let _ytPlayer = null, _ytReady = false, _ytPendingVideo = null, _currentSound = 'none', _isMuted = false;
 
-// YouTube IFrame API yükle (bir kere)
 function loadYTApi() {
-  if (window.YT || document.getElementById('yt-api-script')) return;
+  if (document.getElementById('yt-api-script')) return;
   const tag = document.createElement('script');
   tag.id = 'yt-api-script';
   tag.src = 'https://www.youtube.com/iframe_api';
   document.head.appendChild(tag);
 }
 
-// YouTube API hazır olunca çağrılır
 window.onYouTubeIframeAPIReady = function() {
-  // Gizli div oluştur
   const div = document.createElement('div');
   div.id = 'yt-player-container';
-  div.style.cssText = 'position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none';
+  div.style.cssText = 'position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1';
   document.body.appendChild(div);
 
   _ytPlayer = new YT.Player('yt-player-container', {
     width: '1', height: '1',
-    playerVars: { autoplay: 0, controls: 0, loop: 1, disablekb: 1, fs: 0, modestbranding: 1, rel: 0 },
+    videoId: 'mPZkdNFkNps',
+    playerVars: { autoplay: 0, controls: 0, loop: 1, disablekb: 1, fs: 0, modestbranding: 1, rel: 0, playsinline: 1 },
     events: {
-      onReady: () => {
+      onReady: (e) => {
         _ytReady = true;
+        e.target.setVolume(40);
+        e.target.pauseVideo();
         if (_ytPendingVideo) {
-          _ytPlayer.loadVideoById({ videoId: _ytPendingVideo, startSeconds: 0 });
-          _ytPlayer.setVolume((document.getElementById('sound-volume')?.value || 40));
-          _ytPlayer.playVideo();
+          e.target.cueVideoById({ videoId: _ytPendingVideo, startSeconds: 0 });
           _ytPendingVideo = null;
         }
       },
       onStateChange: (e) => {
-        // Video bitince başa sar
-        if (e.data === YT.PlayerState.ENDED) _ytPlayer.playVideo();
+        if (e.data === YT.PlayerState.ENDED) _ytPlayer.seekTo(0);
       }
     }
   });
 };
 
 function stopSound() {
-  if (_ytPlayer && _ytReady) { try { _ytPlayer.stopVideo(); } catch(e){} }
-  document.getElementById('sound-controls').style.display = 'none';
+  if (_ytPlayer && _ytReady) { try { _ytPlayer.pauseVideo(); } catch(e){} }
+  const ctrl = document.getElementById('sound-controls');
+  if (ctrl) ctrl.style.display = 'none';
   _currentSound = 'none';
 }
 
@@ -1965,7 +1963,6 @@ function playAmbient(type) {
   if (type === 'none') { stopSound(); return; }
   const videoId = SOUND_VIDEOS[type];
   if (!videoId) return;
-  loadYTApi();
   const vol = parseInt(document.getElementById('sound-volume')?.value || 40);
   if (_ytReady && _ytPlayer) {
     _ytPlayer.loadVideoById({ videoId, startSeconds: 0 });
@@ -1973,11 +1970,12 @@ function playAmbient(type) {
     _ytPlayer.playVideo();
   } else {
     _ytPendingVideo = videoId;
+    loadYTApi();
   }
   const ctrl = document.getElementById('sound-controls');
   if (ctrl) ctrl.style.display = 'flex';
   const icon = document.getElementById('sound-icon');
-  if (icon) icon.textContent = SOUND_ICONS[type] || '🎵';
+  if (icon) icon.textContent = SOUND_ICONS[type] || '\U0001F3B5';
 }
 
 function setSoundVolume(val) {
@@ -1989,10 +1987,8 @@ function setSoundVolume(val) {
 function toggleSoundMute() {
   const btn = document.getElementById('sound-mute-btn');
   _isMuted = !_isMuted;
-  if (_ytPlayer && _ytReady) {
-    _isMuted ? _ytPlayer.mute() : _ytPlayer.unMute();
-  }
-  if (btn) btn.textContent = _isMuted ? '▶' : '⏸';
+  if (_ytPlayer && _ytReady) { _isMuted ? _ytPlayer.mute() : _ytPlayer.unMute(); }
+  if (btn) btn.textContent = _isMuted ? '\u25B6' : '\u23F8';
 }
 
 function setSound(btn) {
