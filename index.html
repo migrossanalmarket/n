@@ -190,7 +190,8 @@ body { background: var(--theme-bg); transition: background 0.3s, color 0.3s; }
  display: none;
  padding-top: 52px;
 }
-.app-panel.visible { display: block; }
+.app-panel.visible { display: block; animation: panelFadeIn 0.35s ease; }
+@keyframes panelFadeIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
 #panel-dashboard {
  background: var(--theme-bg);
  min-height: 100vh;
@@ -730,6 +731,40 @@ mark { background: rgba(200,241,53,0.25); color: var(--theme-text); border-radiu
  .schedule-section{padding:0 20px 32px}
  .shortcuts-bar{padding:12px 20px;display:none}
 }
+/* ═══ GRADIENT BORDER KARTLAR ═══ */
+/* ═══ GRADIENT BORDER KARTLAR — JS ile döndürülür ═══ */
+.course-card { position:relative; }
+.course-card::after { content:''; position:absolute; inset:-1.5px; border-radius:17px; background:conic-gradient(#c8f135,#38bdf8,#a78bfa,#f97316,#c8f135); z-index:-1; opacity:0; transition:opacity 0.3s; }
+.course-card:hover::after { opacity:1; }
+/* ═══ SKELETON ═══ */
+.skeleton { background:linear-gradient(90deg,var(--theme-border) 25%,var(--theme-surface) 50%,var(--theme-border) 75%); background-size:200% 100%; animation:skelAnim 1.4s infinite; border-radius:6px; }
+@keyframes skelAnim { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+/* ═══ GÜNÜN TERİMİ ═══ */
+.word-of-day { margin:0 20px 16px; padding:18px 24px; background:linear-gradient(135deg,rgba(200,241,53,0.06),rgba(56,189,248,0.06)); border:1px solid rgba(200,241,53,0.2); border-radius:14px; cursor:pointer; transition:all 0.2s; }
+.word-of-day:hover { border-color:rgba(200,241,53,0.5); transform:translateY(-1px); }
+.wod-label { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--theme-muted); margin-bottom:8px; }
+.wod-term { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; color:var(--theme-accent); margin-bottom:4px; }
+.wod-def { font-size:13px; color:var(--theme-muted); line-height:1.5; }
+/* ═══ PWA BANNER ═══ */
+.pwa-banner { display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--theme-surface); border:1px solid var(--theme-border); border-radius:14px; padding:14px 20px; z-index:9000; box-shadow:0 8px 32px rgba(0,0,0,0.4); align-items:center; gap:14px; max-width:340px; width:90%; }
+.pwa-banner.show { display:flex; animation:panelFadeIn 0.3s ease; }
+.pwa-text { font-size:13px; color:var(--theme-text); line-height:1.4; }
+.pwa-text strong { color:var(--theme-accent); font-family:'Syne',sans-serif; }
+.pwa-btn { padding:8px 16px; background:var(--theme-accent); color:#08090d; border:none; border-radius:8px; font-family:'Syne',sans-serif; font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; }
+.pwa-close { background:none; border:none; color:var(--theme-muted); font-size:18px; cursor:pointer; padding:0 4px; }
+/* ═══ PULL TO REFRESH ═══ */
+.ptr-indicator { position:fixed; top:52px; left:50%; transform:translateX(-50%) translateY(-60px); background:var(--theme-surface); border:1px solid var(--theme-border); border-radius:50px; padding:8px 18px; font-size:12px; color:var(--theme-accent); font-family:'Syne',sans-serif; font-weight:700; z-index:8000; transition:transform 0.25s; pointer-events:none; }
+.ptr-indicator.ptr-ready { transform:translateX(-50%) translateY(10px); }
+/* ═══ SES SEÇENEKLERİ ═══ */
+.pomo-sound-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.sound-opt { padding:5px 12px; border-radius:20px; border:1px solid var(--theme-border); background:none; color:var(--theme-muted); font-size:12px; cursor:pointer; transition:all 0.2s; font-family:'Syne',sans-serif; }
+.sound-opt.active { border-color:var(--theme-accent); color:var(--theme-accent); background:rgba(200,241,53,0.08); }
+.wave-canvas { display:block; width:100%; height:36px; margin-top:6px; opacity:0.5; }
+/* ═══ DİNAMİK SELAM GRADİENT ═══ */
+.dash-greeting { background:linear-gradient(135deg,var(--theme-accent),#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+/* ═══ CURSOR GLOW ═══ */
+#cursor-glow { pointer-events:none; position:fixed; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle,rgba(200,241,53,0.07) 0%,transparent 70%); transform:translate(-50%,-50%); z-index:99998; transition:opacity 0.4s; opacity:0; }
+[data-theme="light"] #cursor-glow { background:radial-gradient(circle,rgba(90,122,0,0.04) 0%,transparent 70%); }
 </style>
 </head>
 <body>
@@ -747,6 +782,9 @@ mark { background: rgba(200,241,53,0.25); color: var(--theme-text); border-radiu
 #lock-logo{font-size:32px;margin-bottom:-8px}
 </style>
 <div id="lockscreen">
+<div id="cursor-glow"></div>
+<div class="pwa-banner" id="pwa-banner"><div class="pwa-text"><strong>Tariktanta</strong><br>Ana ekrana ekle, uygulama gibi kullan</div><button class="pwa-btn" id="pwa-install-btn">Ekle</button><button class="pwa-close" onclick="document.getElementById('pwa-banner').classList.remove('show');localStorage.setItem('pwa-dismissed','1')">×</button></div>
+<div class="ptr-indicator" id="ptr-indicator">↓ Yenile</div>
   <div id="lock-logo">🔒</div>
   <h2>Tariktanta</h2>
   <p class="lock-sub">Şifrenizi girin</p>
@@ -880,7 +918,32 @@ window.addEventListener('load',function(){
       <div class="pomo-dot" id="pd3"></div>
     </div>
   </div>
+  <div style="padding:0 20px 4px;display:flex;flex-direction:column;gap:4px">
+    <div class="pomo-sound-row">
+      <button class="sound-opt active" data-sound="none" onclick="setSound(this)">🔇 Kapalı</button>
+      <button class="sound-opt" data-sound="rain" onclick="setSound(this)">🌧️ Yağmur</button>
+      <button class="sound-opt" data-sound="forest" onclick="setSound(this)">🐦 Orman</button>
+      <button class="sound-opt" data-sound="wind" onclick="setSound(this)">💨 Rüzgar</button>
+      <button class="sound-opt" data-sound="fire" onclick="setSound(this)">🔥 Şömine</button>
+      <button class="sound-opt" data-sound="piano" onclick="setSound(this)">🎹 Piyano</button>
+      <button class="sound-opt" data-sound="ocean" onclick="setSound(this)">🌊 Okyanus</button>
+    </div>
+    <div id="sound-controls" style="display:none;align-items:center;gap:10px;margin-top:8px;padding:0 2px">
+      <span style="font-size:18px" id="sound-icon">🌧️</span>
+      <input type="range" id="sound-volume" min="0" max="100" value="40" oninput="setSoundVolume(this.value)"
+        style="flex:1;accent-color:var(--theme-accent);cursor:pointer">
+      <span style="font-size:11px;color:var(--theme-muted);font-family:'Syne',sans-serif;min-width:28px" id="sound-vol-label">40%</span>
+      <button onclick="toggleSoundMute()" id="sound-mute-btn"
+        style="background:none;border:1px solid var(--theme-border);border-radius:8px;color:var(--theme-muted);font-size:13px;padding:4px 10px;cursor:pointer;transition:all 0.2s;font-family:'Syne',sans-serif">⏸</button>
+    </div>
+    <canvas class="wave-canvas" id="wave-canvas" height="36"></canvas>
+  </div>
 
+  <div class="word-of-day" id="word-of-day-widget">
+    <div class="wod-label">💡 Günün Terimi</div>
+    <div class="wod-term" id="wod-term"><span class="skeleton" style="display:inline-block;width:160px;height:22px"></span></div>
+    <div class="wod-def" id="wod-def"><span class="skeleton" style="display:inline-block;width:240px;height:14px;margin-top:6px"></span></div>
+  </div>
   <div class="dash-section-title">— TÜM DERSLER</div>
   <div class="course-grid" id="course-grid"></div>
   <div class="dash-section-title">— HAFTALIK PROGRAM</div>
@@ -1738,7 +1801,237 @@ function initApp(){
   buildSearchIndex();
   registerSW();
   restoreLastPanel(); // ← localStorage SON PANEL
+  initPremium();
 }
+
+// ════════════════════════════════════════════════
+// PREMIUM ÖZELLİKLER
+// ════════════════════════════════════════════════
+function initPremium() {
+  initCursorGlow();
+  initWordOfDay();
+  initPWABanner();
+  initPullToRefresh();
+  initSoundEngine();
+  init3DTilt();
+}
+
+// ── CURSOR GLOW ──
+function initCursorGlow() {
+  const glow = document.getElementById('cursor-glow');
+  if (!glow) return;
+  // Sadece gerçek mouse varsa aktif et (touch-only cihazlarda kapalı)
+  let hasMouse = false;
+  window.addEventListener('mousemove', function onFirstMove(e) {
+    hasMouse = true;
+    window.removeEventListener('mousemove', onFirstMove);
+    glow.style.opacity = '1';
+  }, {once:true, passive:true});
+  document.addEventListener('mousemove', e => {
+    if (!hasMouse) return;
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  }, {passive:true});
+  document.addEventListener('mouseleave', () => { glow.style.opacity = '0'; });
+  document.addEventListener('mouseenter', () => { if(hasMouse) glow.style.opacity = '1'; });
+}
+
+// ── GÜNÜN TERİMİ ──
+const WOD_LIST = [
+  {term:'Force Majeure', def:'Mücbir sebep — tarafların kontrolü dışındaki olaylar'},
+  {term:'Simultane Çeviri', def:'Konuşmayla eş zamanlı yapılan sözlü çeviri'},
+  {term:'Habeas Corpus', def:'Kişi özgürlüğünü güvence altına alan hukuki ilke'},
+  {term:'Terminoloji', def:'Bir bilim ya da sanat dalının özel söz varlığı'},
+  {term:'Konsekütif', def:'Art arda — konuşmacı durduktan sonra yapılan çeviri'},
+  {term:'Sözleşme', def:'Taraflar arasında hukuki bağ kuran yazılı anlaşma'},
+  {term:'Kaynak Metin', def:'Çevirinin yapıldığı özgün dildeki metin'},
+  {term:'Erek Metin', def:'Çeviri sonucu elde edilen hedef dildeki metin'},
+  {term:'Yeminli Çeviri', def:'Resmi onay gerektiren hukuki belge çevirileri'},
+  {term:'Register', def:'Dil kullanımındaki resmiyet düzeyi ve bağlam'},
+  {term:'Eşdeğerlik', def:'Kaynak ve erek metin arasındaki anlam dengesi'},
+  {term:'Lokalizasyon', def:'İçeriği hedef kültüre uyarlama süreci'},
+];
+function initWordOfDay() {
+  const el = document.getElementById('word-of-day-widget');
+  if (!el) return;
+  const idx = Math.floor(Date.now() / 86400000) % WOD_LIST.length;
+  const w = WOD_LIST[idx];
+  setTimeout(() => {
+    document.getElementById('wod-term').innerHTML = w.term;
+    document.getElementById('wod-def').innerHTML = w.def;
+  }, 600);
+}
+
+// ── PWA BANNER ──
+let _deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _deferredPrompt = e;
+  if (!localStorage.getItem('pwa-dismissed')) {
+    setTimeout(() => document.getElementById('pwa-banner').classList.add('show'), 3000);
+  }
+});
+function initPWABanner() {
+  const btn = document.getElementById('pwa-install-btn');
+  if (!btn) return;
+  btn.onclick = async () => {
+    if (_deferredPrompt) {
+      _deferredPrompt.prompt();
+      await _deferredPrompt.userChoice;
+      _deferredPrompt = null;
+    }
+    document.getElementById('pwa-banner').classList.remove('show');
+  };
+}
+
+// ── PULL TO REFRESH ──
+function initPullToRefresh() {
+  let startY = 0, pulling = false;
+  const ind = document.getElementById('ptr-indicator');
+  document.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, {passive:true});
+  document.addEventListener('touchmove', e => {
+    if (window.scrollY === 0 && e.touches[0].clientY - startY > 60) {
+      pulling = true;
+      ind.textContent = '↓ Bırak — Yenile';
+      ind.classList.add('ptr-ready');
+    }
+  }, {passive:true});
+  document.addEventListener('touchend', () => {
+    if (pulling) { setTimeout(() => location.reload(), 200); }
+    pulling = false;
+    ind.classList.remove('ptr-ready');
+    ind.textContent = '↓ Yenile';
+  }, {passive:true});
+}
+
+// ── SES MOTORU (Gerçek Ses Dosyaları) ──
+const SOUND_SOURCES = {
+  rain:   'https://cdn.pixabay.com/audio/2022/03/10/audio_270f4b1fdb.mp3',
+  forest: 'https://cdn.pixabay.com/audio/2022/03/15/audio_8cb749f091.mp3',
+  wind:   'https://cdn.pixabay.com/audio/2022/07/10/audio_5c8c5c33ca.mp3',
+  fire:   'https://cdn.pixabay.com/audio/2023/02/28/audio_56b5f7c786.mp3',
+  piano:  'https://cdn.pixabay.com/audio/2024/02/28/audio_c0e4f78b64.mp3',
+  ocean:  'https://cdn.pixabay.com/audio/2022/03/24/audio_3e5d9b5a8e.mp3',
+};
+const SOUND_ICONS = { rain:'🌧️', forest:'🐦', wind:'💨', fire:'🔥', piano:'🎹', ocean:'🌊' };
+let _audio = null, _currentSound = 'none', _isMuted = false, _waveAnim = null, _audioCtx = null, _analyser = null, _source = null;
+
+function stopSound() {
+  if (_audio) { _audio.pause(); _audio.src = ''; _audio = null; }
+  if (_waveAnim) { cancelAnimationFrame(_waveAnim); _waveAnim = null; }
+  if (_source) { try { _source.disconnect(); } catch(e){} _source = null; }
+  if (_analyser) { try { _analyser.disconnect(); } catch(e){} _analyser = null; }
+  const cv = document.getElementById('wave-canvas');
+  if (cv) { const c = cv.getContext('2d'); c.clearRect(0,0,cv.width,cv.height); }
+  document.getElementById('sound-controls').style.display = 'none';
+}
+
+function playAmbient(type) {
+  stopSound();
+  if (type === 'none') return;
+  const url = SOUND_SOURCES[type];
+  if (!url) return;
+  _audio = new Audio();
+  _audio.crossOrigin = 'anonymous';
+  _audio.loop = true;
+  _audio.volume = (document.getElementById('sound-volume')?.value || 40) / 100;
+  // iOS için: ses başlamadan önce AudioContext unlock
+  const unlockAndPlay = () => {
+    if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume();
+    _audio.play().catch(() => {});
+  };
+  _audio.src = url;
+  unlockAndPlay();
+  // ses dalgası
+  try {
+    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    _analyser = _audioCtx.createAnalyser();
+    _analyser.fftSize = 128;
+    _source = _audioCtx.createMediaElementSource(_audio);
+    _source.connect(_analyser);
+    _analyser.connect(_audioCtx.destination);
+    drawWave();
+  } catch(e) {}
+  const ctrl = document.getElementById('sound-controls');
+  if (ctrl) ctrl.style.display = 'flex';
+  const icon = document.getElementById('sound-icon');
+  if (icon) icon.textContent = SOUND_ICONS[type] || '🎵';
+}
+
+function drawWave() {
+  const cv = document.getElementById('wave-canvas');
+  if (!cv || !_analyser) return;
+  cv.width = cv.offsetWidth * window.devicePixelRatio;
+  cv.height = 36 * window.devicePixelRatio;
+  const buf = new Uint8Array(_analyser.frequencyBinCount);
+  const ctx = cv.getContext('2d');
+  function draw() {
+    _waveAnim = requestAnimationFrame(draw);
+    _analyser.getByteTimeDomainData(buf);
+    ctx.clearRect(0,0,cv.width,cv.height);
+    const grad = ctx.createLinearGradient(0,0,cv.width,0);
+    grad.addColorStop(0,'#c8f135'); grad.addColorStop(0.5,'#38bdf8'); grad.addColorStop(1,'#c8f135');
+    ctx.beginPath(); ctx.strokeStyle = grad; ctx.lineWidth = 2;
+    const sliceW = cv.width / buf.length; let x = 0;
+    buf.forEach((v,i) => {
+      const y = (v/128)*(cv.height/2);
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+      x += sliceW;
+    });
+    ctx.stroke();
+  }
+  draw();
+}
+
+function setSoundVolume(val) {
+  if (_audio) _audio.volume = val / 100;
+  const lbl = document.getElementById('sound-vol-label');
+  if (lbl) lbl.textContent = val + '%';
+}
+
+function toggleSoundMute() {
+  const btn = document.getElementById('sound-mute-btn');
+  _isMuted = !_isMuted;
+  if (_audio) _audio.muted = _isMuted;
+  if (btn) btn.textContent = _isMuted ? '▶' : '⏸';
+}
+
+function setSound(btn) {
+  document.querySelectorAll('.sound-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _currentSound = btn.dataset.sound;
+  playAmbient(_currentSound);
+}
+
+function initSoundEngine() {}
+
+
+// ── 3D KART TİLT ──
+function init3DTilt() {
+  function applyTilt(el) {
+    el.addEventListener('mousemove', e => {
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      el.style.transform = `perspective(600px) rotateY(${x*10}deg) rotateX(${-y*10}deg) translateY(-2px)`;
+    }, {passive:true});
+    el.addEventListener('mouseleave', () => {
+      el.style.transform = '';
+    });
+  }
+  // course kartlara uygula
+  document.querySelectorAll('.course-card').forEach(applyTilt);
+  // Ardıl session kartlara da
+  document.querySelectorAll('.session-card').forEach(applyTilt);
+  // Dinamik eklenen kartlar için observer
+  const obs = new MutationObserver(muts => {
+    muts.forEach(m => m.addedNodes.forEach(n => {
+      if (n.classList && (n.classList.contains('course-card')||n.classList.contains('session-card'))) applyTilt(n);
+    }));
+  });
+  obs.observe(document.body, {childList:true, subtree:true});
+}
+
 </script>
 </body>
 </html>
