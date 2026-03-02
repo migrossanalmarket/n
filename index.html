@@ -3216,6 +3216,238 @@
 
     [data-theme="light"] #cursor-glow {
       background: radial-gradient(circle, rgba(90, 122, 0, 0.04) 0%, transparent 70%);
+    }/* ═══ DARK MODE KONTRAST İYİLEŞTİRME ═══ */
+    [data-theme="dark"] {
+      --theme-bg: #06070a;
+      --theme-surface: #0f1115;
+      --theme-border: #1c1e26;
+      --theme-text: #eceef5;
+      --theme-muted: #5a5f70;
+    }
+
+    /* ═══ 3D TILT PÜRÜZSÜZ ANİMASYON ═══ */
+    .course-card, .session-card {
+      transition: transform 0.55s cubic-bezier(0.23, 1, 0.32, 1), 
+                  box-shadow 0.35s ease,
+                  border-color 0.25s ease !important;
+      will-change: transform;
+      transform-style: preserve-3d;
+    }
+
+    /* ═══ HIZLI SÖZLÜK ═══ */
+    .quick-tools {
+      padding: 16px 40px 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .tool-box {
+      background: var(--theme-surface);
+      border: 1px solid var(--theme-border);
+      border-radius: 16px;
+      padding: 20px 22px;
+    }
+
+    .tool-box-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--theme-accent);
+      margin-bottom: 12px;
+    }
+
+    .dict-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .dict-input {
+      flex: 1;
+      background: var(--theme-bg);
+      border: 1px solid var(--theme-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--theme-text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .dict-input:focus {
+      border-color: var(--theme-accent);
+    }
+
+    .dict-input::placeholder {
+      color: var(--theme-muted);
+    }
+
+    #dict-result {
+      display: none;
+      margin-top: 14px;
+      border: 1px solid var(--theme-border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--theme-bg);
+    }
+
+    .dict-header {
+      background: var(--theme-surface);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--theme-border);
+    }
+
+    .dict-word {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--theme-text);
+    }
+
+    .dict-phonetic {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      color: var(--theme-muted);
+      margin-top: 3px;
+    }
+
+    .dict-speak-btn {
+      background: var(--theme-bg);
+      border: 1px solid var(--theme-border);
+      border-radius: 10px;
+      padding: 8px 14px;
+      color: var(--theme-accent);
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .dict-speak-btn:hover {
+      border-color: var(--theme-accent);
+    }
+
+    .dict-pos {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--theme-accent);
+      padding: 14px 18px 6px;
+    }
+
+    .dict-def-item {
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--theme-border);
+    }
+
+    .dict-def-item:last-child {
+      border-bottom: none;
+    }
+
+    .dict-def-text {
+      color: var(--theme-text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .dict-def-num {
+      color: var(--theme-muted);
+      font-size: 11px;
+      margin-right: 6px;
+    }
+
+    .dict-example {
+      color: var(--theme-muted);
+      font-size: 12px;
+      font-style: italic;
+      margin-top: 5px;
+      padding-left: 16px;
+    }
+
+    .dict-synonyms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+      padding-left: 16px;
+    }
+
+    .dict-syn-chip {
+      background: var(--theme-surface);
+      border: 1px solid var(--theme-border);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 11px;
+      color: var(--theme-accent);
+      cursor: pointer;
+      font-family: 'IBM Plex Mono', monospace;
+      transition: all 0.15s;
+    }
+
+    .dict-syn-chip:hover {
+      background: rgba(200,241,53,0.1);
+    }
+
+    .dict-footer {
+      padding: 10px 18px;
+      text-align: right;
+      border-top: 1px solid var(--theme-border);
+    }
+
+    .dict-tureng-link {
+      font-size: 11px;
+      color: var(--theme-muted);
+      font-family: 'IBM Plex Sans', sans-serif;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .dict-tureng-link:hover {
+      color: var(--theme-accent);
+    }
+
+    .dict-not-found {
+      padding: 20px 18px;
+      color: var(--theme-muted);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+    }
+
+    @media (max-width: 768px) {
+      .quick-tools {
+        padding: 12px 20px 0;
+      }
+    }
+
+    /* ═══ PWA OFFLİNE TOAST ═══ */
+    #offline-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1c1e26;
+      border: 1px solid var(--theme-border);
+      border-radius: 50px;
+      padding: 10px 22px;
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      color: #f97316;
+      z-index: 99999;
+      transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    #offline-toast.show {
+      transform: translateX(-50%) translateY(0);
     }
   </style>
 </head>
@@ -3547,6 +3779,24 @@
         <div class="pomo-dot" id="pd1"></div>
         <div class="pomo-dot" id="pd2"></div>
         <div class="pomo-dot" id="pd3"></div>
+      </div>
+    </div><!-- HIZLI SÖZLÜK -->
+    <div class="quick-tools">
+      <div class="tool-box">
+        <div class="tool-box-label">📖 Hızlı Sözlük</div>
+        <div class="dict-input-row">
+          <input 
+            type="text" 
+            id="q-dict" 
+            class="dict-input"
+            placeholder="İngilizce kelime yaz, Enter'a bas..."
+            onkeydown="if(event.key==='Enter') runDict()"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button class="pomo-btn" onclick="runDict()">ARA</button>
+        </div>
+        <div id="dict-result"></div>
       </div>
     </div>
     <div style="padding:0 20px 4px;display:flex;flex-direction:column;gap:4px">
@@ -5671,7 +5921,84 @@
         }));
       });
       obs.observe(document.body, { childList: true, subtree: true });
+    }// ═══ HIZLI SÖZLÜK ═══
+    async function runDict() {
+      const q = document.getElementById('q-dict').value.trim();
+      const box = document.getElementById('dict-result');
+      if (!q) return;
+
+      box.style.display = 'block';
+      box.innerHTML = `<div style="padding:18px; color:var(--theme-muted); font-family:'IBM Plex Sans',sans-serif; font-size:13px;">🔍 Aranıyor…</div>`;
+
+      try {
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(q)}`);
+        if (!res.ok) throw new Error('not found');
+        const data = await res.json();
+        const entry = data[0];
+
+        const phonetic = entry.phonetics?.find(p => p.text)?.text || '';
+        const audioUrl = entry.phonetics?.find(p => p.audio && p.audio.trim())?.audio || '';
+
+        let bodyHTML = '';
+        entry.meanings.forEach(m => {
+          bodyHTML += `<div class="dict-pos">${m.partOfSpeech}</div>`;
+          m.definitions.slice(0, 3).forEach((d, i) => {
+            const syns = (d.synonyms || []).slice(0, 5)
+              .map(s => `<span class="dict-syn-chip" onclick="document.getElementById('q-dict').value='${s}';runDict()">${s}</span>`)
+              .join('');
+            bodyHTML += `
+              <div class="dict-def-item">
+                <div class="dict-def-text"><span class="dict-def-num">${i + 1}.</span>${d.definition}</div>
+                ${d.example ? `<div class="dict-example">💬 "${d.example}"</div>` : ''}
+                ${syns ? `<div class="dict-synonyms">${syns}</div>` : ''}
+              </div>`;
+          });
+        });
+
+        box.innerHTML = `
+          <div class="dict-header">
+            <div>
+              <div class="dict-word">${entry.word}</div>
+              ${phonetic ? `<div class="dict-phonetic">${phonetic}</div>` : ''}
+            </div>
+            ${audioUrl ? `<button class="dict-speak-btn" onclick="new Audio('${audioUrl}').play()" title="Seslendir">🔊</button>` : ''}
+          </div>
+          ${bodyHTML}
+          <div class="dict-footer">
+            <a href="https://tureng.com/tr/turkce-ingilizce/${encodeURIComponent(q)}" target="_blank" rel="noopener" class="dict-tureng-link">Tureng'de TR↔EN karşılığını gör ↗</a>
+          </div>
+        `;
+      } catch (e) {
+        box.innerHTML = `
+          <div class="dict-not-found">
+            ❌ "<strong style="color:var(--theme-text)">${q}</strong>" bulunamadı.
+            <br><br>
+            <a href="https://tureng.com/tr/turkce-ingilizce/${encodeURIComponent(q)}" target="_blank" rel="noopener" class="dict-tureng-link" style="font-size:13px;">→ Tureng'de ara ↗</a>
+          </div>
+        `;
+      }
     }
+
+    // ═══ PWA — OFFLİNE/ONLİNE ALGILAMA ═══
+    (function initOfflineDetect() {
+      const toast = document.createElement('div');
+      toast.id = 'offline-toast';
+      toast.textContent = '📡 Çevrimdışısın — bazı özellikler çalışmayabilir';
+      document.body.appendChild(toast);
+
+      function showToast() { toast.classList.add('show'); }
+      function hideToast() { toast.classList.remove('show'); }
+
+      window.addEventListener('offline', showToast);
+      window.addEventListener('online', () => {
+        toast.textContent = '✅ Bağlantı geri geldi';
+        toast.style.color = 'var(--theme-accent)';
+        showToast();
+        setTimeout(hideToast, 2500);
+      });
+
+      if (!navigator.onLine) showToast();
+    })();
 
   </script>
 </body>
