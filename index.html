@@ -3221,6 +3221,7 @@
 </head>
 
 <body>
+  <div id="yt-player-container" style="display:none;position:absolute;"></div>
   <div id="cursor-glow"></div>
   <!-- APPS POPUP MENÜ - fixed pozisyon, overflow sorununu aşar -->
   <div id="apps-popup"
@@ -3554,9 +3555,12 @@
     </div>
 
     <div class="word-of-day" id="word-of-day-widget" style="padding:16px;">
-      <div class="wod-label" style="margin-bottom:12px; font-weight:800; color:var(--theme-accent);">🔤 Daily Phrasal Match</div>
-      <div id="match-container" style="display:flex; flex-direction:column; gap:8px;"></div>
-      <button onclick="initWordOfDay()" style="margin-top:12px; padding:8px 12px; background:var(--theme-surface); color:var(--theme-text); border:1px solid var(--theme-border); border-radius:6px; cursor:pointer; font-family:'Syne'; width:100%; font-weight:600;">Shuffle Pairs 🔁</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+         <div class="wod-label" style="font-weight:800; color:var(--theme-accent);">🔤 Daily Phrasal Quiz</div>
+         <div id="quiz-progress" style="font-size:12px; color:var(--theme-muted); font-weight:600;">1 / 5</div>
+      </div>
+      <div id="quiz-container" style="display:flex; flex-direction:column; gap:12px;"></div>
+      <button onclick="initWordOfDay()" id="quiz-reload-btn" style="display:none; margin-top:12px; padding:8px 12px; background:var(--theme-surface); color:var(--theme-text); border:2px solid var(--theme-border); border-bottom-width:4px; border-radius:8px; cursor:pointer; font-family:'Syne'; width:100%; font-weight:800; transition:all 0.1s;">Restart Quiz 🔁</button>
     </div>
     <div class="dash-section-title">— ALL COURSES</div>
     <div class="course-grid" id="course-grid"></div>
@@ -5128,13 +5132,11 @@
     function openApp(app) {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const apps = {
-        instagram: { ios: 'instagram://', web: 'https://www.instagram.com' },
-        x: { ios: 'twitter://', web: 'https://x.com' },
-        youtube: { ios: 'youtube://', web: 'https://www.youtube.com' },
-        tiktok: { ios: 'snssdk1180://', web: 'https://www.tiktok.com' },
-        spotify: { ios: 'spotify://', web: 'https://open.spotify.com' },
-        github: { ios: 'github://', web: 'https://github.com' },
-        coc: { ios: 'clashofclans://', web: 'https://supercell.com/en/games/clashofclans/' },
+        kick: { ios: 'kick://', web: 'https://kick.com/hype' },
+        ubys: { ios: 'https://ubys.ibu.edu.tr//Home/Index?ReturnUrl=https://ubys.ibu.edu.tr//AIS/Student/Class/Index?sapid=!xBBx!HyicQFJay9DZepNg4mkpQ!xGGx!!xGGx!', web: 'https://ubys.ibu.edu.tr//Home/Index?ReturnUrl=https://ubys.ibu.edu.tr//AIS/Student/Class/Index?sapid=!xBBx!HyicQFJay9DZepNg4mkpQ!xGGx!!xGGx!' },
+        duolingo: { ios: 'duolingo://', web: 'https://www.duolingo.com/learn' },
+        claude: { ios: 'claude://', web: 'https://claude.ai/new' },
+        gemini: { ios: 'googleapp://', web: 'https://gemini.google.com/u/2/app?hl=tr&pageId=none' }
       };
       const a = apps[app];
       if (!a) return;
@@ -5438,95 +5440,140 @@
 
     // ── GÜNÜN TERİMİ ──
     const WOD_LIST = [
-      { term: 'Break down', def: '🔤 Phrasal Verb — Çökmek · "The negotiations broke down." → Müzakereler çöktü.', type: 'phrasal' },
-      { term: 'Carry out', def: '🔤 Phrasal Verb — Yürütmek · "Carry out the terms of the contract." → Sözleşmeyi uygulamak.', type: 'phrasal' },
-      { term: 'Draw up', def: '🔤 Phrasal Verb — Taslak hazırlamak · "Draw up an agreement." → Anlaşma taslağı hazırlamak.', type: 'phrasal' },
-      { term: 'Back out', def: '🔤 Phrasal Verb — Caymak · "Back out of a deal." → Anlaşmadan caymak.', type: 'phrasal' },
-      { term: 'Set out', def: '🔤 Phrasal Verb — Belirtmek · "Set out the conditions." → Koşulları belirtmek.', type: 'phrasal' },
-      { term: 'Come into force', def: '🔤 Phrasal Verb — Yürürlüğe girmek · "The law came into force." → Kanun yürürlüğe girdi.', type: 'phrasal' },
-      { term: 'Rule out', def: '🔤 Phrasal Verb — Dışlamak · "Rule out any ambiguity." → Her türlü belirsizliği elemek.', type: 'phrasal' },
-      { term: 'Stand by', def: '🔤 Phrasal Verb — Uymak · "Stand by the agreement." → Anlaşmaya uymak.', type: 'phrasal' },
-      { term: 'Phase out', def: '🔤 Phrasal Verb — Aşamalı kaldırmak · "Phase out fossil fuels." → Fosil yakıtları kaldırmak.', type: 'phrasal' },
-      { term: 'Look into', def: '🔤 Phrasal Verb — İncelemek · "Look into the matter." → Konuyu incelemek.', type: 'phrasal' },
-      { term: 'Put forward', def: '🔤 Phrasal Verb — Öne sürmek · "Put forward a proposal." → Teklif sunmak.', type: 'phrasal' },
-      { term: 'Call off', def: '🔤 Phrasal Verb — İptal etmek · "Call off the negotiations." → Müzakereleri iptal etmek.', type: 'phrasal' },
-      { term: 'Force Majeure', def: '📚 Terminoloji — Mücbir sebep · Tarafların kontrolü dışındaki olağanüstü olaylar.', type: 'term' },
-      { term: 'Habeas Corpus', def: '📚 Terminoloji — Kişi özgürlüğü güvencesi · Yasadışı tutukluluğa karşı hukuki ilke.', type: 'term' },
-      { term: 'Simultaneous Interpreting', def: '📚 Terminoloji — Simultane çeviri · Konuşmayla eş zamanlı sözlü çeviri.', type: 'term' },
-      { term: 'Net-zero Emissions', def: '📚 Terminoloji — Net sıfır emisyon · Atmosfere salınan karbonu dengeleyerek sıfıra indirmek.', type: 'term' },
-      { term: 'Due Diligence', def: '📚 Terminoloji — Gerekli özen · İşlem öncesi risklerin kapsamlı araştırılması.', type: 'term' },
-      { term: 'Consecutive Interpreting', def: '📚 Terminoloji — Konsekütif çeviri · Konuşmacı duraksadıktan sonra yapılan çeviri.', type: 'term' },
-      { term: 'Localization', def: '📚 Terminoloji — Yerelleştirme · İçeriği hedef kitlenin kültürüne uyarlama.', type: 'term' },
-      { term: 'Source Text', def: '📚 Terminoloji — Kaynak metin · Çevirinin yapıldığı özgün dildeki metin.', type: 'term' },
-      { term: 'Target Text', def: '📚 Terminoloji — Erek metin · Çeviri sonucu elde edilen hedef dildeki metin.', type: 'term' },
-      { term: 'Sworn Translation', def: '📚 Terminoloji — Yeminli çeviri · Resmi makamlarca onaylanan hukuki çeviri.', type: 'term' },
-      { term: 'Register', def: '📚 Terminoloji — Dil kullanım düzeyi · Bağlama göre değişen resmiyet biçimi.', type: 'term' },
-      { term: 'Equivalence', def: '📚 Terminoloji — Eşdeğerlik · Kaynak ve erek metin arasındaki anlam-işlev dengesi.', type: 'term' },
+      { term: 'Break down', def: '🔤 Phrasal Verb — Çökmek ', type: 'phrasal' },
+      { term: 'Carry out', def: '🔤 Phrasal Verb — Yürütmek ', type: 'phrasal' },
+      { term: 'Draw up', def: '🔤 Phrasal Verb — Taslak hazırlamak ', type: 'phrasal' },
+      { term: 'Back out', def: '🔤 Phrasal Verb — Caymak ', type: 'phrasal' },
+      { term: 'Set out', def: '🔤 Phrasal Verb — Belirtmek ', type: 'phrasal' },
+      { term: 'Come into force', def: '🔤 Phrasal Verb — Yürürlüğe girmek ', type: 'phrasal' },
+      { term: 'Rule out', def: '🔤 Phrasal Verb — Dışlamak ', type: 'phrasal' },
+      { term: 'Stand by', def: '🔤 Phrasal Verb — Uymak ', type: 'phrasal' },
+      { term: 'Phase out', def: '🔤 Phrasal Verb — Aşamalı kaldırmak ', type: 'phrasal' },
+      { term: 'Look into', def: '🔤 Phrasal Verb — İncelemek ', type: 'phrasal' },
+      { term: 'Put forward', def: '🔤 Phrasal Verb — Öne sürmek ', type: 'phrasal' },
+      { term: 'Call off', def: '🔤 Phrasal Verb — İptal etmek ', type: 'phrasal' },
+      { term: 'Force Majeure', def: '📚 Terminoloji — Mücbir sebep ', type: 'term' },
+      { term: 'Habeas Corpus', def: '📚 Terminoloji — Kişi özgürlüğü güvencesi ', type: 'term' },
+      { term: 'Simultaneous Interpreting', def: '📚 Terminoloji — Simultane çeviri ', type: 'term' },
+      { term: 'Net-zero Emissions', def: '📚 Terminoloji — Net sıfır emisyon ', type: 'term' },
+      { term: 'Due Diligence', def: '📚 Terminoloji — Gerekli özen ', type: 'term' },
+      { term: 'Consecutive Interpreting', def: '📚 Terminoloji — Konsekütif çeviri ', type: 'term' },
+      { term: 'Localization', def: '📚 Terminoloji — Yerelleştirme ', type: 'term' },
+      { term: 'Source Text', def: '📚 Terminoloji — Kaynak metin ', type: 'term' },
+      { term: 'Target Text', def: '📚 Terminoloji — Erek metin ', type: 'term' },
+      { term: 'Sworn Translation', def: '📚 Terminoloji — Yeminli çeviri ', type: 'term' },
+      { term: 'Register', def: '📚 Terminoloji — Dil kullanım düzeyi ', type: 'term' },
+      { term: 'Equivalence', def: '📚 Terminoloji — Eşdeğerlik ', type: 'term' },
     ];
-        let matchState = { selectedEn: null, selectedTr: null };
+        let quizState = { currentIdx: 0, items: [] };
+    
     function initWordOfDay() {
-      const el = document.getElementById('match-container');
+      const el = document.getElementById('quiz-container');
+      const reloadBtn = document.getElementById('quiz-reload-btn');
+      const progress = document.getElementById('quiz-progress');
       if (!el) return;
-      const phrases = WOD_LIST.filter(w => w.type === 'phrasal');
-      let shuffled = [...phrases].sort(() => 0.5 - Math.random()).slice(0, 5);
       
-      let leftCol = shuffled.map(p => ({ id: p.term, text: p.term, lang: 'en' })).sort(() => 0.5 - Math.random());
-      let rightCol = shuffled.map(p => ({ id: p.term, text: p.def.split('→')[0].split('—')[1].trim(), lang: 'tr' })).sort(() => 0.5 - Math.random());
-
-      let h = '<div style="display:flex; justify-content:space-between; gap:8px;">';
-      h += '<div style="flex:1; display:flex; flex-direction:column; gap:6px;">';
-      leftCol.forEach(item => {
-        h += `<div id="match-en-${item.id.replace(/\s+/g,'-')}" onclick="selectMatch('${item.id}', 'en')" style="padding:10px; border:2px solid var(--theme-border); border-radius:8px; cursor:pointer; text-align:center; font-size:13px; font-weight:800; transition:all 0.2s;">${item.text}</div>`;
-      });
-      h += '</div><div style="flex:1; display:flex; flex-direction:column; gap:6px;">';
-      rightCol.forEach(item => {
-        h += `<div id="match-tr-${item.id.replace(/\s+/g,'-')}" onclick="selectMatch('${item.id}', 'tr')" style="padding:10px; border:2px solid var(--theme-border); border-radius:8px; cursor:pointer; text-align:center; font-size:13px; color:var(--theme-text); font-weight:600; transition:all 0.2s;">${item.text}</div>`;
-      });
-      h += '</div></div>';
-      el.innerHTML = h;
-      matchState = { selectedEn: null, selectedTr: null };
+      reloadBtn.style.display = 'none';
+      progress.style.display = 'block';
+      
+      const phrases = WOD_LIST.filter(w => w.type === 'phrasal');
+      // Pick 5 distinct
+      quizState.items = [...phrases].sort(() => 0.5 - Math.random()).slice(0, 5);
+      quizState.currentIdx = 0;
+      
+      renderQuizQuestion();
     }
 
-    function selectMatch(id, lang) {
-      if (lang === 'en') {
-        if (matchState.selectedEn) {
-          const prev = document.getElementById(`match-en-${matchState.selectedEn.replace(/\s+/g,'-')}`);
-          if(prev) prev.style.borderColor = 'var(--theme-border)';
-        }
-        matchState.selectedEn = id;
-        document.getElementById(`match-en-${id.replace(/\s+/g,'-')}`).style.borderColor = 'var(--theme-accent)';
-      } else {
-        if (matchState.selectedTr) {
-           const prev = document.getElementById(`match-tr-${matchState.selectedTr.replace(/\s+/g,'-')}`);
-           if(prev) prev.style.borderColor = 'var(--theme-border)';
-        }
-        matchState.selectedTr = id;
-        document.getElementById(`match-tr-${id.replace(/\s+/g,'-')}`).style.borderColor = 'var(--theme-accent)';
+    function renderQuizQuestion() {
+      const el = document.getElementById('quiz-container');
+      const progress = document.getElementById('quiz-progress');
+      
+      if (quizState.currentIdx >= quizState.items.length) {
+        el.innerHTML = `<div style="text-align:center; padding:30px 10px; font-weight:800; color:var(--theme-accent); font-size:18px;">Quiz Completed! 🎉</div>`;
+        progress.style.display = 'none';
+        document.getElementById('quiz-reload-btn').style.display = 'block';
+        return;
       }
-
-      if (matchState.selectedEn && matchState.selectedTr) {
-        const enEl = document.getElementById(`match-en-${matchState.selectedEn.replace(/\s+/g,'-')}`);
-        const trEl = document.getElementById(`match-tr-${matchState.selectedTr.replace(/\s+/g,'-')}`);
-        if (matchState.selectedEn === matchState.selectedTr) {
-          enEl.style.backgroundColor = 'var(--theme-accent)';
-          enEl.style.color = '#000';
-          enEl.style.opacity = '0.5';
-          enEl.onclick = null;
-          trEl.style.backgroundColor = 'var(--theme-accent)';
-          trEl.style.color = '#000';
-          trEl.style.opacity = '0.5';
-          trEl.onclick = null;
-          enEl.style.borderColor = 'transparent';
-          trEl.style.borderColor = 'transparent';
-        } else {
-          enEl.style.borderColor = '#f87171';
-          trEl.style.borderColor = '#f87171';
-          setTimeout(() => {
-            if(enEl) enEl.style.borderColor = 'var(--theme-border)';
-            if(trEl) trEl.style.borderColor = 'var(--theme-border)';
-          }, 400);
-        }
-        matchState = { selectedEn: null, selectedTr: null };
+      
+      progress.textContent = (quizState.currentIdx + 1) + ' / ' + quizState.items.length;
+      const currentItem = quizState.items[quizState.currentIdx];
+      
+      // The currentItem.def looks like: "🔤 Phrasal Verb — Çökmek" or similar
+      const correctTr = currentItem.def.split('—')[1].trim();
+      
+      // Get random WRONG options from WOD_LIST
+      const allPhrases = WOD_LIST.filter(w => w.type === 'phrasal' && w.term !== currentItem.term);
+      const wrongItems = [...allPhrases].sort(() => 0.5 - Math.random()).slice(0, 3);
+      const wrongTrs = wrongItems.map(w => w.def.split('—')[1].trim());
+      
+      const options = [correctTr, ...wrongTrs].sort(() => 0.5 - Math.random());
+      
+      let h = `<div style="
+        background: var(--theme-surface); 
+        border: 2px solid var(--theme-border); 
+        border-bottom-width: 6px;
+        border-radius: 12px; 
+        padding: 20px 10px; 
+        text-align: center; 
+        font-size: 20px; 
+        font-weight: 800; 
+        margin-bottom: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        ">${currentItem.term}</div>`;
+        
+      h += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">`;
+      options.forEach(opt => {
+        const isCorrect = opt === correctTr;
+        // Escape quotes
+        let safeOpt = opt.replace(/'/g, "\\'");
+        h += `<button onclick="checkQuizAnswer(this, ${isCorrect})" style="
+          padding: 14px 8px; 
+          background: var(--theme-surface); 
+          color: var(--theme-text); 
+          border: 2px solid var(--theme-border); 
+          border-bottom-width: 4px;
+          border-radius: 8px; 
+          font-family: 'Syne'; 
+          font-weight: 700; 
+          font-size: 13px;
+          cursor: pointer;
+          transition: all 0.1s;
+        ">${opt}</button>`;
+      });
+      h += `</div>`;
+      
+      el.innerHTML = h;
+    }
+    
+    function checkQuizAnswer(btn, isCorrect) {
+      const buttons = btn.parentElement.querySelectorAll('button');
+      buttons.forEach(b => { b.onclick = null; b.style.opacity = '0.7'; }); // disable all
+      btn.style.opacity = '1';
+      
+      if (isCorrect) {
+        btn.style.borderColor = '#c8f135';
+        btn.style.backgroundColor = 'rgba(200, 241, 53, 0.15)';
+        btn.style.color = '#c8f135';
+        setTimeout(() => {
+          quizState.currentIdx++;
+          renderQuizQuestion();
+        }, 700);
+      } else {
+        btn.style.borderColor = '#f87171';
+        btn.style.backgroundColor = 'rgba(248, 113, 113, 0.15)';
+        btn.style.color = '#f87171';
+        // Auto-show correct
+        buttons.forEach(b => {
+          if (b.getAttribute('onclick') && b.getAttribute('onclick').includes('true')) {
+            b.style.opacity = '1';
+            b.style.borderColor = '#c8f135';
+            b.style.color = '#c8f135';
+          }
+        });
+        setTimeout(() => {
+          quizState.currentIdx++;
+          renderQuizQuestion();
+        }, 1200);
       }
     }
 
@@ -5632,26 +5679,58 @@
       });
     };
 
-        const SOUND_SOURCES = {
-      'rain': 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_34baf68b91.mp3',
-      'forest': 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_d086202add.mp3',
-      'wind': 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_82c0fa06fc.mp3',
-      'fire': 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_145d3bc649.mp3',
-      'piano': 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_40b2fc3048.mp3',
-      'ocean': 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_03d2e071e6.mp3'
+        const SOUND_VIDEOS = {
+      'rain': 'mPZkdNFkNps',
+      'forest': 'xNN7iTA57jM',
+      'wind': 'QyE25Y_1T_E',
+      'fire': 'L_LUpnjgPso',
+      'piano': '8O7P1qYF-xU',
+      'ocean': 'qREKP9oijWI'
     };
 
-    let _audioPlayer = null;
-    function getAudioPlayer() {
-      if (!_audioPlayer) {
-        _audioPlayer = new Audio();
-        _audioPlayer.loop = true;
-      }
-      return _audioPlayer;
+    let _ytPlayer = null;
+    let _ytReady = false;
+    let _ytPendingVideo = null;
+    let _isMuted = false;
+    let _currentSound = 'none';
+
+    function loadYTApi() {
+      if (document.getElementById('yt-api-script')) return;
+      const tag = document.createElement('script');
+      tag.id = 'yt-api-script';
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const first = document.getElementsByTagName('script')[0];
+      first.parentNode.insertBefore(tag, first);
     }
 
+    window.onYouTubeIframeAPIReady = function() {
+      const vol = parseInt(document.getElementById('sound-volume') ? document.getElementById('sound-volume').value : 40);
+      _ytPlayer = new YT.Player('yt-player-container', {
+        height: '0',
+        width: '0',
+        videoId: _ytPendingVideo || '',
+        playerVars: { 'autoplay': 1, 'controls': 0, 'loop': 1, 'origin': window.location.origin, 'playsinline': 1 },
+        events: {
+          'onReady': function(e) {
+            _ytReady = true;
+            e.target.setVolume(vol);
+            if (_isMuted) e.target.mute();
+            if (_currentSound !== 'none' && _ytPendingVideo) {
+               e.target.loadVideoById({ videoId: _ytPendingVideo, startSeconds: 0 });
+               e.target.playVideo();
+            }
+          },
+          'onStateChange': function(e) {
+             if (e.data === YT.PlayerState.ENDED) {
+                 e.target.playVideo();
+             }
+          }
+        }
+      });
+    };
+
     function stopSound() {
-      if (_audioPlayer) _audioPlayer.pause();
+      if (_ytPlayer && _ytReady) _ytPlayer.pauseVideo();
       const ctrl = document.getElementById('sound-controls');
       if (ctrl) ctrl.style.display = 'none';
       _currentSound = 'none';
@@ -5660,32 +5739,43 @@
     function playAmbient(type) {
       if (type === 'none') { stopSound(); return; }
       const vol = parseInt(document.getElementById('sound-volume') ? document.getElementById('sound-volume').value : 40);
-      const url = SOUND_SOURCES[type];
-      if (!url) return;
+      const videoId = SOUND_VIDEOS[type];
+      if (!videoId) return;
       
-      const audio = getAudioPlayer();
-      audio.pause();
-      audio.src = url;
-      audio.volume = vol / 100;
-      audio.play().catch(function (e) { console.log('Audio error:', e); });
+      _currentSound = type;
+      _ytPendingVideo = videoId;
+      
+      if (_ytReady && _ytPlayer) {
+        _ytPlayer.loadVideoById({ videoId: videoId, startSeconds: 0 });
+        _ytPlayer.setVolume(vol);
+        // Sometimes playVideo fails on iOS if not immediately tied to click, but since this fires from click:
+        _ytPlayer.playVideo();
+      } else {
+        loadYTApi();
+      }
 
       const ctrl = document.getElementById('sound-controls');
       if (ctrl) ctrl.style.display = 'flex';
       const icon = document.getElementById('sound-icon');
       if (icon) icon.textContent = SOUND_ICONS[type] || '🎵';
-      _currentSound = type;
     }
 
     function setSoundVolume(val) {
-      if (_audioPlayer) _audioPlayer.volume = val / 100;
+      if (_ytPlayer && _ytReady) _ytPlayer.setVolume(parseInt(val));
       const lbl = document.getElementById('sound-vol-label');
       if (lbl) lbl.textContent = val + '%';
     }
+    
+    window._toggleSoundMuteInternal = function() {
+        if (_ytPlayer && _ytReady) {
+            _isMuted ? _ytPlayer.mute() : _ytPlayer.unMute();
+        }
+    };
 
     function toggleSoundMute() {
       const btn = document.getElementById('sound-mute-btn');
       _isMuted = !_isMuted;
-      if (_audioPlayer) _audioPlayer.muted = _isMuted;
+      if (window._toggleSoundMuteInternal) window._toggleSoundMuteInternal();
       if (btn) btn.textContent = _isMuted ? '▶' : '⏸';
     }
 
