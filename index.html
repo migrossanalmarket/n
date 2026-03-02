@@ -769,6 +769,18 @@ mark { background: rgba(200,241,53,0.25); color: var(--theme-text); border-radiu
 </style>
 </head>
 <body>
+<div id="cursor-glow"></div>
+<!-- UYGULAMALAR POPUP MENÜ - fixed pozisyon, overflow sorununu aşar -->
+<div id="apps-popup" style="display:none;position:fixed;top:52px;right:12px;background:var(--theme-surface);border:1px solid var(--theme-border);border-radius:10px;padding:6px;min-width:190px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.5);flex-direction:column;gap:2px">
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--theme-muted);padding:8px 14px 4px;border-bottom:1px solid var(--theme-border);margin-bottom:4px">📱 Hızlı Aç</div>
+  <button class="drop-item" onclick="openApp('instagram')">📸 Instagram</button>
+  <button class="drop-item" onclick="openApp('x')">𝕏 X (Twitter)</button>
+  <button class="drop-item" onclick="openApp('youtube')">▶️ YouTube</button>
+  <button class="drop-item" onclick="openApp('tiktok')">🎵 TikTok</button>
+  <button class="drop-item" onclick="openApp('spotify')">🎧 Spotify</button>
+  <button class="drop-item" onclick="openApp('github')">🐙 GitHub</button>
+  <button class="drop-item" onclick="openApp('coc')">⚔️ Clash of Clans</button>
+</div>
 
 <style>
 #lockscreen{position:fixed;inset:0;background:#08090d;z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;font-family:'Syne',sans-serif}
@@ -782,9 +794,7 @@ mark { background: rgba(200,241,53,0.25); color: var(--theme-text); border-radiu
 #lock-btn:hover{opacity:0.85}
 #lock-logo{font-size:32px;margin-bottom:-8px}
 </style>
-<div id="lockscreen">
-<div id="cursor-glow"></div>
-<div class="pwa-banner" id="pwa-banner"><div class="pwa-text"><strong>Tariktanta</strong><br>Ana ekrana ekle, uygulama gibi kullan</div><button class="pwa-btn" id="pwa-install-btn">Ekle</button><button class="pwa-close" onclick="document.getElementById('pwa-banner').classList.remove('show');localStorage.setItem('pwa-dismissed','1')">×</button></div>
+<div id="lockscreen"><div class="pwa-text"><strong>Tariktanta</strong><br>Ana ekrana ekle, uygulama gibi kullan</div><button class="pwa-btn" id="pwa-install-btn">Ekle</button><button class="pwa-close" onclick="document.getElementById('pwa-banner').classList.remove('show');localStorage.setItem('pwa-dismissed','1')">×</button></div>
 <div class="ptr-indicator" id="ptr-indicator">↓ Yenile</div>
   <div id="lock-logo">🔒</div>
   <h2>Tariktanta</h2>
@@ -874,20 +884,10 @@ window.addEventListener('load',function(){
       <button class="drop-item" onclick="switchApp('tibbi','Tıbbi Bitki','tibbi')">🌿 Tıbbi Bitki</button>
     </div>
   </div>
-  <div class="dropdown" id="drop-apps" style="margin-left:8px">
-    <div class="drop-label" onclick="(function(){var d=document.getElementById('drop-apps');var isOpen=d.classList.contains('open');document.querySelectorAll('.dropdown').forEach(function(x){x.classList.remove('open');});if(!isOpen)d.classList.add('open');})()" style="color:#a78bfa;cursor:pointer">UYGULAMALAR</div>
-    <div class="drop-menu" id="dropmenu-apps" style="min-width:180px;right:0;left:auto;position:absolute;z-index:9999">
-      <div class="drop-week-label">📱 Hızlı Aç</div>
-      <button class="drop-item" onclick="openApp('instagram')">📸 Instagram</button>
-      <button class="drop-item" onclick="openApp('x')">𝕏 X (Twitter)</button>
-      <button class="drop-item" onclick="openApp('youtube')">▶️ YouTube</button>
-      <button class="drop-item" onclick="openApp('tiktok')">🎵 TikTok</button>
-      <button class="drop-item" onclick="openApp('spotify')">🎧 Spotify</button>
-      <button class="drop-item" onclick="openApp('github')">🐙 GitHub</button>
-      <button class="drop-item" onclick="openApp('coc')">⚔️ Clash of Clans</button>
-    </div>
-  </div>
   <div class="switcher-right">
+    <div class="dropdown" id="drop-apps">
+      <div class="drop-label" onclick="toggleAppsMenu()" style="color:#a78bfa">UYGULAMALAR</div>
+    </div>
     <button class="search-btn" onclick="openSearch()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       Ara <kbd>⌘K</kbd>
@@ -1313,7 +1313,7 @@ window.addEventListener('load',function(){
 <div class="app-panel" id="panel-gobilim"><div class="panel-placeholder" style="background:#0d0a1a;min-height:100vh"><div class="placeholder-icon">📐</div><div class="placeholder-title" style="color:#a78bfa">Çeviri Göstergebilimi II</div><div class="placeholder-sub" style="color:#7a8090">Salı · 11:30–14:30 · Bu dersin notları eklenmeye hazır.</div><span class="placeholder-badge" style="border-color:#a78bfa;color:#a78bfa">Yakında · Hafta notlarını at</span></div></div>
 <div class="app-panel" id="panel-etik"><div class="panel-placeholder" style="background:#110a00;min-height:100vh"><div class="placeholder-icon">⚡</div><div class="placeholder-title" style="color:#f97316">Çeviride Etik & Mesleki Sorumluluklar</div><div class="placeholder-sub" style="color:#7a8090">Çarşamba · 08:30–11:15</div><span class="placeholder-badge" style="border-color:#f97316;color:#f97316">Yakında · Hafta notlarını at</span></div></div>
 <div class="app-panel" id="panel-rusca4"><div class="panel-placeholder" style="background:#000d1a;min-height:100vh"><div class="placeholder-icon">🇷🇺</div><div class="placeholder-title" style="color:#38bdf8">Rusça IV</div><div class="placeholder-sub" style="color:#7a8090">Perşembe · 11:30–14:15</div><span class="placeholder-badge" style="border-color:#38bdf8;color:#38bdf8">Yakında · Hafta notlarını at</span></div></div>
-<div class="app-panel" id="panel-rusca6"><div class="panel-placeholder" style="background:#000d1a;min-height:100vh"><div class="placeholder-icon">🇷🇺</div><div class="placeholder-title" style="color:#38bdf8">Rusça VI</div><div class="placeholder-sub" style="color:#7a8090">Salı · 14:30–17:15</div><span class="placeholder-badge" style="border-color:#38bdf8;color:#38bdf8">Yakında · Hafta notlarını at</span></div></div>
+<div class="app-panel" id="panel-rusca6"><div class="panel-placeholder" style="background:#000d1a;min-height:100vh"><div class="placeholder-icon">🇷🇺</div><div class="placeholder-title" style="color:#38bdf8">Rusça VI</div><div class="placeholder-sub" style="color:#7a8090">Perşembe · 14:30–17:15</div><span class="placeholder-badge" style="border-color:#38bdf8;color:#38bdf8">Yakında · Hafta notlarını at</span></div></div>
 <div class="app-panel" id="panel-isaret"><div class="panel-placeholder" style="background:#001a08;min-height:100vh"><div class="placeholder-icon">🤟</div><div class="placeholder-title" style="color:#4ade80">Türk İşaret Dili</div><div class="placeholder-sub" style="color:#7a8090">Çarşamba · 09:30–12:15</div><span class="placeholder-badge" style="border-color:#4ade80;color:#4ade80">Yakında · Hafta notlarını at</span></div></div>
 <div class="app-panel" id="panel-tibbi"><div class="panel-placeholder" style="background:#0a1100;min-height:100vh"><div class="placeholder-icon">🌿</div><div class="placeholder-title" style="color:#fb923c">Tıbbi Bitki (Seçmeli)</div><div class="placeholder-sub" style="color:#7a8090">Çarşamba · 13:00–14:45</div><span class="placeholder-badge" style="border-color:#fb923c;color:#fb923c">Yakında · Hafta notlarını at</span></div></div>
 
@@ -1323,15 +1323,15 @@ window.addEventListener('load',function(){
 // ════════════════════════════════════════════════
 const SCHEDULE = {
   'Pazartesi':[{name:'Ardıl Çeviriye Giriş',time:'09:30–13:15',panel:'davos',color:'#c8f135',icon:'🎙️'},{name:'Hukuk Çevirisi',time:'13:30–16:15',panel:'hukuk',color:'#e8c547',icon:'⚖️'}],
-  'Salı':[{name:'Çeviri Göstergebilimi II',time:'11:30–14:30',panel:'gobilim',color:'#a78bfa',icon:'📐'},{name:'Rusça VI',time:'14:30–17:15',panel:'rusca6',color:'#38bdf8',icon:'🇷🇺'}],
+  'Salı':[{name:'Çeviri Göstergebilimi II',time:'11:30–14:30',panel:'gobilim',color:'#a78bfa',icon:'📐'}],
   'Çarşamba':[{name:'Çeviride Etik',time:'08:30–11:15',panel:'etik',color:'#f97316',icon:'⚡'},{name:'Türk İşaret Dili',time:'09:30–12:15',panel:'isaret',color:'#4ade80',icon:'🤟'},{name:'Tıbbi Bitki',time:'13:00–14:45',panel:'tibbi',color:'#fb923c',icon:'🌿'}],
-  'Perşembe':[{name:'Rusça IV',time:'11:30–14:15',panel:'rusca4',color:'#38bdf8',icon:'🇷🇺'}]
+  'Perşembe':[{name:'Rusça IV',time:'11:30–14:15',panel:'rusca4',color:'#38bdf8',icon:'🇷🇺'},{name:'Rusça VI',time:'14:30–17:15',panel:'rusca6',color:'#38bdf8',icon:'🇷🇺'}]
 };
 const COURSES=[
   {id:'hukuk',name:'Hukuk Çevirisi',icon:'⚖️',color:'#e8c547',desc:'Deborah Cao · AB Mevzuatı Çeviri Rehberi',day:'Pazartesi',time:'13:30–16:15',available:true},
   {id:'davos',name:'Ardıl Çeviriye Giriş',icon:'🎙️',color:'#c8f135',desc:'Davos 2026 · WEF terminoloji ve pratik',day:'Pazartesi',time:'09:30–13:15',available:true},
   {id:'gobilim',name:'Çeviri Göstergebilimi II',icon:'📐',color:'#a78bfa',desc:'Göstergebilim · Öztürk Kasar modeli',day:'Salı',time:'11:30–14:30',available:false},
-  {id:'rusca6',name:'Rusça VI',icon:'🇷🇺',color:'#38bdf8',desc:'İleri düzey Rusça terminoloji',day:'Salı',time:'14:30–17:15',available:false},
+  {id:'rusca6',name:'Rusça VI',icon:'🇷🇺',color:'#38bdf8',desc:'İleri düzey Rusça terminoloji',day:'Perşembe',time:'14:30–17:15',available:false},
   {id:'etik',name:'Çeviride Etik',icon:'⚡',color:'#f97316',desc:'Mesleki sorumluluklar · Etik ilkeler',day:'Çarşamba',time:'08:30–11:15',available:false},
   {id:'isaret',name:'Türk İşaret Dili',icon:'🤟',color:'#4ade80',desc:'TİD terminoloji ve görseller',day:'Çarşamba',time:'09:30–12:15',available:false},
   {id:'tibbi',name:'Tıbbi Bitki (Seçmeli)',icon:'🌿',color:'#fb923c',desc:'Tıbbi terminoloji · Bitki sözlüğü',day:'Çarşamba',time:'13:00–14:45',available:false},
@@ -1560,6 +1560,25 @@ function initDashboard() {
     dc.innerHTML = inner;
     sgrid.appendChild(dc);
   });
+}
+
+// ── UYGULAMALAR MENÜ ──
+function toggleAppsMenu() {
+  const popup = document.getElementById('apps-popup');
+  const isOpen = popup.style.display === 'flex';
+  popup.style.display = isOpen ? 'none' : 'flex';
+  popup.style.flexDirection = 'column';
+  if (!isOpen) {
+    // Dışarı tıklayınca kapat
+    setTimeout(() => {
+      document.addEventListener('click', function handler(e) {
+        if (!popup.contains(e.target) && !e.target.closest('#drop-apps')) {
+          popup.style.display = 'none';
+          document.removeEventListener('click', handler);
+        }
+      });
+    }, 10);
+  }
 }
 
 // ── UYGULAMA AÇICI ──
