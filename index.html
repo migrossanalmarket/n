@@ -1904,87 +1904,84 @@ function initPullToRefresh() {
   }, {passive:true});
 }
 
-// ── SES MOTORU (Gerçek Ses Dosyaları) ──
-const SOUND_SOURCES = {
-  rain:   'https://cdn.pixabay.com/audio/2022/03/10/audio_270f4b1fdb.mp3',
-  forest: 'https://cdn.pixabay.com/audio/2022/03/15/audio_8cb749f091.mp3',
-  wind:   'https://cdn.pixabay.com/audio/2022/07/10/audio_5c8c5c33ca.mp3',
-  fire:   'https://cdn.pixabay.com/audio/2023/02/28/audio_56b5f7c786.mp3',
-  piano:  'https://cdn.pixabay.com/audio/2024/02/28/audio_c0e4f78b64.mp3',
-  ocean:  'https://cdn.pixabay.com/audio/2022/03/24/audio_3e5d9b5a8e.mp3',
+// ── SES MOTORU (YouTube IFrame API) ──
+// Reklamsız ambient YouTube videoları (sadece ses, görünmez player)
+const SOUND_VIDEOS = {
+  rain:   'mPZkdNFkNps',  // Heavy rain sounds
+  forest: 'xNN7iTA57jM',  // Forest birds ambience
+  wind:   'bGKth93bHUw',  // Gentle wind sounds
+  fire:   'L_LUpnjgPso',  // Fireplace crackling
+  piano:  'lTRiuFIWV54',  // Relaxing piano music
+  ocean:  'bn9F19Hi1Lk',  // Ocean waves
 };
 const SOUND_ICONS = { rain:'🌧️', forest:'🐦', wind:'💨', fire:'🔥', piano:'🎹', ocean:'🌊' };
-let _audio = null, _currentSound = 'none', _isMuted = false, _waveAnim = null, _audioCtx = null, _analyser = null, _source = null;
+let _ytPlayer = null, _ytReady = false, _ytPendingVideo = null, _currentSound = 'none', _isMuted = false;
+
+// YouTube IFrame API yükle (bir kere)
+function loadYTApi() {
+  if (window.YT || document.getElementById('yt-api-script')) return;
+  const tag = document.createElement('script');
+  tag.id = 'yt-api-script';
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+}
+
+// YouTube API hazır olunca çağrılır
+window.onYouTubeIframeAPIReady = function() {
+  // Gizli div oluştur
+  const div = document.createElement('div');
+  div.id = 'yt-player-container';
+  div.style.cssText = 'position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none';
+  document.body.appendChild(div);
+
+  _ytPlayer = new YT.Player('yt-player-container', {
+    width: '1', height: '1',
+    playerVars: { autoplay: 0, controls: 0, loop: 1, disablekb: 1, fs: 0, modestbranding: 1, rel: 0 },
+    events: {
+      onReady: () => {
+        _ytReady = true;
+        if (_ytPendingVideo) {
+          _ytPlayer.loadVideoById({ videoId: _ytPendingVideo, startSeconds: 0 });
+          _ytPlayer.setVolume((document.getElementById('sound-volume')?.value || 40));
+          _ytPlayer.playVideo();
+          _ytPendingVideo = null;
+        }
+      },
+      onStateChange: (e) => {
+        // Video bitince başa sar
+        if (e.data === YT.PlayerState.ENDED) _ytPlayer.playVideo();
+      }
+    }
+  });
+};
 
 function stopSound() {
-  if (_audio) { _audio.pause(); _audio.src = ''; _audio = null; }
-  if (_waveAnim) { cancelAnimationFrame(_waveAnim); _waveAnim = null; }
-  if (_source) { try { _source.disconnect(); } catch(e){} _source = null; }
-  if (_analyser) { try { _analyser.disconnect(); } catch(e){} _analyser = null; }
-  const cv = document.getElementById('wave-canvas');
-  if (cv) { const c = cv.getContext('2d'); c.clearRect(0,0,cv.width,cv.height); }
+  if (_ytPlayer && _ytReady) { try { _ytPlayer.stopVideo(); } catch(e){} }
   document.getElementById('sound-controls').style.display = 'none';
+  _currentSound = 'none';
 }
 
 function playAmbient(type) {
-  stopSound();
-  if (type === 'none') return;
-  const url = SOUND_SOURCES[type];
-  if (!url) return;
-  _audio = new Audio();
-  _audio.crossOrigin = 'anonymous';
-  _audio.loop = true;
-  _audio.volume = (document.getElementById('sound-volume')?.value || 40) / 100;
-  // iOS için: ses başlamadan önce AudioContext unlock
-  const unlockAndPlay = () => {
-    if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume();
-    _audio.play().catch(() => {});
-  };
-  _audio.src = url;
-  unlockAndPlay();
-  // ses dalgası
-  try {
-    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    _analyser = _audioCtx.createAnalyser();
-    _analyser.fftSize = 128;
-    _source = _audioCtx.createMediaElementSource(_audio);
-    _source.connect(_analyser);
-    _analyser.connect(_audioCtx.destination);
-    drawWave();
-  } catch(e) {}
+  if (type === 'none') { stopSound(); return; }
+  const videoId = SOUND_VIDEOS[type];
+  if (!videoId) return;
+  loadYTApi();
+  const vol = parseInt(document.getElementById('sound-volume')?.value || 40);
+  if (_ytReady && _ytPlayer) {
+    _ytPlayer.loadVideoById({ videoId, startSeconds: 0 });
+    _ytPlayer.setVolume(vol);
+    _ytPlayer.playVideo();
+  } else {
+    _ytPendingVideo = videoId;
+  }
   const ctrl = document.getElementById('sound-controls');
   if (ctrl) ctrl.style.display = 'flex';
   const icon = document.getElementById('sound-icon');
   if (icon) icon.textContent = SOUND_ICONS[type] || '🎵';
 }
 
-function drawWave() {
-  const cv = document.getElementById('wave-canvas');
-  if (!cv || !_analyser) return;
-  cv.width = cv.offsetWidth * window.devicePixelRatio;
-  cv.height = 36 * window.devicePixelRatio;
-  const buf = new Uint8Array(_analyser.frequencyBinCount);
-  const ctx = cv.getContext('2d');
-  function draw() {
-    _waveAnim = requestAnimationFrame(draw);
-    _analyser.getByteTimeDomainData(buf);
-    ctx.clearRect(0,0,cv.width,cv.height);
-    const grad = ctx.createLinearGradient(0,0,cv.width,0);
-    grad.addColorStop(0,'#c8f135'); grad.addColorStop(0.5,'#38bdf8'); grad.addColorStop(1,'#c8f135');
-    ctx.beginPath(); ctx.strokeStyle = grad; ctx.lineWidth = 2;
-    const sliceW = cv.width / buf.length; let x = 0;
-    buf.forEach((v,i) => {
-      const y = (v/128)*(cv.height/2);
-      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-      x += sliceW;
-    });
-    ctx.stroke();
-  }
-  draw();
-}
-
 function setSoundVolume(val) {
-  if (_audio) _audio.volume = val / 100;
+  if (_ytPlayer && _ytReady) _ytPlayer.setVolume(parseInt(val));
   const lbl = document.getElementById('sound-vol-label');
   if (lbl) lbl.textContent = val + '%';
 }
@@ -1992,7 +1989,9 @@ function setSoundVolume(val) {
 function toggleSoundMute() {
   const btn = document.getElementById('sound-mute-btn');
   _isMuted = !_isMuted;
-  if (_audio) _audio.muted = _isMuted;
+  if (_ytPlayer && _ytReady) {
+    _isMuted ? _ytPlayer.mute() : _ytPlayer.unMute();
+  }
   if (btn) btn.textContent = _isMuted ? '▶' : '⏸';
 }
 
@@ -2003,7 +2002,7 @@ function setSound(btn) {
   playAmbient(_currentSound);
 }
 
-function initSoundEngine() {}
+function initSoundEngine() { loadYTApi(); }
 
 
 // ── 3D KART TİLT ──
