@@ -873,20 +873,20 @@ window.addEventListener('load',function(){
       <button class="drop-item" onclick="switchApp('tibbi','Tıbbi Bitki','tibbi')">🌿 Tıbbi Bitki</button>
     </div>
   </div>
-  <div class="switcher-right">
-    <div class="dropdown" id="drop-apps">
-      <div class="drop-label" onclick="toggleDrop('apps')" style="color:#a78bfa">UYGULAMALAR</div>
-      <div class="drop-menu" id="dropmenu-apps" style="min-width:200px">
-        <div class="drop-week-label">📱 Hızlı Aç</div>
-        <button class="drop-item" onclick="openApp('instagram')">📸 Instagram</button>
-        <button class="drop-item" onclick="openApp('x')">𝕏 X (Twitter)</button>
-        <button class="drop-item" onclick="openApp('youtube')">▶️ YouTube</button>
-        <button class="drop-item" onclick="openApp('tiktok')">🎵 TikTok</button>
-        <button class="drop-item" onclick="openApp('spotify')">🎧 Spotify</button>
-        <button class="drop-item" onclick="openApp('github')">🐙 GitHub</button>
-        <button class="drop-item" onclick="openApp('coc')">⚔️ Clash of Clans</button>
-      </div>
+  <div class="dropdown" id="drop-apps" style="margin-left:8px">
+    <div class="drop-label" onclick="toggleDrop('drop-apps')" style="color:#a78bfa">UYGULAMALAR</div>
+    <div class="drop-menu" id="dropmenu-apps" style="min-width:180px;right:0;left:auto">
+      <div class="drop-week-label">📱 Hızlı Aç</div>
+      <button class="drop-item" onclick="openApp('instagram')">📸 Instagram</button>
+      <button class="drop-item" onclick="openApp('x')">𝕏 X (Twitter)</button>
+      <button class="drop-item" onclick="openApp('youtube')">▶️ YouTube</button>
+      <button class="drop-item" onclick="openApp('tiktok')">🎵 TikTok</button>
+      <button class="drop-item" onclick="openApp('spotify')">🎧 Spotify</button>
+      <button class="drop-item" onclick="openApp('github')">🐙 GitHub</button>
+      <button class="drop-item" onclick="openApp('coc')">⚔️ Clash of Clans</button>
     </div>
+  </div>
+  <div class="switcher-right">
     <button class="search-btn" onclick="openSearch()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       Ara <kbd>⌘K</kbd>
