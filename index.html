@@ -3461,6 +3461,92 @@
       transform: translateX(-50%) translateY(0);
     }
 
+    /* ═══ MOBİL PREMIUM LAYOUT ═══ */
+    @media (max-width: 768px) {
+      /* Navbar daha kompakt */
+      .app-switcher {
+        height: 48px;
+        padding: 0 8px;
+        gap: 2px;
+      }
+      .drop-label {
+        font-size: 10px !important;
+        padding: 6px 8px !important;
+        letter-spacing: 0.8px !important;
+      }
+      /* Hero */
+      .dash-hero {
+        padding: 24px 20px 18px !important;
+      }
+      .dash-title {
+        font-size: clamp(1.6rem, 7vw, 2.4rem) !important;
+      }
+      /* Bugün banner */
+      .today-banner {
+        margin: 12px 16px 0 !important;
+        padding: 12px 16px !important;
+        border-radius: 12px !important;
+      }
+      /* Dashboard grid — mobilde tam genişlik kartlar */
+      .dashboard-grid {
+        grid-template-columns: 1fr !important;
+        padding: 12px 16px 0 !important;
+        gap: 12px !important;
+      }
+      .pomodoro-widget {
+        margin: 0 !important;
+        border-radius: 14px !important;
+        padding: 16px !important;
+      }
+      .tool-box {
+        border-radius: 14px !important;
+        padding: 16px !important;
+      }
+      /* Ses satırı */
+      .pomo-sound-row {
+        gap: 4px !important;
+      }
+      .sound-opt {
+        font-size: 11px !important;
+        padding: 4px 10px !important;
+      }
+      /* Ders kartları grid */
+      .course-grid {
+        grid-template-columns: 1fr !important;
+        padding: 0 16px 24px !important;
+        gap: 10px !important;
+      }
+      .course-card {
+        padding: 20px !important;
+        border-radius: 14px !important;
+      }
+      /* Schedule */
+      .schedule-section {
+        padding: 0 16px 24px !important;
+      }
+      .schedule-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+      }
+      /* Başlıklar */
+      .dash-section-title {
+        padding: 20px 16px 10px !important;
+      }
+      /* Shortcuts bar gizle mobilde */
+      .shortcuts-bar {
+        display: none !important;
+      }
+      /* Word of day */
+      .word-of-day {
+        margin: 12px 16px 0 !important;
+        border-radius: 14px !important;
+      }
+      /* Ses padding */
+      .pomo-sound-row-wrap {
+        padding: 0 16px 4px !important;
+      }
+    }
+
     /* ═══ APPS POPUP GRID BUTON ═══ */
     .app-grid-btn {
       display: flex;
@@ -3659,19 +3745,40 @@
   <div id="lockscreen">
     <div id="lock-logo">🔒</div>
     <h2>Tariktanta</h2>
-    <p class="lock-sub">Şifrenizi girin</p>
-    <input type="password" id="lock-input" maxlength="10" placeholder="••••" inputmode="numeric" pattern="[0-9]*"
+    <p class="lock-sub">Şifreyi gir</p>
+    <input type="password" id="lock-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*"
       autocomplete="off" onkeydown="if(event.key==='Enter') lockCheck()" />
-    <button id="lock-btn" onclick="lockCheck()">Giriş</button>
   </div>
   <script>
     function lockCheck() {
       const val = document.getElementById('lock-input').value;
-      if (val === '3131') { document.getElementById('lockscreen').style.display = 'none'; sessionStorage.setItem('unlocked', '1'); initApp(); }
-      else { const inp = document.getElementById('lock-input'); inp.classList.add('wrong'); inp.value = ''; setTimeout(() => inp.classList.remove('wrong'), 400); }
+      if (val === '3131') {
+        document.getElementById('lockscreen').style.display = 'none';
+        sessionStorage.setItem('unlocked', '1');
+        initApp();
+      } else {
+        const inp = document.getElementById('lock-input');
+        inp.classList.add('wrong');
+        inp.value = '';
+        setTimeout(() => inp.classList.remove('wrong'), 400);
+      }
     }
     window.addEventListener('load', function () {
-      if (sessionStorage.getItem('unlocked') === '1') { var ls = document.getElementById('lockscreen'); if (ls) ls.style.display = 'none'; initApp(); }
+      if (sessionStorage.getItem('unlocked') === '1') {
+        var ls = document.getElementById('lockscreen');
+        if (ls) ls.style.display = 'none';
+        initApp();
+        return;
+      }
+      // Şifre girilince otomatik kontrol — Enter bekleme yok
+      var inp = document.getElementById('lock-input');
+      if (inp) {
+        inp.addEventListener('input', function () {
+          if (inp.value.length >= 4) lockCheck();
+        });
+        // iOS'ta klavye açılsın
+        setTimeout(function() { inp.focus(); }, 300);
+      }
     });
   </script>
 
@@ -3883,7 +3990,7 @@
         <div id="dict-result"></div>
       </div>
     </div>
-    <div style="padding:0 40px 4px;display:flex;flex-direction:column;gap:4px;margin-top:12px">
+    <div class="pomo-sound-row-wrap" style="padding:0 40px 4px;display:flex;flex-direction:column;gap:4px;margin-top:12px">
       <div class="pomo-sound-row">
         <button class="sound-opt active" data-sound="none" onclick="setSound(this)">🔇 Kapalı</button>
         <button class="sound-opt" data-sound="rain" onclick="setSound(this)">🌧️ Yağmur</button>
@@ -5085,53 +5192,80 @@
     // ════════════════════════════════════════════════
     // DROPDOWN — HOVER (mouseenter/leave) + CLICK/TOUCH
     // ════════════════════════════════════════════════
-        function initDropdowns() {
-      const switcher = document.querySelector('.app-switcher');
-      if (switcher) {
-        switcher.addEventListener('scroll', function() {
-          document.querySelectorAll('.dropdown').forEach(function(d) { d.classList.remove('open'); });
-        }, { passive: true });
-      }
-      document.querySelectorAll('.dropdown').forEach(function (dd) {
-        var leaveTimer;
-        dd.addEventListener('mouseenter', function () {
-          if (!window.matchMedia('(pointer: fine)').matches) return;
-          clearTimeout(leaveTimer);
-          document.querySelectorAll('.dropdown').forEach(function (d) { if (d !== dd) d.classList.remove('open'); });
-          var menu = dd.querySelector('.drop-menu');
-          if(menu) {
-              var rect = dd.getBoundingClientRect();
-              menu.style.position = 'fixed';
-              menu.style.top = '52px';
-              var leftPos = rect.left;
-              if (leftPos + 240 > window.innerWidth) leftPos = window.innerWidth - 250;
-              menu.style.left = leftPos + 'px';
-          }
-          dd.classList.add('open');
-        });
-        dd.addEventListener('mouseleave', function () {
-          if (!window.matchMedia('(pointer: fine)').matches) return;
-          leaveTimer = setTimeout(function () { dd.classList.remove('open'); }, 120);
-        });
-      });
+    // ── DROPDOWN MENU KONUMLAMA (ortak yardımcı) ──
+    function _positionMenu(dd) {
+      var menu = dd.querySelector('.drop-menu');
+      if (!menu) return;
+      var rect = dd.getBoundingClientRect();
+      menu.style.position = 'fixed';
+      menu.style.top = '52px';
+      var leftPos = rect.left;
+      if (leftPos + 260 > window.innerWidth) leftPos = window.innerWidth - 268;
+      if (leftPos < 4) leftPos = 4;
+      menu.style.left = leftPos + 'px';
     }
 
     function toggleDrop(id) {
       var dd = document.getElementById(id);
+      if (!dd) return;
       var isOpen = dd.classList.contains('open');
+      // diğerlerini kapat
       document.querySelectorAll('.dropdown').forEach(function (d) { d.classList.remove('open'); });
       if (!isOpen) {
-        var menu = dd.querySelector('.drop-menu');
-        if(menu) {
-            var rect = dd.getBoundingClientRect();
-            menu.style.position = 'fixed';
-            menu.style.top = '52px';
-            var leftPos = rect.left;
-            if (leftPos + 240 > window.innerWidth) leftPos = window.innerWidth - 250;
-            menu.style.left = leftPos + 'px';
-        }
+        _positionMenu(dd);
         dd.classList.add('open');
       }
+    }
+
+    function initDropdowns() {
+      var switcher = document.querySelector('.app-switcher');
+      if (switcher) {
+        switcher.addEventListener('scroll', function () {
+          document.querySelectorAll('.dropdown').forEach(function (d) { d.classList.remove('open'); });
+        }, { passive: true });
+      }
+
+      document.querySelectorAll('.dropdown').forEach(function (dd) {
+        var leaveTimer;
+
+        // ── MASAÜSTÜ: hover ──
+        dd.addEventListener('mouseenter', function () {
+          if (!window.matchMedia('(pointer: fine)').matches) return;
+          clearTimeout(leaveTimer);
+          document.querySelectorAll('.dropdown').forEach(function (d) { if (d !== dd) d.classList.remove('open'); });
+          _positionMenu(dd);
+          dd.classList.add('open');
+        });
+        dd.addEventListener('mouseleave', function () {
+          if (!window.matchMedia('(pointer: fine)').matches) return;
+          leaveTimer = setTimeout(function () { dd.classList.remove('open'); }, 150);
+        });
+      });
+
+      // ── iOS / TOUCH: drop-label butonlara touchend ──
+      document.querySelectorAll('.drop-label').forEach(function (btn) {
+        btn.addEventListener('touchend', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          // onclick attribute'unu güvenle çalıştır
+          var fn = btn.getAttribute('onclick');
+          if (fn) {
+            try { new Function(fn)(); } catch(err) { eval(fn); }
+          }
+        }, { passive: false });
+      });
+
+      // ── Dışarı tıklayınca kapat ──
+      document.addEventListener('touchstart', function (e) {
+        if (!e.target.closest('.dropdown') && !e.target.closest('#apps-popup')) {
+          document.querySelectorAll('.dropdown').forEach(function (d) { d.classList.remove('open'); });
+        }
+      }, { passive: true });
+      document.addEventListener('mousedown', function (e) {
+        if (!e.target.closest('.dropdown') && !e.target.closest('#apps-popup')) {
+          document.querySelectorAll('.dropdown').forEach(function (d) { d.classList.remove('open'); });
+        }
+      });
     }
 
     // ════════════════════════════════════════════════
