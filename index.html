@@ -207,6 +207,13 @@
     }
 
     .drop-label {
+      /* button reset — iOS için şart */
+      appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+      border: none;
+      outline: none;
+      /* stil */
       font-family: 'Syne', sans-serif;
       font-size: 11px;
       font-weight: 700;
@@ -218,12 +225,13 @@
       border-radius: 8px;
       transition: color 0.2s;
       user-select: none;
+      -webkit-user-select: none;
       white-space: nowrap;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
-      /* iOS tıklanabilirlik fix */
-      -webkit-user-select: none;
-      display: block;
+      display: inline-flex;
+      align-items: center;
+      line-height: 1;
     }
 
     .drop-label:hover {
@@ -3452,6 +3460,64 @@
     #offline-toast.show {
       transform: translateX(-50%) translateY(0);
     }
+
+    /* ═══ APPS POPUP GRID BUTON ═══ */
+    .app-grid-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 10px;
+      background: var(--theme-bg);
+      border: 1px solid var(--theme-border);
+      border-radius: 12px;
+      color: var(--theme-text);
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .app-grid-btn:hover, .app-grid-btn:active {
+      border-color: var(--theme-accent);
+      background: rgba(200,241,53,0.05);
+      transform: scale(0.97);
+    }
+
+    /* ═══ PREMIUM ANA SAYFA ═══ */
+    /* Hero daha minimal */
+    .dash-hero {
+      padding: 36px 40px 28px !important;
+    }
+    /* Pomodoro ve sözlük yan yana grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 16px 40px 0;
+    }
+    @media (max-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+        padding: 12px 20px 0;
+      }
+    }
+    /* Ses seçenekleri daha kompakt */
+    .pomo-sound-row {
+      flex-wrap: wrap;
+      gap: 5px !important;
+    }
+    /* Word of day daha şık */
+    .word-of-day {
+      margin: 16px 40px 0 !important;
+    }
+    @media (max-width: 768px) {
+      .dash-hero { padding: 24px 20px 20px !important; }
+      .word-of-day { margin: 12px 20px 0 !important; }
+    }
   </style>
 </head>
 
@@ -3459,26 +3525,39 @@
   <div id="cursor-glow"></div>
   <!-- UYGULAMALAR POPUP MENÜ - fixed pozisyon, overflow sorununu aşar -->
   <div id="apps-popup"
-    style="display:none;position:fixed;top:52px;right:12px;background:var(--theme-surface);border:1px solid var(--theme-border);border-radius:10px;padding:6px;min-width:190px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.5);flex-direction:column;gap:2px">
-    <div
-      style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--theme-muted);padding:8px 14px 4px;border-bottom:1px solid var(--theme-border);margin-bottom:4px">
+    style="display:none;position:fixed;top:52px;right:12px;background:var(--theme-surface);border:1px solid var(--theme-border);border-radius:16px;padding:12px;min-width:280px;z-index:99999;box-shadow:0 12px 40px rgba(0,0,0,0.6);">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--theme-muted);padding:4px 6px 10px;border-bottom:1px solid var(--theme-border);margin-bottom:10px;">
       📱 Hızlı Aç</div>
-    <button class="drop-item app-link-btn" onclick="openApp('instagram')"><img
-        src="https://cdn.simpleicons.org/instagram/E1306C" width="18" height="18" alt=""> Instagram</button>
-    <button class="drop-item app-link-btn" onclick="openApp('x')"><img src="https://cdn.simpleicons.org/x/000000"
-        width="18" height="18" alt="" class="icon-invert-light"> X (Twitter)</button>
-    <button class="drop-item app-link-btn" onclick="openApp('youtube')"><img
-        src="https://cdn.simpleicons.org/youtube/FF0000" width="18" height="18" alt=""> YouTube</button>
-    <button class="drop-item app-link-btn" onclick="openApp('tiktok')"><img
-        src="https://cdn.simpleicons.org/tiktok/000000" width="18" height="18" alt="" class="icon-invert-light">
-      TikTok</button>
-    <button class="drop-item app-link-btn" onclick="openApp('spotify')"><img
-        src="https://cdn.simpleicons.org/spotify/1DB954" width="18" height="18" alt=""> Spotify</button>
-    <button class="drop-item app-link-btn" onclick="openApp('github')"><img
-        src="https://cdn.simpleicons.org/github/181717" width="18" height="18" alt="" class="icon-invert-light">
-      GitHub</button>
-    <button class="drop-item app-link-btn" onclick="openApp('coc')"><img
-        src="https://cdn.simpleicons.org/supercell/0A3CFF" width="18" height="18" alt=""> Clash of Clans</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <button class="app-grid-btn" onclick="openApp('instagram')">
+        <img src="https://cdn.simpleicons.org/instagram/E1306C" width="22" height="22" alt="">
+        <span>Instagram</span>
+      </button>
+      <button class="app-grid-btn" onclick="openApp('x')">
+        <img src="https://cdn.simpleicons.org/x/000000" width="22" height="22" alt="" class="icon-invert-light">
+        <span>X (Twitter)</span>
+      </button>
+      <button class="app-grid-btn" onclick="openApp('youtube')">
+        <img src="https://cdn.simpleicons.org/youtube/FF0000" width="22" height="22" alt="">
+        <span>YouTube</span>
+      </button>
+      <button class="app-grid-btn" onclick="openApp('tiktok')">
+        <img src="https://cdn.simpleicons.org/tiktok/000000" width="22" height="22" alt="" class="icon-invert-light">
+        <span>TikTok</span>
+      </button>
+      <button class="app-grid-btn" onclick="openApp('spotify')">
+        <img src="https://cdn.simpleicons.org/spotify/1DB954" width="22" height="22" alt="">
+        <span>Spotify</span>
+      </button>
+      <button class="app-grid-btn" onclick="openApp('github')">
+        <img src="https://cdn.simpleicons.org/github/181717" width="22" height="22" alt="" class="icon-invert-light">
+        <span>GitHub</span>
+      </button>
+      <button class="app-grid-btn" onclick="openApp('coc')" style="grid-column:1/-1;">
+        <img src="https://cdn.simpleicons.org/supercell/0A3CFF" width="22" height="22" alt="">
+        <span>Clash of Clans</span>
+      </button>
+    </div>
   </div>
 
   <style>
@@ -3618,7 +3697,7 @@
     <div class="app-logo" onclick="switchApp('dashboard','','')">Tariktanta</div>
 
     <div class="dropdown" id="drop-hukuk">
-      <div class="drop-label" id="droplabel-hukuk" onclick="toggleDrop('drop-hukuk')">HUKUK</div>
+      <button class="drop-label" id="droplabel-hukuk" onclick="toggleDrop('drop-hukuk')">HUKUK</button>
       <div class="drop-menu" id="dropmenu-hukuk">
         <div class="drop-week-label">📅 Haftalar</div>
         <!-- Week 2 links to your existing panel-hukuk -->
@@ -3633,7 +3712,7 @@
     </div>
 
     <div class="dropdown" id="drop-davos">
-      <div class="drop-label" id="droplabel-davos" onclick="toggleDrop('drop-davos')">ARDIL</div>
+      <button class="drop-label" id="droplabel-davos" onclick="toggleDrop('drop-davos')">ARDIL</button>
       <div class="drop-menu" id="dropmenu-davos">
         <div class="drop-week-label">📅 Haftalar</div>
         <!-- Week 2 links to your existing panel-davos -->
@@ -3648,7 +3727,7 @@
     </div>
 
     <div class="dropdown" id="drop-gobilim">
-      <div class="drop-label" onclick="toggleDrop('drop-gobilim')">GÖSTERGEBİLİM</div>
+      <button class="drop-label" onclick="toggleDrop('drop-gobilim')">GÖSTERGEBİLİM</button>
       <div class="drop-menu">
         <div class="drop-week-label">📅 Haftalar</div>
         <button class="drop-item" onclick="switchApp('gobilim-w2','2. Hafta','gobilim')">📐 2. Hafta</button>
@@ -3661,7 +3740,7 @@
     </div>
 
     <div class="dropdown" id="drop-etik">
-      <div class="drop-label" onclick="toggleDrop('drop-etik')">ETİK</div>
+      <button class="drop-label" onclick="toggleDrop('drop-etik')">ETİK</button>
       <div class="drop-menu">
         <div class="drop-week-label">📅 Haftalar</div>
         <button class="drop-item" onclick="switchApp('etik-w2','2. Hafta','etik')">⚡ 2. Hafta</button>
@@ -3674,7 +3753,7 @@
     </div>
 
     <div class="dropdown" id="drop-rusca4">
-      <div class="drop-label" onclick="toggleDrop('drop-rusca4')">RUSÇA IV</div>
+      <button class="drop-label" onclick="toggleDrop('drop-rusca4')">RUSÇA IV</button>
       <div class="drop-menu">
         <div class="drop-week-label">📅 Haftalar</div>
         <button class="drop-item" onclick="switchApp('rusca4-w2','2. Hafta','rusca4')">🇷🇺 2. Hafta</button>
@@ -3687,7 +3766,7 @@
     </div>
 
     <div class="dropdown" id="drop-rusca6">
-      <div class="drop-label" onclick="toggleDrop('drop-rusca6')">RUSÇA VI</div>
+      <button class="drop-label" onclick="toggleDrop('drop-rusca6')">RUSÇA VI</button>
       <div class="drop-menu">
         <div class="drop-week-label">📅 Haftalar</div>
         <button class="drop-item" onclick="switchApp('rusca6-w2','2. Hafta','rusca6')">🇷🇺 2. Hafta</button>
@@ -3700,7 +3779,7 @@
     </div>
 
     <div class="dropdown" id="drop-isaret">
-      <div class="drop-label" onclick="toggleDrop('drop-isaret')">İŞARET</div>
+      <button class="drop-label" onclick="toggleDrop('drop-isaret')">İŞARET</button>
       <div class="drop-menu">
         <div class="drop-week-label">📅 Haftalar</div>
         <button class="drop-item" onclick="switchApp('isaret-w2','2. Hafta','isaret')">🤟 2. Hafta</button>
@@ -3713,7 +3792,7 @@
     </div>
 
     <div class="dropdown" id="drop-tibbi">
-      <div class="drop-label" onclick="toggleDrop('drop-tibbi')">TIBBİ BİTKİ</div>
+      <button class="drop-label" onclick="toggleDrop('drop-tibbi')">TIBBİ BİTKİ</button>
       <div class="drop-menu">
         <div class="drop-week-label">📅 Haftalar</div>
         <button class="drop-item" onclick="switchApp('tibbi-w2','2. Hafta','tibbi')">🌿 2. Hafta</button>
@@ -3728,7 +3807,7 @@
     <!-- UYGULAMALAR ve sağ panele dokunulmadı -->
     <div class="switcher-right">
       <div class="dropdown" id="drop-apps">
-        <div class="drop-label" onclick="toggleAppsMenu()" style="color:#a78bfa">UYGULAMALAR</div>
+        <button class="drop-label" onclick="toggleAppsMenu()" style="color:#a78bfa">UYGULAMALAR</button>
       </div>
       <button class="search-btn" onclick="openSearch()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -3762,35 +3841,37 @@
     </div>
 
 
-    <div class="pomodoro-widget">
-      <svg class="pomo-ring" viewBox="0 0 64 64">
-        <circle class="pomo-ring-bg" cx="32" cy="32" r="27" />
-        <circle class="pomo-ring-fill" id="pomoRingFill" cx="32" cy="32" r="27" stroke="#c8f135"
-          stroke-dasharray="169.6" stroke-dashoffset="0" />
-      </svg>
-      <div class="pomo-info">
-        <div class="pomo-label">⏱ Pomodoro</div>
-        <div class="pomo-display" id="pomoDisplay">25:00</div>
-        <div class="pomo-mode" id="pomoMode">Çalışma · 0/4</div>
+    <div class="dashboard-grid">
+      <!-- POMODORO -->
+      <div class="pomodoro-widget" style="margin:0;">
+        <svg class="pomo-ring" viewBox="0 0 64 64">
+          <circle class="pomo-ring-bg" cx="32" cy="32" r="27" />
+          <circle class="pomo-ring-fill" id="pomoRingFill" cx="32" cy="32" r="27" stroke="#c8f135"
+            stroke-dasharray="169.6" stroke-dashoffset="0" />
+        </svg>
+        <div class="pomo-info">
+          <div class="pomo-label">⏱ Pomodoro</div>
+          <div class="pomo-display" id="pomoDisplay">25:00</div>
+          <div class="pomo-mode" id="pomoMode">Çalışma · 0/4</div>
+        </div>
+        <div class="pomo-controls">
+          <button class="pomo-btn" id="pomoStartBtn" onclick="pomoToggle()">▶ Başlat</button>
+          <button class="pomo-btn" onclick="pomoReset()">↺ Sıfırla</button>
+        </div>
+        <div class="pomo-sessions" id="pomoDotsWrap">
+          <div class="pomo-dot" id="pd0"></div>
+          <div class="pomo-dot" id="pd1"></div>
+          <div class="pomo-dot" id="pd2"></div>
+          <div class="pomo-dot" id="pd3"></div>
+        </div>
       </div>
-      <div class="pomo-controls">
-        <button class="pomo-btn" id="pomoStartBtn" onclick="pomoToggle()">▶ Başlat</button>
-        <button class="pomo-btn" onclick="pomoReset()">↺ Sıfırla</button>
-      </div>
-      <div class="pomo-sessions" id="pomoDotsWrap">
-        <div class="pomo-dot" id="pd0"></div>
-        <div class="pomo-dot" id="pd1"></div>
-        <div class="pomo-dot" id="pd2"></div>
-        <div class="pomo-dot" id="pd3"></div>
-      </div>
-    </div><!-- HIZLI SÖZLÜK -->
-    <div class="quick-tools">
-      <div class="tool-box">
+      <!-- HIZLI SÖZLÜK -->
+      <div class="tool-box" style="margin:0;">
         <div class="tool-box-label">📖 Hızlı Sözlük</div>
         <div class="dict-input-row">
-          <input 
-            type="text" 
-            id="q-dict" 
+          <input
+            type="text"
+            id="q-dict"
             class="dict-input"
             placeholder="İngilizce kelime yaz, Enter'a bas..."
             onkeydown="if(event.key==='Enter') runDict()"
@@ -3802,7 +3883,7 @@
         <div id="dict-result"></div>
       </div>
     </div>
-    <div style="padding:0 20px 4px;display:flex;flex-direction:column;gap:4px">
+    <div style="padding:0 40px 4px;display:flex;flex-direction:column;gap:4px;margin-top:12px">
       <div class="pomo-sound-row">
         <button class="sound-opt active" data-sound="none" onclick="setSound(this)">🔇 Kapalı</button>
         <button class="sound-opt" data-sound="rain" onclick="setSound(this)">🌧️ Yağmur</button>
@@ -5034,17 +5115,6 @@
         });
       });
     }
-
-    // iOS'ta div onclick çalışmaz — touchend ile fix
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.drop-label').forEach(function(el) {
-        el.addEventListener('touchend', function(e) {
-          e.preventDefault();
-          var onclick = el.getAttribute('onclick');
-          if (onclick) eval(onclick);
-        }, { passive: false });
-      });
-    });
 
     function toggleDrop(id) {
       var dd = document.getElementById(id);
