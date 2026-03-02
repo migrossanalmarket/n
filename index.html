@@ -9,7 +9,9 @@
 <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;Tariktanta&quot;,&quot;short_name&quot;:&quot;Tariktanta&quot;,&quot;start_url&quot;:&quot;/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#08090d&quot;,&quot;theme_color&quot;:&quot;#08090d&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<!-- Font async yükle — ilk render'ı bloklamasın -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"></noscript>
 <style>
 :root {
  --theme-bg: #08090d;
@@ -29,6 +31,13 @@
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+/* Performans: GPU katmanları ve paint optimizasyonu */
+.app-panel { contain: layout style; }
+.app-switcher { contain: layout style; will-change: transform; }
+.course-card { contain: layout style paint; }
+.drop-menu { will-change: transform, opacity; }
+.app-panel.visible { will-change: auto; }
+img { loading: lazy; decoding: async; }
 body { background: var(--theme-bg); transition: background 0.3s, color 0.3s; }
 .app-switcher {
  position: fixed;
@@ -732,45 +741,36 @@ mark { background: rgba(200,241,53,0.25); color: var(--theme-text); border-radiu
  .schedule-section{padding:0 20px 32px}
  .shortcuts-bar{padding:12px 20px;display:none}
 }
-/* ═══ GRADIENT BORDER KARTLAR ═══ */
-/* ═══ GRADIENT BORDER KARTLAR — JS ile döndürülür ═══ */
-.course-card { position:relative; }
+ .course-card { position:relative; }
 .course-card::after { content:''; position:absolute; inset:-1.5px; border-radius:17px; background:conic-gradient(#c8f135,#38bdf8,#a78bfa,#f97316,#c8f135); z-index:-1; opacity:0; transition:opacity 0.3s; }
 .course-card:hover::after { opacity:1; }
-/* ═══ SKELETON ═══ */
-.skeleton { background:linear-gradient(90deg,var(--theme-border) 25%,var(--theme-surface) 50%,var(--theme-border) 75%); background-size:200% 100%; animation:skelAnim 1.4s infinite; border-radius:6px; }
+ .skeleton { background:linear-gradient(90deg,var(--theme-border) 25%,var(--theme-surface) 50%,var(--theme-border) 75%); background-size:200% 100%; animation:skelAnim 1.4s infinite; border-radius:6px; }
 @keyframes skelAnim { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-/* ═══ GÜNÜN TERİMİ ═══ */
-.word-of-day { margin:0 20px 16px; padding:18px 24px; background:linear-gradient(135deg,rgba(200,241,53,0.06),rgba(56,189,248,0.06)); border:1px solid rgba(200,241,53,0.2); border-radius:14px; cursor:pointer; transition:all 0.2s; }
+ .word-of-day { margin:0 20px 16px; padding:18px 24px; background:linear-gradient(135deg,rgba(200,241,53,0.06),rgba(56,189,248,0.06)); border:1px solid rgba(200,241,53,0.2); border-radius:14px; cursor:pointer; transition:all 0.2s; }
 .word-of-day:hover { border-color:rgba(200,241,53,0.5); transform:translateY(-1px); }
 .wod-label { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--theme-muted); margin-bottom:8px; }
 .wod-term { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; color:var(--theme-accent); margin-bottom:4px; }
 .wod-def { font-size:13px; color:var(--theme-muted); line-height:1.5; }
-/* ═══ PWA BANNER ═══ */
-.pwa-banner { display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--theme-surface); border:1px solid var(--theme-border); border-radius:14px; padding:14px 20px; z-index:9000; box-shadow:0 8px 32px rgba(0,0,0,0.4); align-items:center; gap:14px; max-width:340px; width:90%; }
+ .pwa-banner { display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--theme-surface); border:1px solid var(--theme-border); border-radius:14px; padding:14px 20px; z-index:9000; box-shadow:0 8px 32px rgba(0,0,0,0.4); align-items:center; gap:14px; max-width:340px; width:90%; }
 .pwa-banner.show { display:flex; animation:panelFadeIn 0.3s ease; }
 .pwa-text { font-size:13px; color:var(--theme-text); line-height:1.4; }
 .pwa-text strong { color:var(--theme-accent); font-family:'Syne',sans-serif; }
 .pwa-btn { padding:8px 16px; background:var(--theme-accent); color:#08090d; border:none; border-radius:8px; font-family:'Syne',sans-serif; font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; }
 .pwa-close { background:none; border:none; color:var(--theme-muted); font-size:18px; cursor:pointer; padding:0 4px; }
-/* ═══ PULL TO REFRESH ═══ */
-.ptr-indicator { position:fixed; top:52px; left:50%; transform:translateX(-50%) translateY(-60px); background:var(--theme-surface); border:1px solid var(--theme-border); border-radius:50px; padding:8px 18px; font-size:12px; color:var(--theme-accent); font-family:'Syne',sans-serif; font-weight:700; z-index:8000; transition:transform 0.25s; pointer-events:none; }
+ .ptr-indicator { position:fixed; top:52px; left:50%; transform:translateX(-50%) translateY(-60px); background:var(--theme-surface); border:1px solid var(--theme-border); border-radius:50px; padding:8px 18px; font-size:12px; color:var(--theme-accent); font-family:'Syne',sans-serif; font-weight:700; z-index:8000; transition:transform 0.25s; pointer-events:none; }
 .ptr-indicator.ptr-ready { transform:translateX(-50%) translateY(10px); }
-/* ═══ SES SEÇENEKLERİ ═══ */
-.pomo-sound-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+ .pomo-sound-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
 .sound-opt { padding:5px 12px; border-radius:20px; border:1px solid var(--theme-border); background:none; color:var(--theme-muted); font-size:12px; cursor:pointer; transition:all 0.2s; font-family:'Syne',sans-serif; }
 .sound-opt.active { border-color:var(--theme-accent); color:var(--theme-accent); background:rgba(200,241,53,0.08); }
 .wave-canvas { display:block; width:100%; height:36px; margin-top:6px; opacity:0.5; }
-/* ═══ DİNAMİK SELAM GRADİENT ═══ */
-.dash-greeting { background:linear-gradient(135deg,var(--theme-accent),#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-/* ═══ CURSOR GLOW ═══ */
-#cursor-glow { pointer-events:none; position:fixed; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle,rgba(200,241,53,0.07) 0%,transparent 70%); transform:translate(-50%,-50%); z-index:99998; transition:opacity 0.4s; opacity:0; }
+ .dash-greeting { background:linear-gradient(135deg,var(--theme-accent),#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+ #cursor-glow { pointer-events:none; position:fixed; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle,rgba(200,241,53,0.07) 0%,transparent 70%); transform:translate(-50%,-50%); z-index:99998; transition:opacity 0.4s; opacity:0; }
 [data-theme="light"] #cursor-glow { background:radial-gradient(circle,rgba(90,122,0,0.04) 0%,transparent 70%); }
 </style>
 </head>
 <body>
 <div id="cursor-glow"></div>
-<!-- UYGULAMALAR POPUP MENÜ - fixed pozisyon, overflow sorununu aşar -->
+
 <div id="apps-popup" style="display:none;position:fixed;top:52px;right:12px;background:var(--theme-surface);border:1px solid var(--theme-border);border-radius:10px;padding:6px;min-width:190px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.5);flex-direction:column;gap:2px">
   <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--theme-muted);padding:8px 14px 4px;border-bottom:1px solid var(--theme-border);margin-bottom:4px">📱 Hızlı Aç</div>
   <button class="drop-item" onclick="openApp('instagram')">📸 Instagram</button>
@@ -1371,16 +1371,24 @@ function toggleDrop(id) {
 // ════════════════════════════════════════════════
 // Ardıl nav scroll gizle/göster
 (function(){
-  let lastY = 0;
+  let lastY = 0, ticking = false;
   window.addEventListener('scroll', function(){
-    const nav = document.querySelector('#panel-davos nav');
-    if(!nav) return;
-    const panel = document.getElementById('panel-davos');
-    if(!panel || !panel.classList.contains('visible')) return;
-    const y = window.scrollY;
-    if(y > lastY && y > 100) nav.classList.add('nav-hidden');
-    else nav.classList.remove('nav-hidden');
-    lastY = y;
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        const nav = document.querySelector('#panel-davos nav');
+        if(nav) {
+          const panel = document.getElementById('panel-davos');
+          if(panel && panel.classList.contains('visible')) {
+            const y = window.scrollY;
+            if(y > lastY && y > 100) nav.classList.add('nav-hidden');
+            else nav.classList.remove('nav-hidden');
+            lastY = y;
+          }
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
   }, {passive:true});
 })();
 
@@ -1836,7 +1844,73 @@ function dToggleTracked(key,elId){if(dIsTracked(key))sessionStorage.removeItem('
 // ════════════════════════════════════════════════
 // PWA
 // ════════════════════════════════════════════════
-function registerSW(){if('serviceWorker' in navigator){const swCode=`const CACHE='tariktanta-v2';const ASSETS=['/'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const clone=res.clone();caches.open(CACHE).then(c=>c.put(e.request,clone));return res;}).catch(()=>caches.match('/')))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));`;const blob=new Blob([swCode],{type:'application/javascript'});const url=URL.createObjectURL(blob);navigator.serviceWorker.register(url).catch(()=>{});}}
+function registerSW(){
+  if(!('serviceWorker' in navigator)) return;
+  const swCode = `
+const CACHE = 'tariktanta-v4';
+const FONTS = 'tariktanta-fonts-v1';
+
+// Uygulama shell — her zaman cache'den sun
+const SHELL = [
+  self.location.pathname.replace('sw.js','') || '/',
+];
+
+// Font URL'leri — ayrı cache
+const FONT_URLS = [
+  'https://fonts.googleapis.com',
+  'https://fonts.gstatic.com',
+];
+
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE && k !== FONTS).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+
+  // YouTube/external API — cache'leme
+  if (url.hostname.includes('youtube') || url.hostname.includes('googleapis.com') && !url.hostname.includes('fonts')) return;
+
+  // Font istekleri — cache-first
+  if (url.hostname.includes('fonts.gstatic.com') || url.hostname.includes('fonts.googleapis.com')) {
+    e.respondWith(
+      caches.open(FONTS).then(cache =>
+        cache.match(e.request).then(hit =>
+          hit || fetch(e.request).then(res => { cache.put(e.request, res.clone()); return res; })
+        )
+      ).catch(() => new Response(''))
+    );
+    return;
+  }
+
+  // Ana sayfa — network-first, offline fallback
+  e.respondWith(
+    fetch(e.request)
+      .then(res => {
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return res;
+      })
+      .catch(() => caches.match(e.request).then(r => r || caches.match('/')))
+  );
+});
+`;
+  const blob = new Blob([swCode], {type:'application/javascript'});
+  const url = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url).catch(()=>{});
+}
 
 // ════════════════════════════════════════════════
 // INIT
@@ -2056,7 +2130,6 @@ function setSound(btn) {
 }
 
 function initSoundEngine() { loadYTApi(); }
-
 
 // ── 3D KART TİLT ──
 function init3DTilt() {
