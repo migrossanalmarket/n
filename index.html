@@ -89,122 +89,122 @@
   </div>
 
   <div class="app-switcher">
-    <div class="app-logo" onclick="switchApp('dashboard','','')">Tariktanta</div>
+    <div class="app-logo" data-app="dashboard" data-label="" data-drop="">Tariktanta</div>
 
     <div class="dropdown" id="drop-hukuk">
-      <button class="drop-label" id="droplabel-hukuk" onclick="toggleDrop('drop-hukuk')">HUKUK</button>
+      <button data-drop-id="drop-hukuk" class="drop-label" id="droplabel-hukuk">HUKUK</button>
       <div class="drop-menu" id="dropmenu-hukuk">
         <div class="drop-week-label">📅 Haftalar</div>
         <!-- Week 2 links to your existing panel-hukuk -->
-        <button class="drop-item active-item" onclick="switchApp('hukuk','2. Hafta — Hukuki Çeviri','hukuk')">⚖️ 2.
+        <button data-app="hukuk" data-label="2. Hafta — Hukuki Çeviri" data-drop="hukuk" class="drop-item active-item">⚖️ 2.
           Hafta — Hukuki Çeviri</button>
-        <button class="drop-item" onclick="switchApp('hukuk-w3','3. Hafta','hukuk')">⚖️ 3. Hafta</button>
-        <button class="drop-item" onclick="switchApp('hukuk-w4','4. Hafta','hukuk')">⚖️ 4. Hafta</button>
-        <button class="drop-item" onclick="switchApp('hukuk-w5','5. Hafta','hukuk')">⚖️ 5. Hafta</button>
-        <button class="drop-item" onclick="switchApp('hukuk-w6','6. Hafta','hukuk')">⚖️ 6. Hafta</button>
-        <button class="drop-item" onclick="switchApp('hukuk-w7','7. Hafta','hukuk')">⚖️ 7. Hafta</button>
+        <button data-app="hukuk-w3" data-label="3. Hafta" data-drop="hukuk" class="drop-item">⚖️ 3. Hafta</button>
+        <button data-app="hukuk-w4" data-label="4. Hafta" data-drop="hukuk" class="drop-item">⚖️ 4. Hafta</button>
+        <button data-app="hukuk-w5" data-label="5. Hafta" data-drop="hukuk" class="drop-item">⚖️ 5. Hafta</button>
+        <button data-app="hukuk-w6" data-label="6. Hafta" data-drop="hukuk" class="drop-item">⚖️ 6. Hafta</button>
+        <button data-app="hukuk-w7" data-label="7. Hafta" data-drop="hukuk" class="drop-item">⚖️ 7. Hafta</button>
       </div>
     </div>
 
     <div class="dropdown" id="drop-davos">
-      <button class="drop-label" id="droplabel-davos" onclick="toggleDrop('drop-davos')">ARDIL</button>
+      <button data-drop-id="drop-davos" class="drop-label" id="droplabel-davos">ARDIL</button>
       <div class="drop-menu" id="dropmenu-davos">
         <div class="drop-week-label">📅 Haftalar</div>
         <!-- Week 2 links to your existing panel-davos -->
-        <button class="drop-item active-item" onclick="switchApp('davos','2. Hafta — Davos Summit','davos')">🎙️ 2.
+        <button data-app="davos" data-label="2. Hafta — Davos Summit" data-drop="davos" class="drop-item active-item">🎙️ 2.
           Hafta — Davos Summit</button>
-        <button class="drop-item" onclick="switchApp('davos-w3','3. Hafta','davos')">🎙️ 3. Hafta</button>
-        <button class="drop-item" onclick="switchApp('davos-w4','4. Hafta','davos')">🎙️ 4. Hafta</button>
-        <button class="drop-item" onclick="switchApp('davos-w5','5. Hafta','davos')">🎙️ 5. Hafta</button>
-        <button class="drop-item" onclick="switchApp('davos-w6','6. Hafta','davos')">🎙️ 6. Hafta</button>
-        <button class="drop-item" onclick="switchApp('davos-w7','7. Hafta','davos')">🎙️ 7. Hafta</button>
+        <button data-app="davos-w3" data-label="3. Hafta" data-drop="davos" class="drop-item">🎙️ 3. Hafta</button>
+        <button data-app="davos-w4" data-label="4. Hafta" data-drop="davos" class="drop-item">🎙️ 4. Hafta</button>
+        <button data-app="davos-w5" data-label="5. Hafta" data-drop="davos" class="drop-item">🎙️ 5. Hafta</button>
+        <button data-app="davos-w6" data-label="6. Hafta" data-drop="davos" class="drop-item">🎙️ 6. Hafta</button>
+        <button data-app="davos-w7" data-label="7. Hafta" data-drop="davos" class="drop-item">🎙️ 7. Hafta</button>
       </div>
     </div>
 
     <div class="dropdown" id="drop-gobilim">
-      <button class="drop-label" onclick="toggleDrop('drop-gobilim')">GÖSTERGEBİLİM</button>
+      <button data-drop-id="drop-gobilim" class="drop-label">GÖSTERGEBİLİM</button>
       <div class="drop-menu">
         <div class="drop-week-label">📅 Haftalar</div>
-        <button class="drop-item" onclick="switchApp('gobilim-w2','2. Hafta','gobilim')">📐 2. Hafta</button>
-        <button class="drop-item" onclick="switchApp('gobilim-w3','3. Hafta','gobilim')">📐 3. Hafta</button>
-        <button class="drop-item" onclick="switchApp('gobilim-w4','4. Hafta','gobilim')">📐 4. Hafta</button>
-        <button class="drop-item" onclick="switchApp('gobilim-w5','5. Hafta','gobilim')">📐 5. Hafta</button>
-        <button class="drop-item" onclick="switchApp('gobilim-w6','6. Hafta','gobilim')">📐 6. Hafta</button>
-        <button class="drop-item" onclick="switchApp('gobilim-w7','7. Hafta','gobilim')">📐 7. Hafta</button>
+        <button data-app="gobilim-w2" data-label="2. Hafta" data-drop="gobilim" class="drop-item">📐 2. Hafta</button>
+        <button data-app="gobilim-w3" data-label="3. Hafta" data-drop="gobilim" class="drop-item">📐 3. Hafta</button>
+        <button data-app="gobilim-w4" data-label="4. Hafta" data-drop="gobilim" class="drop-item">📐 4. Hafta</button>
+        <button data-app="gobilim-w5" data-label="5. Hafta" data-drop="gobilim" class="drop-item">📐 5. Hafta</button>
+        <button data-app="gobilim-w6" data-label="6. Hafta" data-drop="gobilim" class="drop-item">📐 6. Hafta</button>
+        <button data-app="gobilim-w7" data-label="7. Hafta" data-drop="gobilim" class="drop-item">📐 7. Hafta</button>
       </div>
     </div>
 
     <div class="dropdown" id="drop-etik">
-      <button class="drop-label" onclick="toggleDrop('drop-etik')">ETİK</button>
+      <button data-drop-id="drop-etik" class="drop-label">ETİK</button>
       <div class="drop-menu">
         <div class="drop-week-label">📅 Haftalar</div>
-        <button class="drop-item" onclick="switchApp('etik-w2','2. Hafta','etik')">⚡ 2. Hafta</button>
-        <button class="drop-item" onclick="switchApp('etik-w3','3. Hafta','etik')">⚡ 3. Hafta</button>
-        <button class="drop-item" onclick="switchApp('etik-w4','4. Hafta','etik')">⚡ 4. Hafta</button>
-        <button class="drop-item" onclick="switchApp('etik-w5','5. Hafta','etik')">⚡ 5. Hafta</button>
-        <button class="drop-item" onclick="switchApp('etik-w6','6. Hafta','etik')">⚡ 6. Hafta</button>
-        <button class="drop-item" onclick="switchApp('etik-w7','7. Hafta','etik')">⚡ 7. Hafta</button>
+        <button data-app="etik-w2" data-label="2. Hafta" data-drop="etik" class="drop-item">⚡ 2. Hafta</button>
+        <button data-app="etik-w3" data-label="3. Hafta" data-drop="etik" class="drop-item">⚡ 3. Hafta</button>
+        <button data-app="etik-w4" data-label="4. Hafta" data-drop="etik" class="drop-item">⚡ 4. Hafta</button>
+        <button data-app="etik-w5" data-label="5. Hafta" data-drop="etik" class="drop-item">⚡ 5. Hafta</button>
+        <button data-app="etik-w6" data-label="6. Hafta" data-drop="etik" class="drop-item">⚡ 6. Hafta</button>
+        <button data-app="etik-w7" data-label="7. Hafta" data-drop="etik" class="drop-item">⚡ 7. Hafta</button>
       </div>
     </div>
 
     <div class="dropdown" id="drop-rusca4">
-      <button class="drop-label" onclick="toggleDrop('drop-rusca4')">RUSÇA IV</button>
+      <button data-drop-id="drop-rusca4" class="drop-label">RUSÇA IV</button>
       <div class="drop-menu">
         <div class="drop-week-label">📅 Haftalar</div>
-        <button class="drop-item" onclick="switchApp('rusca4-w2','2. Hafta','rusca4')">🇷🇺 2. Hafta</button>
-        <button class="drop-item" onclick="switchApp('rusca4-w3','3. Hafta','rusca4')">🇷🇺 3. Hafta</button>
-        <button class="drop-item" onclick="switchApp('rusca4-w4','4. Hafta','rusca4')">🇷🇺 4. Hafta</button>
-        <button class="drop-item" onclick="switchApp('rusca4-w5','5. Hafta','rusca4')">🇷🇺 5. Hafta</button>
-        <button class="drop-item" onclick="switchApp('rusca4-w6','6. Hafta','rusca4')">🇷🇺 6. Hafta</button>
-        <button class="drop-item" onclick="switchApp('rusca4-w7','7. Hafta','rusca4')">🇷🇺 7. Hafta</button>
+        <button data-app="rusca4-w2" data-label="2. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 2. Hafta</button>
+        <button data-app="rusca4-w3" data-label="3. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 3. Hafta</button>
+        <button data-app="rusca4-w4" data-label="4. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 4. Hafta</button>
+        <button data-app="rusca4-w5" data-label="5. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 5. Hafta</button>
+        <button data-app="rusca4-w6" data-label="6. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 6. Hafta</button>
+        <button data-app="rusca4-w7" data-label="7. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 7. Hafta</button>
       </div>
     </div>
 
     <div class="dropdown" id="drop-rusca6">
-      <button class="drop-label" onclick="toggleDrop('drop-rusca6')">RUSÇA VI</button>
+      <button data-drop-id="drop-rusca6" class="drop-label">RUSÇA VI</button>
       <div class="drop-menu">
         <div class="drop-week-label">📅 Haftalar</div>
-        <button class="drop-item" onclick="switchApp('rusca6-w2','2. Hafta','rusca6')">🇷🇺 2. Hafta</button>
-        <button class="drop-item" onclick="switchApp('rusca6-w3','3. Hafta','rusca6')">🇷🇺 3. Hafta</button>
-        <button class="drop-item" onclick="switchApp('rusca6-w4','4. Hafta','rusca6')">🇷🇺 4. Hafta</button>
-        <button class="drop-item" onclick="switchApp('rusca6-w5','5. Hafta','rusca6')">🇷🇺 5. Hafta</button>
-        <button class="drop-item" onclick="switchApp('rusca6-w6','6. Hafta','rusca6')">🇷🇺 6. Hafta</button>
-        <button class="drop-item" onclick="switchApp('rusca6-w7','7. Hafta','rusca6')">🇷🇺 7. Hafta</button>
+        <button data-app="rusca6-w2" data-label="2. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 2. Hafta</button>
+        <button data-app="rusca6-w3" data-label="3. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 3. Hafta</button>
+        <button data-app="rusca6-w4" data-label="4. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 4. Hafta</button>
+        <button data-app="rusca6-w5" data-label="5. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 5. Hafta</button>
+        <button data-app="rusca6-w6" data-label="6. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 6. Hafta</button>
+        <button data-app="rusca6-w7" data-label="7. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 7. Hafta</button>
       </div>
     </div>
 
     <div class="dropdown" id="drop-isaret">
-      <button class="drop-label" onclick="toggleDrop('drop-isaret')">İŞARET</button>
+      <button data-drop-id="drop-isaret" class="drop-label">İŞARET</button>
       <div class="drop-menu">
         <div class="drop-week-label">📅 Haftalar</div>
-        <button class="drop-item" onclick="switchApp('isaret-w2','2. Hafta','isaret')">🤟 2. Hafta</button>
-        <button class="drop-item" onclick="switchApp('isaret-w3','3. Hafta','isaret')">🤟 3. Hafta</button>
-        <button class="drop-item" onclick="switchApp('isaret-w4','4. Hafta','isaret')">🤟 4. Hafta</button>
-        <button class="drop-item" onclick="switchApp('isaret-w5','5. Hafta','isaret')">🤟 5. Hafta</button>
-        <button class="drop-item" onclick="switchApp('isaret-w6','6. Hafta','isaret')">🤟 6. Hafta</button>
-        <button class="drop-item" onclick="switchApp('isaret-w7','7. Hafta','isaret')">🤟 7. Hafta</button>
+        <button data-app="isaret-w2" data-label="2. Hafta" data-drop="isaret" class="drop-item">🤟 2. Hafta</button>
+        <button data-app="isaret-w3" data-label="3. Hafta" data-drop="isaret" class="drop-item">🤟 3. Hafta</button>
+        <button data-app="isaret-w4" data-label="4. Hafta" data-drop="isaret" class="drop-item">🤟 4. Hafta</button>
+        <button data-app="isaret-w5" data-label="5. Hafta" data-drop="isaret" class="drop-item">🤟 5. Hafta</button>
+        <button data-app="isaret-w6" data-label="6. Hafta" data-drop="isaret" class="drop-item">🤟 6. Hafta</button>
+        <button data-app="isaret-w7" data-label="7. Hafta" data-drop="isaret" class="drop-item">🤟 7. Hafta</button>
       </div>
     </div>
 
     <div class="dropdown" id="drop-tibbi">
-      <button class="drop-label" onclick="toggleDrop('drop-tibbi')">TIBBİ BİTKİ</button>
+      <button data-drop-id="drop-tibbi" class="drop-label">TIBBİ BİTKİ</button>
       <div class="drop-menu">
         <div class="drop-week-label">📅 Haftalar</div>
-        <button class="drop-item" onclick="switchApp('tibbi-w2','2. Hafta','tibbi')">🌿 2. Hafta</button>
-        <button class="drop-item" onclick="switchApp('tibbi-w3','3. Hafta','tibbi')">🌿 3. Hafta</button>
-        <button class="drop-item" onclick="switchApp('tibbi-w4','4. Hafta','tibbi')">🌿 4. Hafta</button>
-        <button class="drop-item" onclick="switchApp('tibbi-w5','5. Hafta','tibbi')">🌿 5. Hafta</button>
-        <button class="drop-item" onclick="switchApp('tibbi-w6','6. Hafta','tibbi')">🌿 6. Hafta</button>
-        <button class="drop-item" onclick="switchApp('tibbi-w7','7. Hafta','tibbi')">🌿 7. Hafta</button>
+        <button data-app="tibbi-w2" data-label="2. Hafta" data-drop="tibbi" class="drop-item">🌿 2. Hafta</button>
+        <button data-app="tibbi-w3" data-label="3. Hafta" data-drop="tibbi" class="drop-item">🌿 3. Hafta</button>
+        <button data-app="tibbi-w4" data-label="4. Hafta" data-drop="tibbi" class="drop-item">🌿 4. Hafta</button>
+        <button data-app="tibbi-w5" data-label="5. Hafta" data-drop="tibbi" class="drop-item">🌿 5. Hafta</button>
+        <button data-app="tibbi-w6" data-label="6. Hafta" data-drop="tibbi" class="drop-item">🌿 6. Hafta</button>
+        <button data-app="tibbi-w7" data-label="7. Hafta" data-drop="tibbi" class="drop-item">🌿 7. Hafta</button>
       </div>
     </div>
 
     <!-- UYGULAMALAR ve sağ panele dokunulmadı -->
     <div class="switcher-right">
       <div class="dropdown" id="drop-apps">
-        <button class="drop-label" onclick="toggleAppsMenu()" style="color:#a78bfa">UYGULAMALAR</button>
+        <button data-drop-id="apps-menu" class="drop-label" style="color:#a78bfa">UYGULAMALAR</button>
       </div>
-      <button class="search-btn" onclick="openSearch()">
+      <button class="search-btn" id="search-btn-main">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
