@@ -18,13 +18,11 @@ window.addEventListener('load', function () {
     initApp();
     return;
   }
-  // Şifre girilince otomatik kontrol — Enter bekleme yok
   var inp = document.getElementById('lock-input');
   if (inp) {
     inp.addEventListener('input', function () {
       if (inp.value.length >= 4) lockCheck();
     });
-    // iOS'ta klavye açılsın
     setTimeout(function () { inp.focus(); }, 300);
   }
 });
@@ -50,7 +48,7 @@ const COURSES = [
 ];
 
 // ════════════════════════════════════════════════
-// DROPDOWN — temiz, hem Windows hem iOS
+// DROPDOWN
 // ════════════════════════════════════════════════
 
 function _positionMenu(dd) {
@@ -70,7 +68,17 @@ function closeAllDrops() {
   document.querySelectorAll('.body-menu').forEach(function (m) { m.style.display = 'none'; });
 }
 
+// Overlay'e yönlendirilen course drop ID'leri
+const OVERLAY_DROP_IDS = ['drop-davos','drop-hukuk','drop-gobilim','drop-etik','drop-isaret','drop-tibbi','drop-rusca4','drop-rusca6'];
+
 function toggleDrop(id) {
+  // ── WEEK OVERLAY INTERCEPT ──
+  if (OVERLAY_DROP_IDS.indexOf(id) !== -1) {
+    closeAllDrops();
+    openWeekOverlay(id);
+    return;
+  }
+  // ── Normal dropdown (UYGULAMALAR vb.) ──
   var dd = document.getElementById(id);
   if (!dd) return;
   var isOpen = dd.classList.contains('open');
@@ -84,19 +92,16 @@ function toggleDrop(id) {
 }
 
 function initDropdowns() {
-  // ── MASAÜSTÜ DIŞINDA BÜTÜN MENÜLERİ BODY İÇİNE TAŞI (iOS CLIPPING SORUNU ÇÖZÜMÜ) ──
   document.querySelectorAll('.app-switcher .dropdown').forEach(function (dd) {
     if (!dd.id) return;
     var menu = dd.querySelector('.drop-menu');
     if (menu) {
       menu.dataset.parentId = dd.id;
       menu.classList.add('body-menu');
-      // .app-switcher yatay scroll clipping sorununu engellemek için body'e taşıyoruz
       document.body.appendChild(menu);
     }
   });
 
-  // ── Scroll'da kapat (iOS'ta dokunurken olan mikro kaymaları yok saymak için) ──
   var switcher = document.querySelector('.app-switcher');
   if (switcher) {
     var lastScroll = switcher.scrollLeft;
@@ -108,7 +113,6 @@ function initDropdowns() {
     }, { passive: true });
   }
 
-  // ── MASAÜSTÜ: hover ile aç/kapat ──
   var isTouch = window.matchMedia('(pointer: coarse)').matches;
   if (!isTouch) {
     document.querySelectorAll('.dropdown').forEach(function (dd) {
@@ -117,6 +121,8 @@ function initDropdowns() {
 
       function onEnter() {
         clearTimeout(leaveTimer);
+        // Overlay course'lar için hover'da overlay açma, sadece click
+        if (OVERLAY_DROP_IDS.indexOf(dd.id) !== -1) return;
         closeAllDrops();
         _positionMenu(dd);
         dd.classList.add('open');
@@ -138,13 +144,10 @@ function initDropdowns() {
     });
   }
 
-  // ── HEM MASAÜSTÜ HEM iOS: drop-label'a click & touchstart ──
-  // iOS'ta daha hızlı ve kesin açılması için touchstart da eklendi.
   document.querySelectorAll('.drop-label').forEach(function (btn) {
     var dropId = btn.getAttribute('data-drop-id');
     function handleToggle(e) {
       e.stopPropagation();
-      // Eğer touchstart çalıştıysa click'i yoksaymak için bayrak koyuyoruz
       if (e.type === 'touchstart') {
         btn.dataset.touched = '1';
       } else if (e.type === 'click' && btn.dataset.touched === '1') {
@@ -162,7 +165,6 @@ function initDropdowns() {
     btn.addEventListener('touchstart', handleToggle, { passive: true });
   });
 
-  // ── drop-item'lara click ──
   document.querySelectorAll('.drop-item').forEach(function (btn) {
     var app = btn.getAttribute('data-app');
     var label = btn.getAttribute('data-label');
@@ -176,7 +178,6 @@ function initDropdowns() {
     }
   });
 
-  // ── app-logo click ──
   var logo = document.querySelector('.app-logo');
   if (logo) {
     logo.addEventListener('click', function () {
@@ -185,13 +186,11 @@ function initDropdowns() {
     });
   }
 
-  // ── search butonu ──
   var searchBtn = document.getElementById('search-btn-main');
   if (searchBtn) {
     searchBtn.addEventListener('click', openSearch);
   }
 
-  // ── Dışarı tıklayınca kapat ──
   document.addEventListener('click', function (e) {
     if (!e.target.closest('.dropdown') && !e.target.closest('#apps-popup') && !e.target.closest('.body-menu')) {
       closeAllDrops();
@@ -202,7 +201,6 @@ function initDropdowns() {
 // ════════════════════════════════════════════════
 // APP SWITCHER + localStorage SON PANEL
 // ════════════════════════════════════════════════
-// Ardıl nav scroll gizle/göster
 (function () {
   let lastY = 0;
   window.addEventListener('scroll', function () {
@@ -232,7 +230,6 @@ function switchApp(app, label, dropId, fromPopState) {
       });
     }
   }
-  // Tarayıcı history — geri tuşu çalışsın
   if (!fromPopState) {
     try { const _urlId = app === 'davos' ? 'ardil' : app; history.pushState({ app, dropId }, '', '#' + _urlId); } catch (e) { }
   }
@@ -240,7 +237,6 @@ function switchApp(app, label, dropId, fromPopState) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Geri/ileri tuşu
 window.addEventListener('popstate', function (e) {
   if (e.state && e.state.app) {
     switchApp(e.state.app, '', e.state.dropId || '', true);
@@ -254,8 +250,6 @@ function restoreLastPanel() {
     const saved = localStorage.getItem('tariktanta-lastpanel');
     if (saved) {
       const { app, dropId } = JSON.parse(saved);
-      // Her zaman dashboard'da başla
-      // if (app && app !== 'dashboard') { switchApp(app, '', dropId); return; }
     }
   } catch (e) { }
 }
@@ -277,7 +271,7 @@ let pomoRunning = false;
 let pomoIsBreak = false;
 let pomoSession = 0;
 let pomoTimer = null;
-const POMO_CIRC = 2 * Math.PI * 27; // r=27
+const POMO_CIRC = 2 * Math.PI * 27;
 
 function pomoRender() {
   const min = String(Math.floor(pomoRemaining / 60)).padStart(2, '0');
@@ -303,7 +297,6 @@ function pomoRender() {
     const dot = document.getElementById('pd' + i);
     if (dot) dot.className = 'pomo-dot' + (i < pomoSession % 4 || (pomoSession > 0 && i < pomoSession && !pomoIsBreak) ? ' done' : '');
   }
-  // Güncelle: tamamlanan oturumları dot olarak göster
   const completedInCycle = pomoIsBreak ? Math.min(4, (pomoSession)) : Math.min(4, pomoSession);
   for (let i = 0; i < 4; i++) {
     const dot = document.getElementById('pd' + i);
@@ -325,14 +318,12 @@ function pomoToggle() {
           pomoSession++;
           pomoIsBreak = true;
           pomoRemaining = (pomoSession % 4 === 0) ? POMO_LONG : POMO_SHORT;
-          // Bildirim sesi (beep)
           try { const ctx = new AudioContext(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value = 880; g.gain.setValueAtTime(0.3, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5); o.start(); o.stop(ctx.currentTime + 0.5); } catch (e) { }
         } else {
           pomoIsBreak = false;
           pomoRemaining = POMO_WORK;
           try { const ctx = new AudioContext(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value = 440; g.gain.setValueAtTime(0.3, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5); o.start(); o.stop(ctx.currentTime + 0.5); } catch (e) { }
         }
-        // Tekrar başlat
         pomoRunning = true;
         pomoTimer = setInterval(arguments.callee, 1000);
       }
@@ -359,9 +350,6 @@ function initDashboard() {
   const todayIdx = now.getDay();
   const today = days[todayIdx];
 
-  // 18:00'dan sonra yarını göster
-  // Pazar 12:00'dan sonra yarını göster
-  // Perşembe 18:00'dan sonra "tatil" göster
   let showDay, showLabel, isTomorrow = false;
   const isPazar = todayIdx === 0;
   const isPersembe = todayIdx === 4;
@@ -381,7 +369,6 @@ function initDashboard() {
   document.getElementById('today-day-name').textContent = showLabel;
   const tc = document.getElementById('today-courses');
   if (todayCourses.length === 0) {
-    // Perşembe 18'den sonra = tatil
     const msg = (isPersembe && hour >= 18) ? '🎉 Hafta sonu — iyi dinlenmeler!' : 'Bugün ders yok 🎉';
     tc.innerHTML = `<span style="font-size:13px;color:var(--theme-muted);font-family:DM Sans,sans-serif">${msg}</span>`;
   } else {
@@ -431,7 +418,6 @@ function toggleAppsMenu() {
   popup.style.display = isOpen ? 'none' : 'flex';
   popup.style.flexDirection = 'column';
   if (!isOpen) {
-    // Dışarı tıklayınca kapat
     setTimeout(() => {
       document.addEventListener('click', function handler(e) {
         if (!popup.contains(e.target) && !e.target.closest('#drop-apps')) {
@@ -443,7 +429,6 @@ function toggleAppsMenu() {
   }
 }
 
-
 // ── DİL SEÇİCİ ──
 let _currentLang = localStorage.getItem('tariktanta-lang') || 'tr';
 function setLang(lang) {
@@ -451,31 +436,25 @@ function setLang(lang) {
   localStorage.setItem('tariktanta-lang', lang);
   const isEN = lang === 'en';
 
-  // Bayraklar
   const ftr = document.getElementById('flag-tr');
   const fen = document.getElementById('flag-en');
   if (ftr) ftr.style.opacity = isEN ? '0.4' : '1';
   if (fen) fen.style.opacity = isEN ? '1' : '0.4';
 
-  // Greeting
   const hour = new Date().getHours();
   const greet = hour < 12 ? 'Good morning, my lord' : hour < 18 ? 'Good afternoon, my lord' : 'Good evening, my lord';
   const greetEl = document.getElementById('dash-greeting');
   if (greetEl) greetEl.textContent = greet;
 
-  // Subtitle
   const sub = document.getElementById('dash-subtitle');
   if (sub) sub.textContent = isEN ? 'Final year — 8 courses, 1 goal.' : 'Son sinif — 8 ders, 1 hedef.';
 
-  // Today label
   const todayLabel = document.querySelector('.today-label');
   if (todayLabel) todayLabel.textContent = isEN ? '📅 Today\'s Classes' : '📅 Bugunun Dersleri';
 
-  // Apps label
   const appsLabel = document.querySelector('#drop-apps .drop-label');
   if (appsLabel) appsLabel.textContent = isEN ? 'APPS' : 'UYGULAMALAR';
 
-  // Nav labels
   const navLabels = {
     'droplabel-hukuk': isEN ? 'LAW' : 'HUKUK',
     'droplabel-davos': isEN ? 'CONSEC.' : 'ARDIL',
@@ -484,14 +463,12 @@ function setLang(lang) {
     const el = document.getElementById(entry[0]);
     if (el) el.textContent = entry[1];
   });
-  // Nav'daki id'siz drop-label'lar
   const noIdLabels = isEN
     ? ['SEMIOTICS', 'ETHICS', 'RUSSIAN IV', 'RUSSIAN VI', 'SIGN LANG.', 'MEDICINAL']
     : ['GOSTERGEBILIM', 'ETIK', 'RUSCA IV', 'RUSCA VI', 'ISARET', 'TIBBI BITKI'];
   const allDropLabels = document.querySelectorAll('.app-switcher .dropdown:not(#drop-hukuk):not(#drop-davos):not(#drop-apps) .drop-label');
   allDropLabels.forEach(function (el, i) { if (noIdLabels[i]) el.textContent = noIdLabels[i]; });
 
-  // Ses butonları
   const soundMap = [
     { key: 'none', tr: '🔇 Kapali', en: '🔇 Off' },
     { key: 'rain', tr: '🌧️ Yagmur', en: '🌧️ Rain' },
@@ -506,13 +483,11 @@ function setLang(lang) {
     if (s) btn.textContent = isEN ? s.en : s.tr;
   });
 
-  // Pomodoro
   const pomoStart = document.getElementById('pomoStartBtn');
   if (pomoStart && !pomoStart.classList.contains('running')) {
     pomoStart.textContent = isEN ? '▶ Start' : '▶ Baslat';
   }
 
-  // WOD label
   const wodLabel = document.querySelector('#word-of-day-widget .wod-label');
   if (wodLabel) {
     const isPhrasal = wodLabel.textContent.includes('Phrasal') || wodLabel.textContent.includes('phrasal');
@@ -536,7 +511,6 @@ function openApp(app) {
   const a = apps[app];
   if (!a) return;
   if (isIOS) {
-    // iOS: önce uygulama scheme dene, 1.5sn içinde açılmazsa web'e git
     const start = Date.now();
     window.location.href = a.ios;
     setTimeout(() => {
@@ -588,7 +562,7 @@ document.addEventListener('keydown', function (e) {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   const k = e.key.toLowerCase();
   if ((e.metaKey || e.ctrlKey) && k === 'k') { e.preventDefault(); openSearch(); return; }
-  if (k === 'escape') { closeSearch(); return; }
+  if (k === 'escape') { closeSearch(); closeWeekOverlay(); return; }
   if (k === 'd') { switchApp('dashboard', '', ''); return; }
   if (k === 't') { toggleTheme(); return; }
   if (k === '/') { e.preventDefault(); openSearch(); return; }
@@ -782,7 +756,6 @@ function registerSW() { if ('serviceWorker' in navigator) { const swCode = `cons
 // ════════════════════════════════════════════════
 function initApp() {
   loadTheme();
-  // iOS'ta ses butonları ve ara butonu gizle
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   if (isIOS) {
     var soundWrap = document.querySelector('.pomo-sound-row-wrap');
@@ -790,9 +763,9 @@ function initApp() {
     var searchBtn = document.getElementById('search-btn-main');
     if (searchBtn) searchBtn.style.display = 'none';
   }
-  initDropdowns();    // ← HOVER DROPDOWN
+  initDropdowns();
   initDashboard();
-  pomoRender();       // ← POMODORO
+  pomoRender();
   hRenderCard();
   dRenderSessions();
   dRenderTerms();
@@ -805,7 +778,7 @@ function initApp() {
   buildSearchIndex();
   registerSW();
   restoreLastPanel();
-  setTimeout(function () { setLang(_currentLang); }, 150); // ← localStorage SON PANEL
+  setTimeout(function () { setLang(_currentLang); }, 150);
   initPremium();
 }
 
@@ -821,11 +794,9 @@ function initPremium() {
   init3DTilt();
 }
 
-// ── CURSOR GLOW ──
 function initCursorGlow() {
   const glow = document.getElementById('cursor-glow');
   if (!glow) return;
-  // Sadece gerçek mouse varsa aktif et (touch-only cihazlarda kapalı)
   let hasMouse = false;
   window.addEventListener('mousemove', function onFirstMove(e) {
     hasMouse = true;
@@ -841,7 +812,6 @@ function initCursorGlow() {
   document.addEventListener('mouseenter', () => { if (hasMouse) glow.style.opacity = '1'; });
 }
 
-// ── GÜNÜN TERİMİ ──
 const WOD_LIST = [
   { term: 'Break down', def: '🔤 Phrasal Verb — Çökmek · "The negotiations broke down." → Müzakereler çöktü.', type: 'phrasal' },
   { term: 'Carry out', def: '🔤 Phrasal Verb — Yürütmek · "Carry out the terms of the contract." → Sözleşmeyi uygulamak.', type: 'phrasal' },
@@ -873,7 +843,6 @@ function initWordOfDay() {
   if (!el) return;
   const idx = Math.floor(Math.random() * WOD_LIST.length);
   const w = WOD_LIST[idx];
-  // Label'ı hemen set et, skeleton bekleme
   const labelEl = document.querySelector('#word-of-day-widget .wod-label');
   if (labelEl) labelEl.textContent = w.type === 'phrasal' ? '🔤 Günün Phrasal Verbi' : '📚 Günün Terimi';
   const termEl = document.getElementById('wod-term');
@@ -882,7 +851,6 @@ function initWordOfDay() {
   if (defEl) defEl.innerHTML = w.def;
 }
 
-// ── PWA BANNER ──
 let _deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
@@ -904,7 +872,6 @@ function initPWABanner() {
   };
 }
 
-// ── PULL TO REFRESH ──
 function initPullToRefresh() {
   let startY = 0, pulling = false;
   const ind = document.getElementById('ptr-indicator');
@@ -924,15 +891,9 @@ function initPullToRefresh() {
   }, { passive: true });
 }
 
-// ── SES MOTORU (YouTube IFrame API) ──
-// Reklamsız ambient YouTube videoları (sadece ses, görünmez player)
 const SOUND_VIDEOS = {
-  rain: 'mPZkdNFkNps',
-  forest: 'xNN7iTA57jM',
-  wind: 'bGKth93bHUw',
-  fire: 'L_LUpnjgPso',
-  piano: 'lTRiuFIWV54',
-  ocean: 'bn9F19Hi1Lk',
+  rain: 'mPZkdNFkNps', forest: 'xNN7iTA57jM', wind: 'bGKth93bHUw',
+  fire: 'L_LUpnjgPso', piano: 'lTRiuFIWV54', ocean: 'bn9F19Hi1Lk',
 };
 const SOUND_MP3 = {
   rain: 'https://cdn.freesound.org/previews/346/346170_5121236-lq.mp3',
@@ -985,19 +946,13 @@ window.onYouTubeIframeAPIReady = function () {
 };
 
 function getIosAudio() {
-  if (!_iosAudio) {
-    _iosAudio = new Audio();
-    _iosAudio.loop = true;
-  }
+  if (!_iosAudio) { _iosAudio = new Audio(); _iosAudio.loop = true; }
   return _iosAudio;
 }
 
 function stopSound() {
-  if (_isIOS) {
-    if (_iosAudio) { _iosAudio.pause(); }
-  } else {
-    if (_ytPlayer && _ytReady) { try { _ytPlayer.pauseVideo(); } catch (e) { } }
-  }
+  if (_isIOS) { if (_iosAudio) { _iosAudio.pause(); } }
+  else { if (_ytPlayer && _ytReady) { try { _ytPlayer.pauseVideo(); } catch (e) { } } }
   const ctrl = document.getElementById('sound-controls');
   if (ctrl) ctrl.style.display = 'none';
   _currentSound = 'none';
@@ -1047,7 +1002,6 @@ function toggleSoundMute() {
   if (btn) btn.textContent = _isMuted ? '▶' : '⏸';
 }
 
-
 function setSound(btn) {
   document.querySelectorAll('.sound-opt').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -1057,8 +1011,6 @@ function setSound(btn) {
 
 function initSoundEngine() { loadYTApi(); }
 
-
-// ── 3D KART TİLT ──
 function init3DTilt() {
   function applyTilt(el) {
     el.addEventListener('mousemove', e => {
@@ -1067,89 +1019,52 @@ function init3DTilt() {
       const y = (e.clientY - r.top) / r.height - 0.5;
       el.style.transform = `perspective(600px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-2px)`;
     }, { passive: true });
-    el.addEventListener('mouseleave', () => {
-      el.style.transform = '';
-    });
+    el.addEventListener('mouseleave', () => { el.style.transform = ''; });
   }
-  // course kartlara uygula
   document.querySelectorAll('.course-card').forEach(applyTilt);
-  // Ardıl session kartlara da
   document.querySelectorAll('.session-card').forEach(applyTilt);
-  // Dinamik eklenen kartlar için observer
   const obs = new MutationObserver(muts => {
     muts.forEach(m => m.addedNodes.forEach(n => {
       if (n.classList && (n.classList.contains('course-card') || n.classList.contains('session-card'))) applyTilt(n);
     }));
   });
   obs.observe(document.body, { childList: true, subtree: true });
-}// ═══ HIZLI SÖZLÜK ═══
+}
+
 async function runDict() {
   const q = document.getElementById('q-dict').value.trim();
   const box = document.getElementById('dict-result');
   if (!q) return;
-
   box.style.display = 'block';
   box.innerHTML = `<div style="padding:18px; color:var(--theme-muted); font-family:'IBM Plex Sans',sans-serif; font-size:13px;">🔍 Aranıyor…</div>`;
-
   try {
     const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(q)}`);
     if (!res.ok) throw new Error('not found');
     const data = await res.json();
     const entry = data[0];
-
     const phonetic = entry.phonetics?.find(p => p.text)?.text || '';
     const audioUrl = entry.phonetics?.find(p => p.audio && p.audio.trim())?.audio || '';
-
     let bodyHTML = '';
     entry.meanings.forEach(m => {
       bodyHTML += `<div class="dict-pos">${m.partOfSpeech}</div>`;
       m.definitions.slice(0, 3).forEach((d, i) => {
-        const syns = (d.synonyms || []).slice(0, 5)
-          .map(s => `<span class="dict-syn-chip" onclick="document.getElementById('q-dict').value='${s}';runDict()">${s}</span>`)
-          .join('');
-        bodyHTML += `
-              <div class="dict-def-item">
-                <div class="dict-def-text"><span class="dict-def-num">${i + 1}.</span>${d.definition}</div>
-                ${d.example ? `<div class="dict-example">💬 "${d.example}"</div>` : ''}
-                ${syns ? `<div class="dict-synonyms">${syns}</div>` : ''}
-              </div>`;
+        const syns = (d.synonyms || []).slice(0, 5).map(s => `<span class="dict-syn-chip" onclick="document.getElementById('q-dict').value='${s}';runDict()">${s}</span>`).join('');
+        bodyHTML += `<div class="dict-def-item"><div class="dict-def-text"><span class="dict-def-num">${i + 1}.</span>${d.definition}</div>${d.example ? `<div class="dict-example">💬 "${d.example}"</div>` : ''}${syns ? `<div class="dict-synonyms">${syns}</div>` : ''}</div>`;
       });
     });
-
-    box.innerHTML = `
-          <div class="dict-header">
-            <div>
-              <div class="dict-word">${entry.word}</div>
-              ${phonetic ? `<div class="dict-phonetic">${phonetic}</div>` : ''}
-            </div>
-            ${audioUrl ? `<button class="dict-speak-btn" onclick="new Audio('${audioUrl}').play()" title="Seslendir">🔊</button>` : ''}
-          </div>
-          ${bodyHTML}
-          <div class="dict-footer">
-            <a href="https://tureng.com/tr/turkce-ingilizce/${encodeURIComponent(q)}" target="_blank" rel="noopener" class="dict-tureng-link">Tureng'de TR↔EN karşılığını gör ↗</a>
-          </div>
-        `;
+    box.innerHTML = `<div class="dict-header"><div><div class="dict-word">${entry.word}</div>${phonetic ? `<div class="dict-phonetic">${phonetic}</div>` : ''}</div>${audioUrl ? `<button class="dict-speak-btn" onclick="new Audio('${audioUrl}').play()" title="Seslendir">🔊</button>` : ''}</div>${bodyHTML}<div class="dict-footer"><a href="https://tureng.com/tr/turkce-ingilizce/${encodeURIComponent(q)}" target="_blank" rel="noopener" class="dict-tureng-link">Tureng'de TR↔EN karşılığını gör ↗</a></div>`;
   } catch (e) {
-    box.innerHTML = `
-          <div class="dict-not-found">
-            ❌ "<strong style="color:var(--theme-text)">${q}</strong>" bulunamadı.
-            <br><br>
-            <a href="https://tureng.com/tr/turkce-ingilizce/${encodeURIComponent(q)}" target="_blank" rel="noopener" class="dict-tureng-link" style="font-size:13px;">→ Tureng'de ara ↗</a>
-          </div>
-        `;
+    box.innerHTML = `<div class="dict-not-found">❌ "<strong style="color:var(--theme-text)">${q}</strong>" bulunamadı.<br><br><a href="https://tureng.com/tr/turkce-ingilizce/${encodeURIComponent(q)}" target="_blank" rel="noopener" class="dict-tureng-link" style="font-size:13px;">→ Tureng'de ara ↗</a></div>`;
   }
 }
 
-// ═══ PWA — OFFLİNE/ONLİNE ALGILAMA ═══
 (function initOfflineDetect() {
   const toast = document.createElement('div');
   toast.id = 'offline-toast';
   toast.textContent = '📡 Çevrimdışısın — bazı özellikler çalışmayabilir';
   document.body.appendChild(toast);
-
   function showToast() { toast.classList.add('show'); }
   function hideToast() { toast.classList.remove('show'); }
-
   window.addEventListener('offline', showToast);
   window.addEventListener('online', () => {
     toast.textContent = '✅ Bağlantı geri geldi';
@@ -1157,7 +1072,124 @@ async function runDict() {
     showToast();
     setTimeout(hideToast, 2500);
   });
-
   if (!navigator.onLine) showToast();
 })();
 
+// ════════════════════════════════════════════════
+// WEEK OVERLAY
+// ════════════════════════════════════════════════
+const WEEK_OVERLAY_COURSES = {
+  'drop-davos':   { id: 'davos',   name: 'Ardıl Çeviriye Giriş',      icon: '🎙️', color: '#c8f135', weeks: [
+    { num: 2, label: '2. Hafta — Davos Summit',  app: 'davos',    available: true  },
+    { num: 3, label: '3. Hafta',                  app: 'davos-w3', available: false },
+    { num: 4, label: '4. Hafta',                  app: 'davos-w4', available: false },
+    { num: 5, label: '5. Hafta',                  app: 'davos-w5', available: false },
+    { num: 6, label: '6. Hafta',                  app: 'davos-w6', available: false },
+    { num: 7, label: '7. Hafta',                  app: 'davos-w7', available: false },
+  ]},
+  'drop-hukuk':   { id: 'hukuk',   name: 'Hukuk Çevirisi',            icon: '⚖️',  color: '#e8c547', weeks: [
+    { num: 2, label: '2. Hafta — Hukuki Çeviri', app: 'hukuk',    available: true  },
+    { num: 3, label: '3. Hafta',                  app: 'hukuk-w3', available: false },
+    { num: 4, label: '4. Hafta',                  app: 'hukuk-w4', available: false },
+    { num: 5, label: '5. Hafta',                  app: 'hukuk-w5', available: false },
+    { num: 6, label: '6. Hafta',                  app: 'hukuk-w6', available: false },
+    { num: 7, label: '7. Hafta',                  app: 'hukuk-w7', available: false },
+  ]},
+  'drop-gobilim': { id: 'gobilim', name: 'Çeviri Göstergebilimi II',  icon: '📐',  color: '#a78bfa', weeks: [
+    { num: 2, label: '2. Hafta', app: 'gobilim',    available: false },
+    { num: 3, label: '3. Hafta', app: 'gobilim-w3', available: false },
+    { num: 4, label: '4. Hafta', app: 'gobilim-w4', available: false },
+    { num: 5, label: '5. Hafta', app: 'gobilim-w5', available: false },
+    { num: 6, label: '6. Hafta', app: 'gobilim-w6', available: false },
+    { num: 7, label: '7. Hafta', app: 'gobilim-w7', available: false },
+  ]},
+  'drop-etik':    { id: 'etik',    name: 'Çeviride Etik',             icon: '⚡',  color: '#f97316', weeks: [
+    { num: 2, label: '2. Hafta', app: 'etik',    available: false },
+    { num: 3, label: '3. Hafta', app: 'etik-w3', available: false },
+    { num: 4, label: '4. Hafta', app: 'etik-w4', available: false },
+    { num: 5, label: '5. Hafta', app: 'etik-w5', available: false },
+    { num: 6, label: '6. Hafta', app: 'etik-w6', available: false },
+    { num: 7, label: '7. Hafta', app: 'etik-w7', available: false },
+  ]},
+  'drop-isaret':  { id: 'isaret',  name: 'Türk İşaret Dili',          icon: '🤟',  color: '#4ade80', weeks: [
+    { num: 2, label: '2. Hafta', app: 'isaret',    available: false },
+    { num: 3, label: '3. Hafta', app: 'isaret-w3', available: false },
+    { num: 4, label: '4. Hafta', app: 'isaret-w4', available: false },
+    { num: 5, label: '5. Hafta', app: 'isaret-w5', available: false },
+    { num: 6, label: '6. Hafta', app: 'isaret-w6', available: false },
+    { num: 7, label: '7. Hafta', app: 'isaret-w7', available: false },
+  ]},
+  'drop-tibbi':   { id: 'tibbi',   name: 'Tıbbi Bitki',               icon: '🌿',  color: '#fb923c', weeks: [
+    { num: 2, label: '2. Hafta', app: 'tibbi',    available: false },
+    { num: 3, label: '3. Hafta', app: 'tibbi-w3', available: false },
+    { num: 4, label: '4. Hafta', app: 'tibbi-w4', available: false },
+    { num: 5, label: '5. Hafta', app: 'tibbi-w5', available: false },
+    { num: 6, label: '6. Hafta', app: 'tibbi-w6', available: false },
+    { num: 7, label: '7. Hafta', app: 'tibbi-w7', available: false },
+  ]},
+  'drop-rusca4':  { id: 'rusca4',  name: 'Rusça IV',                  icon: '🇷🇺', color: '#38bdf8', weeks: [
+    { num: 2, label: '2. Hafta', app: 'rusca4',    available: false },
+    { num: 3, label: '3. Hafta', app: 'rusca4-w3', available: false },
+    { num: 4, label: '4. Hafta', app: 'rusca4-w4', available: false },
+    { num: 5, label: '5. Hafta', app: 'rusca4-w5', available: false },
+    { num: 6, label: '6. Hafta', app: 'rusca4-w6', available: false },
+    { num: 7, label: '7. Hafta', app: 'rusca4-w7', available: false },
+  ]},
+  'drop-rusca6':  { id: 'rusca6',  name: 'Rusça VI',                  icon: '🇷🇺', color: '#38bdf8', weeks: [
+    { num: 2, label: '2. Hafta', app: 'rusca6',    available: false },
+    { num: 3, label: '3. Hafta', app: 'rusca6-w3', available: false },
+    { num: 4, label: '4. Hafta', app: 'rusca6-w4', available: false },
+    { num: 5, label: '5. Hafta', app: 'rusca6-w5', available: false },
+    { num: 6, label: '6. Hafta', app: 'rusca6-w6', available: false },
+    { num: 7, label: '7. Hafta', app: 'rusca6-w7', available: false },
+  ]},
+};
+
+function openWeekOverlay(dropId) {
+  const course = WEEK_OVERLAY_COURSES[dropId];
+  if (!course) return;
+  const overlay = document.getElementById('week-overlay');
+  const content = document.getElementById('week-overlay-content');
+  let html = `
+    <div class="wo-header" style="--wo-color:${course.color}">
+      <div class="wo-title">
+        <span class="wo-icon">${course.icon}</span>
+        <div>
+          <div class="wo-course-name">${course.name}</div>
+          <div class="wo-subtitle">Hafta seç</div>
+        </div>
+      </div>
+      <button class="wo-close-btn" onclick="closeWeekOverlay()">✕</button>
+    </div>
+    <div class="wo-grid">
+  `;
+  course.weeks.forEach(w => {
+    const activeClass = w.available ? 'wo-card-active' : 'wo-card-soon';
+    const badge = w.available
+      ? `<div class="wo-badge">● Aktif</div>`
+      : `<div class="wo-badge wo-badge-soon">○ Yakında</div>`;
+    const sublabel = w.available
+      ? w.label.replace(/^\d+\. Hafta — /, '')
+      : 'Ders Notları';
+    html += `
+      <button class="wo-card ${activeClass}" style="--wo-color:${course.color}"
+        onclick="closeWeekOverlay();switchApp('${w.app}','${w.label}','${course.id}')">
+        <div class="wo-week-num">${w.num}. HAFTA</div>
+        <div class="wo-week-label">${sublabel}</div>
+        ${badge}
+      </button>
+    `;
+  });
+  html += `</div>`;
+  content.innerHTML = html;
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => overlay.classList.add('wo-visible'));
+  overlay.onclick = function(e) { if (e.target === overlay) closeWeekOverlay(); };
+}
+
+function closeWeekOverlay() {
+  const overlay = document.getElementById('week-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('wo-visible');
+  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+}
