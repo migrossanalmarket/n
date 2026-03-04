@@ -1,4 +1,13 @@
-function lockCheck() {
+const WEEK_AVAILABILITY = {
+  'davos':   { 2: true,  3: false, 4: false, 5: false, 6: false, 7: false },
+  'hukuk':   { 2: true,  3: false, 4: false, 5: false, 6: false, 7: false },
+  'gobilim': { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+  'etik':    { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+  'isaret':  { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+  'tibbi':   { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+  'rusca4':  { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+  'rusca6':  { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+};function lockCheck() {
   const val = document.getElementById('lock-input').value;
   if (val === '3131') {
     document.getElementById('lockscreen').style.display = 'none';
@@ -140,27 +149,33 @@ function initDropdowns() {
 
   // ── HEM MASAÜSTÜ HEM iOS: drop-label'a click & touchstart ──
   // iOS'ta daha hızlı ve kesin açılması için touchstart da eklendi.
-  document.querySelectorAll('.drop-label').forEach(function (btn) {
-    var dropId = btn.getAttribute('data-drop-id');
-    function handleToggle(e) {
-      e.stopPropagation();
-      // Eğer touchstart çalıştıysa click'i yoksaymak için bayrak koyuyoruz
-      if (e.type === 'touchstart') {
-        btn.dataset.touched = '1';
-      } else if (e.type === 'click' && btn.dataset.touched === '1') {
-        btn.dataset.touched = '0';
-        return;
-      }
+  const COURSE_DROP_MAP = {
+  'drop-davos': 'davos', 'drop-hukuk': 'hukuk', 'drop-gobilim': 'gobilim',
+  'drop-etik': 'etik', 'drop-isaret': 'isaret', 'drop-tibbi': 'tibbi',
+  'drop-rusca4': 'rusca4', 'drop-rusca6': 'rusca6'
+};
 
-      if (dropId === 'apps-menu') {
-        toggleAppsMenu();
-      } else if (dropId) {
-        toggleDrop(dropId);
-      }
+document.querySelectorAll('.drop-label').forEach(function (btn) {
+  var dropId = btn.getAttribute('data-drop-id');
+  function handleToggle(e) {
+    e.stopPropagation();
+    if (e.type === 'touchstart') {
+      btn.dataset.touched = '1';
+    } else if (e.type === 'click' && btn.dataset.touched === '1') {
+      btn.dataset.touched = '0';
+      return;
     }
-    btn.addEventListener('click', handleToggle);
-    btn.addEventListener('touchstart', handleToggle, { passive: true });
-  });
+    if (dropId === 'apps-menu') {
+      toggleAppsMenu();
+    } else if (dropId && COURSE_DROP_MAP[dropId]) {
+      openWeekOverlay(COURSE_DROP_MAP[dropId]);
+    } else if (dropId) {
+      toggleDrop(dropId);
+    }
+  }
+  btn.addEventListener('click', handleToggle);
+  btn.addEventListener('touchstart', handleToggle, { passive: true });
+});
 
   // ── drop-item'lara click ──
   document.querySelectorAll('.drop-item').forEach(function (btn) {
@@ -780,6 +795,72 @@ function registerSW() { if ('serviceWorker' in navigator) { const swCode = `cons
 // ════════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════════
+let _woSwipeStartY = 0;
+
+function openWeekOverlay(courseId) {
+  const course = COURSES.find(c => c.id === courseId);
+  if (!course) return;
+  closeAllDrops();
+
+  const overlay = document.getElementById('week-overlay');
+  document.getElementById('wo-icon').textContent = course.icon;
+  document.getElementById('wo-title').textContent = course.name;
+  document.getElementById('wo-sub').textContent = course.day + ' · ' + course.time;
+  document.getElementById('wo-header-bar').style.setProperty('--wo-color', course.color);
+
+  const cardsContainer = document.getElementById('wo-cards');
+  cardsContainer.innerHTML = '';
+  const avail = WEEK_AVAILABILITY[courseId] || {};
+
+  for (let w = 2; w <= 7; w++) {
+    const isAvail = !!avail[w];
+    const panelId = w === 2 ? courseId : courseId + '-w' + w;
+    const card = document.createElement('div');
+    card.className = 'week-card ' + (isAvail ? 'week-card--active' : 'week-card--locked');
+    card.style.setProperty('--wc-color', course.color);
+    card.innerHTML = `
+      <div class="wc-week-num">HAFTA ${w}</div>
+      <div class="wc-status">${isAvail ? '<span class="wc-dot"></span>Hazır' : '🔒 Yakında'}</div>
+    `;
+    if (isAvail) {
+      card.addEventListener('click', function() {
+        closeWeekOverlay();
+        switchApp(panelId, course.name, courseId);
+      });
+      card.addEventListener('mousemove', function(e) {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `perspective(500px) rotateY(${x*16}deg) rotateX(${-y*16}deg) translateY(-4px) scale(1.03)`;
+      });
+      card.addEventListener('mouseleave', function() { card.style.transform = ''; });
+    }
+    cardsContainer.appendChild(card);
+  }
+
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const modal = overlay.querySelector('.week-overlay-modal');
+  modal.ontouchstart = function(e) { _woSwipeStartY = e.touches[0].clientY; };
+  modal.ontouchmove = function(e) {
+    const dy = e.touches[0].clientY - _woSwipeStartY;
+    if (dy > 0) modal.style.transform = 'translateY(' + dy + 'px)';
+  };
+  modal.ontouchend = function(e) {
+    const dy = e.changedTouches[0].clientY - _woSwipeStartY;
+    if (dy > 90) { closeWeekOverlay(); }
+    else { modal.style.transform = ''; }
+  };
+}
+
+function closeWeekOverlay() {
+  const overlay = document.getElementById('week-overlay');
+  const modal = overlay.querySelector('.week-overlay-modal');
+  overlay.classList.remove('open');
+  modal.style.transform = '';
+  document.body.style.overflow = '';
+}
 function initApp() {
   loadTheme();
   // iOS'ta ses butonları ve ara butonu gizle

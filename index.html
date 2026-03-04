@@ -1466,6 +1466,22 @@
 
   <script src="data.js"></script>
   <script src="app.js"></script>
+  <!-- HAFTA OVERLAY -->
+<div id="week-overlay">
+  <div class="week-overlay-backdrop" onclick="closeWeekOverlay()"></div>
+  <div class="week-overlay-modal">
+    <div class="week-overlay-handle"></div>
+    <div class="week-overlay-header" id="wo-header-bar">
+      <span class="week-overlay-icon" id="wo-icon"></span>
+      <div>
+        <div class="week-overlay-title" id="wo-title"></div>
+        <div class="week-overlay-sub" id="wo-sub"></div>
+      </div>
+      <button class="week-overlay-close" onclick="closeWeekOverlay()">✕</button>
+    </div>
+    <div class="week-overlay-cards" id="wo-cards"></div>
+  </div>
+</div>
 </body>
 
 </html>
