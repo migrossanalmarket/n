@@ -68,18 +68,6 @@
     <p class="lock-sub">Şifreyi gir</p>
     <input type="password" id="lock-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*"
       autocomplete="off" onkeydown="if(event.key==='Enter') lockCheck()" />
-    <button id="ios-add-home-btn" onclick="showIOSInstallGuide()" style="display:none;margin-top:20px;background:none;border:1px solid rgba(200,241,53,0.4);color:#c8f135;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;padding:10px 20px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
-      📲 Ana Ekrana Ekle
-    </button>
-  </div>
-  <div id="ios-install-guide" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#111318;border-top:1px solid #1e2028;padding:20px 24px;font-family:'Syne',sans-serif;">
-    <div style="font-size:13px;font-weight:700;color:#c8f135;margin-bottom:10px;letter-spacing:1px;">ANA EKRANA EKLE</div>
-    <div style="font-size:13px;color:#e8eaf0;line-height:1.7;">
-      1. Alttaki <strong style="color:#c8f135">Paylaş</strong> butonuna bas <span style="font-size:16px">⬆️</span><br>
-      2. <strong style="color:#c8f135">"Ana Ekrana Ekle"</strong> seçeneğini seç<br>
-      3. Sağ üstten <strong style="color:#c8f135">Ekle</strong>'ye bas
-    </div>
-    <button onclick="document.getElementById('ios-install-guide').style.display='none'" style="margin-top:14px;background:none;border:1px solid #1e2028;color:#555;font-family:'Syne',sans-serif;font-size:11px;padding:8px 16px;border-radius:8px;cursor:pointer;">Kapat</button>
   </div>
 
   <div id="search-overlay">
@@ -103,21 +91,6 @@
   <div class="app-switcher">
     <div class="app-logo" data-app="dashboard" data-label="" data-drop="">Tariktanta</div>
 
-    <div class="dropdown" id="drop-hukuk">
-      <button data-drop-id="drop-hukuk" class="drop-label" id="droplabel-hukuk">HUKUK</button>
-      <div class="drop-menu" id="dropmenu-hukuk">
-        <div class="drop-week-label">📅 Haftalar</div>
-        <!-- Week 2 links to your existing panel-hukuk -->
-        <button data-app="hukuk" data-label="2. Hafta — Hukuki Çeviri" data-drop="hukuk" class="drop-item active-item">⚖️ 2.
-          Hafta — Hukuki Çeviri</button>
-        <button data-app="hukuk-w3" data-label="3. Hafta" data-drop="hukuk" class="drop-item">⚖️ 3. Hafta</button>
-        <button data-app="hukuk-w4" data-label="4. Hafta" data-drop="hukuk" class="drop-item">⚖️ 4. Hafta</button>
-        <button data-app="hukuk-w5" data-label="5. Hafta" data-drop="hukuk" class="drop-item">⚖️ 5. Hafta</button>
-        <button data-app="hukuk-w6" data-label="6. Hafta" data-drop="hukuk" class="drop-item">⚖️ 6. Hafta</button>
-        <button data-app="hukuk-w7" data-label="7. Hafta" data-drop="hukuk" class="drop-item">⚖️ 7. Hafta</button>
-      </div>
-    </div>
-
     <div class="dropdown" id="drop-davos">
       <button data-drop-id="drop-davos" class="drop-label" id="droplabel-davos">ARDIL</button>
       <div class="drop-menu" id="dropmenu-davos">
@@ -130,6 +103,21 @@
         <button data-app="davos-w5" data-label="5. Hafta" data-drop="davos" class="drop-item">🎙️ 5. Hafta</button>
         <button data-app="davos-w6" data-label="6. Hafta" data-drop="davos" class="drop-item">🎙️ 6. Hafta</button>
         <button data-app="davos-w7" data-label="7. Hafta" data-drop="davos" class="drop-item">🎙️ 7. Hafta</button>
+      </div>
+    </div>
+
+    <div class="dropdown" id="drop-hukuk">
+      <button data-drop-id="drop-hukuk" class="drop-label" id="droplabel-hukuk">HUKUK</button>
+      <div class="drop-menu" id="dropmenu-hukuk">
+        <div class="drop-week-label">📅 Haftalar</div>
+        <!-- Week 2 links to your existing panel-hukuk -->
+        <button data-app="hukuk" data-label="2. Hafta — Hukuki Çeviri" data-drop="hukuk" class="drop-item active-item">⚖️ 2.
+          Hafta — Hukuki Çeviri</button>
+        <button data-app="hukuk-w3" data-label="3. Hafta" data-drop="hukuk" class="drop-item">⚖️ 3. Hafta</button>
+        <button data-app="hukuk-w4" data-label="4. Hafta" data-drop="hukuk" class="drop-item">⚖️ 4. Hafta</button>
+        <button data-app="hukuk-w5" data-label="5. Hafta" data-drop="hukuk" class="drop-item">⚖️ 5. Hafta</button>
+        <button data-app="hukuk-w6" data-label="6. Hafta" data-drop="hukuk" class="drop-item">⚖️ 6. Hafta</button>
+        <button data-app="hukuk-w7" data-label="7. Hafta" data-drop="hukuk" class="drop-item">⚖️ 7. Hafta</button>
       </div>
     </div>
 
@@ -159,32 +147,6 @@
       </div>
     </div>
 
-    <div class="dropdown" id="drop-rusca4">
-      <button data-drop-id="drop-rusca4" class="drop-label">RUSÇA IV</button>
-      <div class="drop-menu">
-        <div class="drop-week-label">📅 Haftalar</div>
-        <button data-app="rusca4-w2" data-label="2. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 2. Hafta</button>
-        <button data-app="rusca4-w3" data-label="3. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 3. Hafta</button>
-        <button data-app="rusca4-w4" data-label="4. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 4. Hafta</button>
-        <button data-app="rusca4-w5" data-label="5. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 5. Hafta</button>
-        <button data-app="rusca4-w6" data-label="6. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 6. Hafta</button>
-        <button data-app="rusca4-w7" data-label="7. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 7. Hafta</button>
-      </div>
-    </div>
-
-    <div class="dropdown" id="drop-rusca6">
-      <button data-drop-id="drop-rusca6" class="drop-label">RUSÇA VI</button>
-      <div class="drop-menu">
-        <div class="drop-week-label">📅 Haftalar</div>
-        <button data-app="rusca6-w2" data-label="2. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 2. Hafta</button>
-        <button data-app="rusca6-w3" data-label="3. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 3. Hafta</button>
-        <button data-app="rusca6-w4" data-label="4. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 4. Hafta</button>
-        <button data-app="rusca6-w5" data-label="5. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 5. Hafta</button>
-        <button data-app="rusca6-w6" data-label="6. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 6. Hafta</button>
-        <button data-app="rusca6-w7" data-label="7. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 7. Hafta</button>
-      </div>
-    </div>
-
     <div class="dropdown" id="drop-isaret">
       <button data-drop-id="drop-isaret" class="drop-label">İŞARET</button>
       <div class="drop-menu">
@@ -211,12 +173,44 @@
       </div>
     </div>
 
+    <div class="dropdown" id="drop-rusca4">
+      <button data-drop-id="drop-rusca4" class="drop-label">RUSÇA IV</button>
+      <div class="drop-menu">
+        <div class="drop-week-label">📅 Haftalar</div>
+        <button data-app="rusca4-w2" data-label="2. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 2. Hafta</button>
+        <button data-app="rusca4-w3" data-label="3. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 3. Hafta</button>
+        <button data-app="rusca4-w4" data-label="4. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 4. Hafta</button>
+        <button data-app="rusca4-w5" data-label="5. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 5. Hafta</button>
+        <button data-app="rusca4-w6" data-label="6. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 6. Hafta</button>
+        <button data-app="rusca4-w7" data-label="7. Hafta" data-drop="rusca4" class="drop-item">🇷🇺 7. Hafta</button>
+      </div>
+    </div>
+
+    <div class="dropdown" id="drop-rusca6">
+      <button data-drop-id="drop-rusca6" class="drop-label">RUSÇA VI</button>
+      <div class="drop-menu">
+        <div class="drop-week-label">📅 Haftalar</div>
+        <button data-app="rusca6-w2" data-label="2. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 2. Hafta</button>
+        <button data-app="rusca6-w3" data-label="3. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 3. Hafta</button>
+        <button data-app="rusca6-w4" data-label="4. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 4. Hafta</button>
+        <button data-app="rusca6-w5" data-label="5. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 5. Hafta</button>
+        <button data-app="rusca6-w6" data-label="6. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 6. Hafta</button>
+        <button data-app="rusca6-w7" data-label="7. Hafta" data-drop="rusca6" class="drop-item">🇷🇺 7. Hafta</button>
+      </div>
+    </div>
+
     <!-- UYGULAMALAR ve sağ panele dokunulmadı -->
     <div class="switcher-right">
       <div class="dropdown" id="drop-apps">
         <button data-drop-id="apps-menu" class="drop-label" style="color:#a78bfa">UYGULAMALAR</button>
       </div>
-
+      <button class="search-btn" id="search-btn-main">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        Ara <kbd>⌘K</kbd>
+      </button>
       <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Tema değiştir">🌙</button>
       <div style="display:flex;gap:2px;align-items:center">
         <button onclick="setLang('tr')" id="flag-tr" title="Türkçe"
