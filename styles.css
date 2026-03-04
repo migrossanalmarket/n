@@ -96,7 +96,7 @@
       height: 52px;
       gap: 4px;
       overflow-x: auto;
-      overflow-y: visible;
+      overflow-y: clip;
       -webkit-overflow-scrolling: touch;
     }
 

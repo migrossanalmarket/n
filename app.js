@@ -50,123 +50,94 @@ const COURSES = [
 ];
 
 // ════════════════════════════════════════════════
-// DROPDOWN — temiz, hem Windows hem iOS
+// DROPDOWN — iOS + Windows (toggleAppsMenu mantığıyla)
 // ════════════════════════════════════════════════
-
-function _positionMenu(dd) {
-  var menu = document.querySelector('.drop-menu[data-parent-id="' + dd.id + '"]') || dd.querySelector('.drop-menu');
-  if (!menu) return;
-  var rect = dd.getBoundingClientRect();
-  menu.style.position = 'fixed';
-  menu.style.top = '52px';
-  var leftPos = rect.left;
-  if (leftPos + 260 > window.innerWidth) leftPos = window.innerWidth - 268;
-  if (leftPos < 4) leftPos = 4;
-  menu.style.left = leftPos + 'px';
-}
 
 function closeAllDrops() {
   document.querySelectorAll('.dropdown').forEach(function (d) { d.classList.remove('open'); });
-  document.querySelectorAll('.body-menu').forEach(function (m) { m.style.display = 'none'; });
+  document.querySelectorAll('.drop-menu').forEach(function (m) { m.style.display = 'none'; });
 }
 
 function toggleDrop(id) {
   var dd = document.getElementById(id);
   if (!dd) return;
+  var menu = dd.querySelector('.drop-menu');
+  if (!menu) return;
+
   var isOpen = dd.classList.contains('open');
   closeAllDrops();
+
   if (!isOpen) {
-    _positionMenu(dd);
+    // Menüyü body'e taşı (bir kez)
+    if (!menu._movedToBody) {
+      menu._ddId = id;
+      document.body.appendChild(menu);
+      menu._movedToBody = true;
+    }
+    // Konumla
+    var rect = dd.getBoundingClientRect();
+    menu.style.position = 'fixed';
+    menu.style.top = '52px';
+    var left = rect.left;
+    if (left + 260 > window.innerWidth) left = window.innerWidth - 268;
+    if (left < 4) left = 4;
+    menu.style.left = left + 'px';
+    menu.style.display = 'flex';
+    menu.style.flexDirection = 'column';
     dd.classList.add('open');
-    var menu = document.querySelector('.drop-menu[data-parent-id="' + id + '"]');
-    if (menu) menu.style.display = 'flex';
+
+    // Dışarı tıklayınca kapat (toggleAppsMenu ile aynı mantık)
+    setTimeout(function () {
+      document.addEventListener('click', function handler(e) {
+        if (!menu.contains(e.target) && !dd.contains(e.target)) {
+          menu.style.display = 'none';
+          dd.classList.remove('open');
+          document.removeEventListener('click', handler);
+        }
+      });
+    }, 10);
   }
 }
 
 function initDropdowns() {
-  // ── MASAÜSTÜ DIŞINDA BÜTÜN MENÜLERİ BODY İÇİNE TAŞI (iOS CLIPPING SORUNU ÇÖZÜMÜ) ──
-  document.querySelectorAll('.app-switcher .dropdown').forEach(function (dd) {
-    if (!dd.id) return;
-    var menu = dd.querySelector('.drop-menu');
-    if (menu) {
-      menu.dataset.parentId = dd.id;
-      menu.classList.add('body-menu');
-      // .app-switcher yatay scroll clipping sorununu engellemek için body'e taşıyoruz
-      document.body.appendChild(menu);
-    }
-  });
-
-  // ── Scroll'da kapat (iOS'ta dokunurken olan mikro kaymaları yok saymak için) ──
   var switcher = document.querySelector('.app-switcher');
   if (switcher) {
-    var lastScroll = switcher.scrollLeft;
-    switcher.addEventListener('scroll', function () {
-      if (Math.abs(switcher.scrollLeft - lastScroll) > 10) {
-        closeAllDrops();
-      }
-      lastScroll = switcher.scrollLeft;
-    }, { passive: true });
+    switcher.addEventListener('scroll', closeAllDrops, { passive: true });
   }
 
-  // ── MASAÜSTÜ: hover ile aç/kapat ──
-  var isTouch = window.matchMedia('(pointer: coarse)').matches;
-  if (!isTouch) {
+  // MASAÜSTÜ: hover (sadece mouse cihazlarda)
+  if (matchMedia('(hover: hover)').matches) {
     document.querySelectorAll('.dropdown').forEach(function (dd) {
+      if (!dd.id) return;
       var leaveTimer;
-      var menu = document.querySelector('.drop-menu[data-parent-id="' + dd.id + '"]');
-
-      function onEnter() {
+      dd.addEventListener('mouseenter', function () {
         clearTimeout(leaveTimer);
-        closeAllDrops();
-        _positionMenu(dd);
-        dd.classList.add('open');
-        if (menu) menu.style.display = 'flex';
-      }
-      function onLeave() {
-        leaveTimer = setTimeout(function () {
-          dd.classList.remove('open');
-          if (menu) menu.style.display = 'none';
-        }, 150);
-      }
-
-      dd.addEventListener('mouseenter', onEnter);
-      dd.addEventListener('mouseleave', onLeave);
-      if (menu) {
-        menu.addEventListener('mouseenter', onEnter);
-        menu.addEventListener('mouseleave', onLeave);
-      }
+        toggleDrop(dd.id);
+      });
+      dd.addEventListener('mouseleave', function () {
+        leaveTimer = setTimeout(closeAllDrops, 200);
+      });
     });
   }
 
-  // ── HEM MASAÜSTÜ HEM iOS: drop-label'a click & touchstart ──
-  // iOS'ta daha hızlı ve kesin açılması için touchstart da eklendi.
+  // HEM MASAÜSTÜ HEM iOS: click
   document.querySelectorAll('.drop-label').forEach(function (btn) {
     var dropId = btn.getAttribute('data-drop-id');
-    function handleToggle(e) {
+    btn.addEventListener('click', function (e) {
       e.stopPropagation();
-      // Eğer touchstart çalıştıysa click'i yoksaymak için bayrak koyuyoruz
-      if (e.type === 'touchstart') {
-        btn.dataset.touched = '1';
-      } else if (e.type === 'click' && btn.dataset.touched === '1') {
-        btn.dataset.touched = '0';
-        return;
-      }
-
       if (dropId === 'apps-menu') {
         toggleAppsMenu();
       } else if (dropId) {
         toggleDrop(dropId);
       }
-    }
-    btn.addEventListener('click', handleToggle);
-    btn.addEventListener('touchstart', handleToggle, { passive: true });
+    });
   });
 
-  // ── drop-item'lara click ──
+  // drop-item click
   document.querySelectorAll('.drop-item').forEach(function (btn) {
-    var app = btn.getAttribute('data-app');
-    var label = btn.getAttribute('data-label');
-    var drop = btn.getAttribute('data-drop');
+    var app   = btn.getAttribute('data-app');
+    var label = btn.getAttribute('data-label') || '';
+    var drop  = btn.getAttribute('data-drop') || '';
     if (app !== null) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -176,7 +147,7 @@ function initDropdowns() {
     }
   });
 
-  // ── app-logo click ──
+  // app-logo
   var logo = document.querySelector('.app-logo');
   if (logo) {
     logo.addEventListener('click', function () {
@@ -185,19 +156,11 @@ function initDropdowns() {
     });
   }
 
-  // ── search butonu ──
+  // search
   var searchBtn = document.getElementById('search-btn-main');
-  if (searchBtn) {
-    searchBtn.addEventListener('click', openSearch);
-  }
-
-  // ── Dışarı tıklayınca kapat ──
-  document.addEventListener('click', function (e) {
-    if (!e.target.closest('.dropdown') && !e.target.closest('#apps-popup') && !e.target.closest('.body-menu')) {
-      closeAllDrops();
-    }
-  });
+  if (searchBtn) searchBtn.addEventListener('click', openSearch);
 }
+
 
 // ════════════════════════════════════════════════
 // APP SWITCHER + localStorage SON PANEL
@@ -923,12 +886,12 @@ const SOUND_VIDEOS = {
   ocean: 'bn9F19Hi1Lk',
 };
 const SOUND_MP3 = {
-  rain: 'https://cdn.freesound.org/previews/346/346170_5121236-lq.mp3',
-  forest: 'https://cdn.freesound.org/previews/416/416079_7037-lq.mp3',
-  wind: 'https://cdn.freesound.org/previews/553/553736_6381832-lq.mp3',
-  fire: 'https://cdn.freesound.org/previews/349/349813_5121236-lq.mp3',
-  piano: 'https://cdn.freesound.org/previews/476/476178_8418129-lq.mp3',
-  ocean: 'https://cdn.freesound.org/previews/402/402543_6381832-lq.mp3',
+  rain: 'https://assets.mixkit.co/active_storage/sfx/212/212.mp3',
+  forest: 'https://assets.mixkit.co/active_storage/sfx/2515/2515.mp3',
+  wind: 'https://assets.mixkit.co/active_storage/sfx/2520/2520.mp3',
+  fire: 'https://assets.mixkit.co/active_storage/sfx/1004/1004.mp3',
+  piano: 'https://assets.mixkit.co/active_storage/sfx/2519/2519.mp3',
+  ocean: 'https://assets.mixkit.co/active_storage/sfx/2352/2352.mp3',
 };
 const SOUND_ICONS = { rain: '🌧️', forest: '🐦', wind: '💨', fire: '🔥', piano: '🎹', ocean: '🌊' };
 const _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -1001,7 +964,12 @@ function playAmbient(type) {
     if (!url) return;
     audio.src = url;
     audio.volume = vol / 100;
-    audio.play().catch(function () { });
+    audio.play().catch(function (err) {
+      console.warn('iOS ses hatası:', err);
+      // Kullanıcıya bildir
+      var icon = document.getElementById('sound-icon');
+      if (icon) icon.textContent = '❌';
+    });
   } else {
     const videoId = SOUND_VIDEOS[type];
     if (!videoId) return;
