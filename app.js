@@ -1,4 +1,4 @@
-constconst WEEK_AVAILABILITY = {
+const WEEK_AVAILABILITY = {
   'davos':   { 2: true,  3: false, 4: false, 5: false, 6: false, 7: false },
   'hukuk':   { 2: true,  3: false, 4: false, 5: false, 6: false, 7: false },
   'gobilim': { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
