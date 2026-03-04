@@ -1,12 +1,12 @@
 const WEEK_AVAILABILITY = {
-  'davos':   { 2: true,  3: false, 4: false, 5: false, 6: false, 7: false },
-  'hukuk':   { 2: true,  3: false, 4: false, 5: false, 6: false, 7: false },
+  'davos': { 2: true, 3: false, 4: false, 5: false, 6: false, 7: false },
+  'hukuk': { 2: true, 3: false, 4: false, 5: false, 6: false, 7: false },
   'gobilim': { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
-  'etik':    { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
-  'termin':  { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
-  'tibbi':   { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
-  'rusca4':  { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
-  'rusca6':  { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+  'etik': { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+  'termin': { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+  'tibbi': { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+  'rusca4': { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+  'rusca6': { 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
 };
 
 function lockCheck() {
@@ -47,15 +47,52 @@ const SCHEDULE = {
   'Çarşamba': [{ name: 'Çeviride Etik', time: '08:30–11:15', panel: 'etik', color: '#f97316', icon: '⚡' }, { name: 'Çevirmenler İçin Terminoloji', time: '09:30–12:15', panel: 'termin', color: '#4ade80', icon: '📖' }, { name: 'Tıbbi Bitki', time: '13:00–14:45', panel: 'tibbi', color: '#fb923c', icon: '🌿' }],
   'Perşembe': [{ name: 'Rusça IV', time: '11:30–14:15', panel: 'rusca4', color: '#38bdf8', icon: '🇷🇺' }, { name: 'Rusça VI', time: '14:30–17:15', panel: 'rusca6', color: '#38bdf8', icon: '🇷🇺' }]
 };
+
+// ════════════════════════════════════════════════
+// INDEXED DB STORAGE (Phase 3)
+// ════════════════════════════════════════════════
+const DB_NAME = 'tariktanta_db';
+const DB_VERSION = 1;
+
+async function initDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('stats')) db.createObjectStore('stats');
+      if (!db.objectStoreNames.contains('progress')) db.createObjectStore('progress');
+    };
+    request.onsuccess = e => resolve(e.target.result);
+    request.onerror = e => reject(e.target.error);
+  });
+}
+
+async function dbSave(store, key, val) {
+  const db = await initDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(store, 'readwrite');
+    tx.objectStore(store).put(val, key);
+    tx.oncomplete = () => resolve();
+  });
+}
+
+async function dbGet(store, key) {
+  const db = await initDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).get(key);
+    req.onsuccess = () => resolve(req.result);
+  });
+}
 const COURSES = [
-  { id: 'davos',   name: 'Ardıl Çeviriye Giriş',           icon: '🎙️', color: '#c8f135', desc: 'Davos 2026 · WEF terminoloji ve pratik',     room: 'FEF 228',  day: 'Pazartesi', time: '09:30–13:15', available: true  },
-  { id: 'hukuk',   name: 'Hukuk Çevirisi (Seçmeli)',        icon: '⚖️',  color: '#e8c547', desc: 'Deborah Cao · AB Mevzuatı Çeviri Rehberi', room: 'FEF 140',  day: 'Pazartesi', time: '13:30–16:15', available: true  },
-  { id: 'gobilim', name: 'Çeviri Göstergebilimi II',         icon: '📐',  color: '#a78bfa', desc: 'Göstergebilim · Öztürk Kasar modeli',        room: 'FEF 228',  day: 'Salı',      time: '13:30–14:30', available: false },
-  { id: 'etik',    name: 'Çeviride Etik',                   icon: '⚡',  color: '#f97316', desc: 'Mesleki sorumluluklar · Etik ilkeler',       room: 'FEF 33',   day: 'Çarşamba',  time: '08:30–11:15', available: false },
-  { id: 'termin',  name: 'Çevirmenler İçin Terminoloji',    icon: '📖',  color: '#4ade80', desc: 'Terminoloji teorisi ve uygulama',           room: 'FEF 235',  day: 'Çarşamba',  time: '09:30–12:15', available: false },
-  { id: 'tibbi',   name: 'Tıbbi Bitki (Seçmeli)',            icon: '🌿',  color: '#fb923c', desc: 'Tıbbi terminoloji · Bitki sözlüğü',          room: '',         day: 'Çarşamba',  time: '13:00–14:45', available: false },
-  { id: 'rusca4',  name: 'Rusça IV',                         icon: '🇷🇺', color: '#38bdf8', desc: 'Orta ileri Rusça terminoloji',              room: 'YDYO 226', day: 'Perşembe',  time: '11:30–14:15', available: false },
-  { id: 'rusca6',  name: 'Rusça VI',                         icon: '🇷🇺', color: '#38bdf8', desc: 'İleri düzey Rusça terminoloji',             room: 'YDYO 226', day: 'Perşembe',  time: '14:30–17:15', available: false },
+  { id: 'davos', name: 'Ardıl Çeviriye Giriş', icon: '🎙️', color: '#c8f135', desc: 'Davos 2026 · WEF terminoloji ve pratik', room: 'FEF 228', day: 'Pazartesi', time: '09:30–13:15', available: true },
+  { id: 'hukuk', name: 'Hukuk Çevirisi (Seçmeli)', icon: '⚖️', color: '#e8c547', desc: 'Deborah Cao · AB Mevzuatı Çeviri Rehberi', room: 'FEF 140', day: 'Pazartesi', time: '13:30–16:15', available: true },
+  { id: 'gobilim', name: 'Çeviri Göstergebilimi II', icon: '📐', color: '#a78bfa', desc: 'Göstergebilim · Öztürk Kasar modeli', room: 'FEF 228', day: 'Salı', time: '13:30–14:30', available: false },
+  { id: 'etik', name: 'Çeviride Etik', icon: '⚡', color: '#f97316', desc: 'Mesleki sorumluluklar · Etik ilkeler', room: 'FEF 33', day: 'Çarşamba', time: '08:30–11:15', available: false },
+  { id: 'termin', name: 'Çevirmenler İçin Terminoloji', icon: '📖', color: '#4ade80', desc: 'Terminoloji teorisi ve uygulama', room: 'FEF 235', day: 'Çarşamba', time: '09:30–12:15', available: false },
+  { id: 'tibbi', name: 'Tıbbi Bitki (Seçmeli)', icon: '🌿', color: '#fb923c', desc: 'Tıbbi terminoloji · Bitki sözlüğü', room: '', day: 'Çarşamba', time: '13:00–14:45', available: false },
+  { id: 'rusca4', name: 'Rusça IV', icon: '🇷🇺', color: '#38bdf8', desc: 'Orta ileri Rusça terminoloji', room: 'YDYO 226', day: 'Perşembe', time: '11:30–14:15', available: false },
+  { id: 'rusca6', name: 'Rusça VI', icon: '🇷🇺', color: '#38bdf8', desc: 'İleri düzey Rusça terminoloji', room: 'YDYO 226', day: 'Perşembe', time: '14:30–17:15', available: false },
 ];
 
 // ════════════════════════════════════════════════
@@ -115,14 +152,14 @@ function initDropdowns() {
   }
 
   const COURSE_DROP_MAP = {
-    'drop-davos':   'davos',
-    'drop-hukuk':   'hukuk',
+    'drop-davos': 'davos',
+    'drop-hukuk': 'hukuk',
     'drop-gobilim': 'gobilim',
-    'drop-etik':    'etik',
-    'drop-termin':  'termin',
-    'drop-tibbi':   'tibbi',
-    'drop-rusca4':  'rusca4',
-    'drop-rusca6':  'rusca6'
+    'drop-etik': 'etik',
+    'drop-termin': 'termin',
+    'drop-tibbi': 'tibbi',
+    'drop-rusca4': 'rusca4',
+    'drop-rusca6': 'rusca6'
   };
 
   document.querySelectorAll('.drop-label').forEach(function (btn) {
@@ -233,12 +270,28 @@ window.addEventListener('popstate', function (e) {
 });
 
 function restoreLastPanel() {
+  // Priority 1: URL hash
+  const hash = window.location.hash.replace('#', '');
+  if (hash) {
+    // Map hash to app ID (ardil -> davos)
+    const hashMap = { ardil: 'davos', dashboard: 'dashboard', hukuk: 'hukuk', gobilim: 'gobilim', etik: 'etik', termin: 'termin', tibbi: 'tibbi', rusca4: 'rusca4', rusca6: 'rusca6' };
+    const app = hashMap[hash] || hash;
+    const panel = document.getElementById('panel-' + app);
+    if (panel) { switchApp(app, '', '', false); return; }
+  }
+  // Priority 2: localStorage
   try {
     const saved = localStorage.getItem('tariktanta-lastpanel');
     if (saved) {
       const { app, dropId } = JSON.parse(saved);
+      if (app && document.getElementById('panel-' + app)) {
+        switchApp(app, '', dropId || '', false);
+        return;
+      }
     }
   } catch (e) { }
+  // Default: show dashboard
+  switchApp('dashboard', '', '', false);
 }
 
 document.addEventListener('click', function (e) {
@@ -305,6 +358,7 @@ function pomoToggle() {
           pomoSession++;
           pomoIsBreak = true;
           pomoRemaining = (pomoSession % 4 === 0) ? POMO_LONG : POMO_SHORT;
+          trackPomoSession(); // Track completed work session
           try { const ctx = new AudioContext(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value = 880; g.gain.setValueAtTime(0.3, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5); o.start(); o.stop(ctx.currentTime + 0.5); } catch (e) { }
         } else {
           pomoIsBreak = false;
@@ -512,14 +566,24 @@ function openApp(app) {
 
 function toggleTheme() {
   const html = document.documentElement;
+  html.classList.add('theme-transitioning');
   const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
   html.setAttribute('data-theme', next);
   document.getElementById('theme-btn').textContent = next === 'dark' ? '🌙' : '☀️';
   localStorage.setItem('tariktanta-theme', next);
+  // Update theme-color meta for iOS Safari address bar
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', next === 'dark' ? '#08090d' : '#f8f7f4');
+  setTimeout(function () { html.classList.remove('theme-transitioning'); }, 500);
 }
 function loadTheme() {
   const saved = localStorage.getItem('tariktanta-theme');
-  if (saved) { document.documentElement.setAttribute('data-theme', saved); document.getElementById('theme-btn').textContent = saved === 'dark' ? '🌙' : '☀️'; }
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+    document.getElementById('theme-btn').textContent = saved === 'dark' ? '🌙' : '☀️';
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', saved === 'dark' ? '#08090d' : '#f8f7f4');
+  }
 }
 
 // ════════════════════════════════════════════════
@@ -527,8 +591,26 @@ function loadTheme() {
 // ════════════════════════════════════════════════
 const SEARCH_INDEX = [];
 function buildSearchIndex() {
-  hCards.forEach(c => { SEARCH_INDEX.push({ en: c.q, tr: c.a, source: '⚖️ Hukuk Çevirisi', panel: 'hukuk', type: 'flashcard' }); });
-  TERMS.forEach(cat => { cat.items.forEach(([en, tr, note]) => { SEARCH_INDEX.push({ en, tr, note, source: '🎙️ Davos · ' + cat.cat.replace(/^[^ ]+ /, ''), panel: 'davos', type: 'term' }); }); });
+  // Web Worker for search indexing
+  const workerCode = `
+    self.onmessage = function(e) {
+      const { hCards, TERMS } = e.data;
+      const index = [];
+      hCards.forEach(c => { index.push({ en: c.q, tr: c.a, source: '⚖️ Hukuk Çevirisi', panel: 'hukuk', type: 'flashcard' }); });
+      TERMS.forEach(cat => { cat.items.forEach(([en, tr, note]) => { index.push({ en, tr, note, source: '🎙️ Davos · ' + cat.cat.replace(/^[^ ]+ /, ''), panel: 'davos', type: 'term' }); }); });
+      self.postMessage(index);
+    };
+  `;
+  const blob = new Blob([workerCode], { type: 'application/javascript' });
+  const worker = new Worker(URL.createObjectURL(blob));
+
+  worker.onmessage = function (e) {
+    SEARCH_INDEX.length = 0;
+    SEARCH_INDEX.push(...e.data);
+    console.log('Search index built via Web Worker:', SEARCH_INDEX.length);
+  };
+
+  worker.postMessage({ hCards, TERMS });
 }
 function openSearch() { document.getElementById('search-overlay').classList.add('open'); setTimeout(() => document.getElementById('global-search-input').focus(), 50); }
 function closeSearch() { document.getElementById('search-overlay').classList.remove('open'); document.getElementById('global-search-input').value = ''; document.getElementById('search-results').innerHTML = '<div class="search-empty">Aramak istediğiniz terimi yazın.<br><span style="font-size:12px;color:#555">Tüm derslerin terminolojisinde arama yapılır.</span></div>'; }
@@ -589,7 +671,7 @@ let hKnown = [], hRetry = [], hShuffled = [...hCards], hCurrentIndex = 0;
 function hGetCurrentQueue() { if (hRetry.length > 0) return hRetry; return hShuffled.filter(c => !hKnown.includes(c)); }
 function hRenderCard() { const queue = hGetCurrentQueue(); if (queue.length === 0) { document.getElementById('hfc-question').textContent = '🎉 Tüm kartları biliyorsun!'; document.getElementById('hfc-answer').textContent = 'Karıştır ve tekrar başla.'; document.getElementById('hfc-topic').textContent = ''; document.getElementById('hfc-counter').textContent = 'Tamamlandı!'; hUpdateLeitnerStats(); return; } const c = queue[hCurrentIndex % queue.length]; const card = document.getElementById('hflashcard'); card.classList.remove('revealed'); document.getElementById('hfc-question').textContent = c.q; document.getElementById('hfc-answer').textContent = c.a; document.getElementById('hfc-hint').textContent = '↑ Cevabı görmek için tıkla'; document.getElementById('hfc-title').textContent = c.q.length > 50 ? c.q.substring(0, 50) + '…' : c.q; document.getElementById('hfc-topic').textContent = '📌 ' + c.topic; document.getElementById('hfc-counter').textContent = (hCurrentIndex % queue.length + 1) + ' / ' + queue.length; hUpdateLeitnerStats(); }
 function hRevealCard() { document.getElementById('hflashcard').classList.add('revealed'); document.getElementById('hfc-hint').textContent = ''; }
-function hMarkKnow() { const queue = hGetCurrentQueue(); const c = queue[hCurrentIndex % queue.length]; if (!hKnown.includes(c)) hKnown.push(c); hRetry = hRetry.filter(x => x !== c); hCurrentIndex = 0; hRenderCard(); }
+function hMarkKnow() { const queue = hGetCurrentQueue(); const c = queue[hCurrentIndex % queue.length]; if (!hKnown.includes(c)) { hKnown.push(c); trackKnownCard(); } hRetry = hRetry.filter(x => x !== c); hCurrentIndex = 0; hRenderCard(); }
 function hMarkDunno() { const queue = hGetCurrentQueue(); const c = queue[hCurrentIndex % queue.length]; if (!hRetry.includes(c)) hRetry.push(c); hCurrentIndex = (hCurrentIndex + 1) % Math.max(1, queue.length); hRenderCard(); }
 function hShuffleCards() { for (let i = hShuffled.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[hShuffled[i], hShuffled[j]] = [hShuffled[j], hShuffled[i]]; } hKnown = []; hRetry = []; hCurrentIndex = 0; hRenderCard(); }
 function hUpdateLeitnerStats() { const pending = hShuffled.filter(c => !hKnown.includes(c) && !hRetry.includes(c)).length; document.getElementById('h-stat-pending').textContent = pending; document.getElementById('h-stat-known').textContent = hKnown.length; document.getElementById('h-stat-retry').textContent = hRetry.length; }
@@ -717,17 +799,35 @@ function dRenderFlashcard() { const queue = dGetCurrentQueue(); if (queue.length
 function dFlipCard() { document.getElementById('dMainFlashcard').classList.toggle('flipped'); }
 function dNextCard() { const q = dGetCurrentQueue(); dFlashIndex = (dFlashIndex + 1) % Math.max(1, q.length); dRenderFlashcard(); }
 function dPrevCard() { const q = dGetCurrentQueue(); dFlashIndex = (dFlashIndex - 1 + Math.max(1, q.length)) % Math.max(1, q.length); dRenderFlashcard(); }
-function dMarkKnow() { const queue = dGetCurrentQueue(); const c = queue[dFlashIndex % queue.length]; if (!dKnown.includes(c)) dKnown.push(c); dRetry = dRetry.filter(x => x !== c); dFlashIndex = 0; dRenderFlashcard(); }
+function dMarkKnow() { const queue = dGetCurrentQueue(); const c = queue[dFlashIndex % queue.length]; if (!dKnown.includes(c)) { dKnown.push(c); trackKnownCard(); } dRetry = dRetry.filter(x => x !== c); dFlashIndex = 0; dRenderFlashcard(); }
 function dMarkDunno() { const queue = dGetCurrentQueue(); const c = queue[dFlashIndex % queue.length]; if (!dRetry.includes(c)) dRetry.push(c); dFlashIndex = (dFlashIndex + 1) % Math.max(1, queue.length); dRenderFlashcard(); }
 function dUpdateLeitnerStats() { const pending = dShuffledCards.filter(c => !dKnown.includes(c) && !dRetry.includes(c)).length; document.getElementById('d-stat-pending').textContent = pending; document.getElementById('d-stat-known').textContent = dKnown.length; document.getElementById('d-stat-retry').textContent = dRetry.length; }
 
 // DAVOS QUIZ
-let dQuizQuestions = [], dQuizCur = 0, dQuizScore = 0, dQuizAnswered = false;
-function dStartQuiz() { dQuizQuestions = [...QUIZ_Q].sort(() => Math.random() - 0.5).slice(0, 12); dQuizCur = 0; dQuizScore = 0; dQuizAnswered = false; document.getElementById('dQuizScore').textContent = '0'; document.getElementById('dQuizTotal').textContent = dQuizQuestions.length; document.getElementById('dQuizComplete').style.display = 'none'; document.getElementById('dQuizCard').style.display = 'block'; dRenderQuizQ(); }
+let dQuizQuestions = [], dQuizCur = 0, dQuizScore = 0, dQuizAnswered = false, dIsHardMode = false;
+function dStartQuiz() {
+  // Adaptive Difficulty: If avg score > 80, trigger Hard Mode (more questions, less time simulated)
+  const avg = _stats.quizScores && _stats.quizScores.length > 0
+    ? _stats.quizScores.reduce((a, b) => a + b, 0) / _stats.quizScores.length
+    : 0;
+
+  dIsHardMode = avg > 80;
+  const count = dIsHardMode ? 20 : 12;
+
+  dQuizQuestions = [...QUIZ_Q].sort(() => Math.random() - 0.5).slice(0, count);
+  dQuizCur = 0; dQuizScore = 0; dQuizAnswered = false;
+  document.getElementById('dQuizScore').textContent = '0';
+  document.getElementById('dQuizTotal').textContent = dQuizQuestions.length;
+  document.getElementById('dQuizComplete').style.display = 'none';
+  document.getElementById('dQuizCard').style.display = 'block';
+
+  if (dIsHardMode) showBackupToast('🔥 ZOR MOD AKTİF: Performansınız harika!');
+  dRenderQuizQ();
+}
 function dRenderQuizQ() { if (dQuizCur >= dQuizQuestions.length) { dEndQuiz(); return; } dQuizAnswered = false; const q = dQuizQuestions[dQuizCur]; document.getElementById('dQuizCurrent').textContent = dQuizCur + 1; const opts = q.opts.map((o, i) => `<button class="quiz-option" onclick="dAnswerQuiz(${i})">${o}</button>`).join(''); document.getElementById('dQuizCard').innerHTML = `<div class="quiz-type">SORU ${dQuizCur + 1} / ${dQuizQuestions.length}</div><div class="quiz-q">${q.q}</div><div class="quiz-options">${opts}</div><div class="quiz-feedback" id="dqfb"></div><button class="quiz-next" id="dqnext" onclick="dNextQuizQ()">Sonraki Soru →</button>`; }
 function dAnswerQuiz(i) { if (dQuizAnswered) return; dQuizAnswered = true; const q = dQuizQuestions[dQuizCur]; const opts = document.querySelectorAll('#dQuizCard .quiz-option'); opts.forEach(o => o.disabled = true); const fb = document.getElementById('dqfb'); if (i === q.ans) { opts[i].classList.add('correct'); dQuizScore++; document.getElementById('dQuizScore').textContent = dQuizScore; fb.className = 'quiz-feedback correct-fb show'; fb.textContent = '✓ Doğru! ' + q.exp; } else { opts[i].classList.add('wrong'); opts[q.ans].classList.add('correct'); fb.className = 'quiz-feedback wrong-fb show'; fb.textContent = '✗ Yanlış. ' + q.exp; } document.getElementById('dqnext').classList.add('show'); }
 function dNextQuizQ() { dQuizCur++; if (dQuizCur >= dQuizQuestions.length) dEndQuiz(); else dRenderQuizQ(); }
-function dEndQuiz() { document.getElementById('dQuizCard').style.display = 'none'; const comp = document.getElementById('dQuizComplete'); comp.style.display = 'block'; document.getElementById('dFinalScore').textContent = dQuizScore + ' / ' + dQuizQuestions.length; sessionStorage.setItem('dQuizDone', '1'); dUpdateProgress(); }
+function dEndQuiz() { document.getElementById('dQuizCard').style.display = 'none'; const comp = document.getElementById('dQuizComplete'); comp.style.display = 'block'; document.getElementById('dFinalScore').textContent = dQuizScore + ' / ' + dQuizQuestions.length; trackQuizScore(dQuizScore, dQuizQuestions.length); if (dQuizScore >= dQuizQuestions.length * 0.7) fireConfetti(); sessionStorage.setItem('dQuizDone', '1'); dUpdateProgress(); }
 const D_SECTIONS = ['oturumlar', 'terminoloji', 'kaliplar', 'flashcard', 'quiz', 'pratik', 'konusmaci'];
 function dShowSection(id, btn) { D_SECTIONS.forEach(s => { document.getElementById('dsec-' + s).classList.remove('active'); }); document.querySelectorAll('.dnav-btn').forEach(b => b.classList.remove('active')); const target = document.getElementById('dsec-' + id); target.classList.add('active'); if (btn) btn.classList.add('active'); sessionStorage.setItem('dvisited_' + id, '1'); dUpdateProgress(); setTimeout(() => { const top = target.getBoundingClientRect().top + window.pageYOffset - 160; window.scrollTo({ top, behavior: 'smooth' }); }, 50); }
 function dUpdateProgress() { let score = 0, total = 10; D_SECTIONS.forEach(s => { if (sessionStorage.getItem('dvisited_' + s)) score += 1; }); SESSIONS.forEach((_, i) => { if (dIsTracked('sess_' + i)) score += 0.1; }); if (sessionStorage.getItem('dQuizDone')) score += 2; const pct = Math.min(100, Math.round((score / total) * 100)); document.getElementById('dProgressFill').style.width = pct + '%'; document.getElementById('dProgressPct').textContent = pct + '%'; }
@@ -771,17 +871,17 @@ function openWeekOverlay(courseId) {
       <div class="wc-status">${isAvail ? '<span class="wc-dot"></span>Hazır' : '🔒 Yakında'}</div>
     `;
     if (isAvail) {
-      card.addEventListener('click', function() {
+      card.addEventListener('click', function () {
         closeWeekOverlay();
         switchApp(panelId, course.name, courseId);
       });
-      card.addEventListener('mousemove', function(e) {
+      card.addEventListener('mousemove', function (e) {
         const r = card.getBoundingClientRect();
         const x = (e.clientX - r.left) / r.width - 0.5;
         const y = (e.clientY - r.top) / r.height - 0.5;
-        card.style.transform = `perspective(500px) rotateY(${x*16}deg) rotateX(${-y*16}deg) translateY(-4px) scale(1.03)`;
+        card.style.transform = `perspective(500px) rotateY(${x * 16}deg) rotateX(${-y * 16}deg) translateY(-4px) scale(1.03)`;
       });
-      card.addEventListener('mouseleave', function() { card.style.transform = ''; });
+      card.addEventListener('mouseleave', function () { card.style.transform = ''; });
     }
     cardsContainer.appendChild(card);
   }
@@ -790,15 +890,53 @@ function openWeekOverlay(courseId) {
   document.body.style.overflow = 'hidden';
 
   const modal = overlay.querySelector('.week-overlay-modal');
-  modal.ontouchstart = function(e) { _woSwipeStartY = e.touches[0].clientY; };
-  modal.ontouchmove = function(e) {
-    const dy = e.touches[0].clientY - _woSwipeStartY;
-    if (dy > 0) modal.style.transform = 'translateY(' + dy + 'px)';
+  let _startX = 0, _startY = 0;
+
+  modal.ontouchstart = function (e) {
+    _startX = e.touches[0].clientX;
+    _startY = e.touches[0].clientY;
+    modal.style.transition = 'none';
   };
-  modal.ontouchend = function(e) {
-    const dy = e.changedTouches[0].clientY - _woSwipeStartY;
-    if (dy > 90) { closeWeekOverlay(); }
-    else { modal.style.transform = ''; }
+
+  modal.ontouchmove = function (e) {
+    const dx = e.touches[0].clientX - _startX;
+    const dy = e.touches[0].clientY - _startY;
+
+    // Vertical drag (Bottom Sheet style)
+    if (Math.abs(dy) > Math.abs(dx)) {
+      if (dy > 0) modal.style.transform = 'translateY(' + (dy * 0.8) + 'px)';
+    }
+    // Horizontal drag (Course cycling)
+    else {
+      modal.style.transform = 'translateX(' + (dx * 0.5) + 'px)';
+    }
+  };
+
+  modal.ontouchend = function (e) {
+    const dx = e.changedTouches[0].clientX - _startX;
+    const dy = e.changedTouches[0].clientY - _startY;
+    modal.style.transition = 'transform 0.3s cubic-bezier(0.19, 1, 0.22, 1)';
+
+    // Dimiss (Vertical)
+    if (dy > 100) {
+      closeWeekOverlay();
+    }
+    // Cycle courses (Horizontal)
+    else if (Math.abs(dx) > 100) {
+      const currentIndex = COURSES.findIndex(c => c.id === courseId);
+      let nextIndex = currentIndex + (dx > 0 ? -1 : 1);
+      if (nextIndex < 0) nextIndex = COURSES.length - 1;
+      if (nextIndex >= COURSES.length) nextIndex = 0;
+
+      modal.style.transform = `translateX(${dx > 0 ? 100 : -100}%)`;
+      setTimeout(() => {
+        openWeekOverlay(COURSES[nextIndex].id);
+        modal.style.transform = '';
+      }, 150);
+    }
+    else {
+      modal.style.transform = '';
+    }
   };
 }
 
@@ -824,7 +962,7 @@ function initApp() {
   pomoRender();
   hRenderCard();
   dRenderSessions();
-  dRenderTerms();
+  initDavosVirtualScroll();
   dRenderPhrases();
   dRenderPractice();
   dRenderSpeakers();
@@ -836,6 +974,37 @@ function initApp() {
   restoreLastPanel();
   setTimeout(function () { setLang(_currentLang); }, 150);
   initPremium();
+  initReadingProgress();
+  initAutoTheme();
+  initWorkStats();
+  showSkeletonDemo(); // Show beautiful skeleton loading on start
+}
+
+function showSkeletonDemo() {
+  const dashboard = document.getElementById('panel-dashboard');
+  if (!dashboard || !dashboard.classList.contains('visible')) return;
+
+  const grid = document.getElementById('course-grid');
+  const originalHTML = grid.innerHTML;
+  grid.innerHTML = '';
+
+  // Create 4 skeleton cards
+  for (let i = 0; i < 4; i++) {
+    const s = document.createElement('div');
+    s.className = 'course-card skeleton-card skeleton';
+    s.innerHTML = `
+      <div style="height:44px;width:44px;border-radius:50%;background:rgba(255,255,255,0.05);margin-bottom:12px"></div>
+      <div class="skeleton-text skeleton-title"></div>
+      <div class="skeleton-text"></div>
+      <div class="skeleton-text" style="width:80%"></div>
+    `;
+    grid.appendChild(s);
+  }
+
+  setTimeout(() => {
+    grid.innerHTML = originalHTML;
+    // Re-run any needed init for cards if necessary
+  }, 1200);
 }
 
 // ════════════════════════════════════════════════
@@ -851,6 +1020,7 @@ function initPremium() {
 }
 
 function initCursorGlow() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const glow = document.getElementById('cursor-glow');
   if (!glow) return;
   let hasMouse = false;
@@ -1078,6 +1248,7 @@ function setSound(btn) {
 function initSoundEngine() { loadYTApi(); }
 
 function init3DTilt() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   function applyTilt(el) {
     el.addEventListener('mousemove', e => {
       const r = el.getBoundingClientRect();
@@ -1175,3 +1346,480 @@ async function runDict() {
 
   if (!navigator.onLine) showToast();
 })();
+
+// ════════════════════════════════════════════════
+// DATA BACKUP / RESTORE
+// ════════════════════════════════════════════════
+function showBackupToast(msg) {
+  let toast = document.getElementById('backup-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'backup-toast';
+    toast.className = 'backup-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(function () { toast.classList.remove('show'); }, 2500);
+}
+
+function exportData() {
+  try {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      data[key] = localStorage.getItem(key);
+    }
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const now = new Date();
+    const dateStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'tariktanta-backup-' + dateStr + '.json';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+    showBackupToast('✅ Yedek başarıyla indirildi!');
+  } catch (e) {
+    showBackupToast('❌ Yedekleme başarısız oldu');
+  }
+}
+
+function importData(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (typeof data !== 'object' || data === null) throw new Error('invalid');
+      // Confirm before overwriting
+      const count = Object.keys(data).length;
+      if (!confirm('📥 ' + count + ' veri öğesi bulundu. Mevcut veriler üzerine yazılsın mı?')) return;
+      Object.keys(data).forEach(function (key) {
+        localStorage.setItem(key, data[key]);
+      });
+      showBackupToast('✅ Veriler geri yüklendi! Sayfa yenileniyor…');
+      setTimeout(function () { location.reload(); }, 1200);
+    } catch (err) {
+      showBackupToast('❌ Geçersiz yedek dosyası');
+    }
+  };
+  reader.readAsText(file);
+  // Reset file input so same file can be selected again
+  document.getElementById('import-file').value = '';
+}
+
+// ════════════════════════════════════════════════
+// READING PROGRESS BAR
+// ════════════════════════════════════════════════
+function initReadingProgress() {
+  const bar = document.getElementById('reading-progress');
+  if (!bar) return;
+  let ticking = false;
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      requestAnimationFrame(function () {
+        // Only show progress bar on non-dashboard panels
+        const dashboard = document.getElementById('panel-dashboard');
+        if (dashboard && dashboard.classList.contains('visible')) {
+          bar.style.width = '0%';
+          ticking = false;
+          return;
+        }
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (docHeight <= 0) {
+          bar.style.width = '0%';
+        } else {
+          const pct = Math.min(100, (scrollTop / docHeight) * 100);
+          bar.style.width = pct + '%';
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+}
+
+// ════════════════════════════════════════════════
+// MOBILE BOTTOM NAV
+// ════════════════════════════════════════════════
+function bnav(panel) {
+  switchApp(panel, '', '', false);
+  // Update bottom nav active state
+  document.querySelectorAll('.bnav-btn').forEach(function (b) { b.classList.remove('active'); });
+  var btn = document.getElementById('bnav-' + panel);
+  if (btn) btn.classList.add('active');
+}
+
+// Sync bottom nav with top nav clicks
+var _origSwitchApp = switchApp;
+// We patch into switchApp via a wrapper approach using MutationObserver on panel visibility:
+(function () {
+  var observer = new MutationObserver(function () {
+    var visiblePanel = document.querySelector('.app-panel.visible');
+    if (!visiblePanel) return;
+    var panelId = visiblePanel.id.replace('panel-', '');
+    document.querySelectorAll('.bnav-btn').forEach(function (b) { b.classList.remove('active'); });
+    // Map panel to bnav button
+    var bnavMap = { dashboard: 'dashboard', davos: 'davos', hukuk: 'hukuk' };
+    var bnavId = bnavMap[panelId];
+    if (bnavId) {
+      var btn = document.getElementById('bnav-' + bnavId);
+      if (btn) btn.classList.add('active');
+    }
+  });
+  // Observe all panels for class changes
+  document.querySelectorAll('.app-panel').forEach(function (p) {
+    observer.observe(p, { attributes: true, attributeFilter: ['class'] });
+  });
+})();
+
+// ════════════════════════════════════════════════
+// FOCUS MODE
+// ════════════════════════════════════════════════
+function toggleFocusMode() {
+  var body = document.body;
+  body.classList.toggle('focus-mode');
+  var isOn = body.classList.contains('focus-mode');
+  var toggle = document.getElementById('focus-toggle');
+  if (toggle) toggle.textContent = isOn ? '✕' : '🎯';
+  // Show toast
+  showBackupToast(isOn ? '🎯 Odak modu açık' : '🎯 Odak modu kapalı');
+}
+
+// ════════════════════════════════════════════════
+// SWIPE FLASHCARDS (Touch Gesture)
+// ════════════════════════════════════════════════
+function initSwipeFlashcards() {
+  // Hukuk flashcard
+  var hCard = document.getElementById('hflashcard');
+  if (hCard) attachSwipe(hCard, function () { hMarkKnow(); }, function () { hMarkDunno(); });
+
+  // Davos flashcard
+  var dCard = document.getElementById('dMainFlashcard');
+  if (dCard) attachSwipe(dCard, function () { dMarkKnow(); }, function () { dMarkDunno(); });
+}
+
+function attachSwipe(el, onRight, onLeft) {
+  var startX = 0, startY = 0, dx = 0, isDragging = false;
+  var threshold = 80; // px needed to trigger swipe
+
+  el.addEventListener('touchstart', function (e) {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    dx = 0;
+    isDragging = false;
+    el.classList.add('swiping');
+  }, { passive: true });
+
+  el.addEventListener('touchmove', function (e) {
+    var currentX = e.touches[0].clientX;
+    var currentY = e.touches[0].clientY;
+    dx = currentX - startX;
+    var dy = Math.abs(currentY - startY);
+
+    // Only swipe horizontally, not when scrolling vertically
+    if (dy > Math.abs(dx) && !isDragging) return;
+    isDragging = true;
+
+    var rotate = dx * 0.08;
+    var opacity = 1 - Math.abs(dx) / 300;
+    el.style.transform = 'translateX(' + dx + 'px) rotate(' + rotate + 'deg)';
+    el.style.opacity = Math.max(0.5, opacity);
+  }, { passive: true });
+
+  el.addEventListener('touchend', function () {
+    el.classList.remove('swiping');
+    if (Math.abs(dx) > threshold) {
+      // Trigger swipe animation
+      var direction = dx > 0 ? 'swipe-right' : 'swipe-left';
+      el.classList.add(direction);
+      setTimeout(function () {
+        if (dx > 0) onRight();
+        else onLeft();
+        el.classList.remove(direction);
+        el.style.transform = '';
+        el.style.opacity = '';
+      }, 300);
+    } else {
+      // Snap back
+      el.style.transform = '';
+      el.style.opacity = '';
+    }
+    dx = 0;
+    isDragging = false;
+  }, { passive: true });
+}
+
+// ════════════════════════════════════════════════
+// VIRTUAL SCROLLING (Davos Terms)
+// ════════════════════════════════════════════════
+function initDavosVirtualScroll() {
+  const container = document.getElementById('dTermListContainer');
+  if (!container) return;
+
+  const allTerms = TERMS.flatMap(cat => cat.items.map(item => ({ ...item, catColor: cat.color, catName: cat.cat })));
+  const rowHeight = 44; // Approx height per term row
+  const visibleCount = Math.ceil(window.innerHeight / rowHeight) + 10;
+
+  const viewport = document.createElement('div');
+  viewport.style.height = (allTerms.length * rowHeight) + 'px';
+  viewport.style.position = 'relative';
+  container.innerHTML = '';
+  container.appendChild(viewport);
+
+  function renderRows() {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const startIdx = Math.max(0, Math.floor((scrollTop - container.offsetTop) / rowHeight) - 5);
+    const endIdx = Math.min(allTerms.length, startIdx + visibleCount);
+
+    // Keep only needed rows in DOM
+    viewport.innerHTML = '';
+    for (let i = startIdx; i < endIdx; i++) {
+      const t = allTerms[i];
+      const row = document.createElement('div');
+      row.className = 'term-row';
+      row.style.position = 'absolute';
+      row.style.top = (i * rowHeight) + 'px';
+      row.style.width = '100%';
+      row.style.borderLeft = `4px solid ${t.catColor}`;
+      row.innerHTML = `<div class="dterm-en">${t[0]}</div><div class="dterm-tr">${t[1]}</div>`;
+      viewport.appendChild(row);
+    }
+  }
+
+  window.addEventListener('scroll', renderRows, { passive: true });
+  renderRows();
+}
+
+// ════════════════════════════════════════════════
+// WEEK NOTE TEMPLATE
+// ════════════════════════════════════════════════
+function generateWeekNoteTemplate() {
+  const overlay = document.createElement('div');
+  overlay.id = 'note-template-overlay';
+  overlay.className = 'app-panel visible';
+  overlay.style.background = '#fff';
+  overlay.style.color = '#111';
+  overlay.style.zIndex = '200000';
+  overlay.innerHTML = `
+    <div style="padding:40px;max-width:800px;margin:0 auto;font-family:serif">
+      <h1 style="border-bottom:2px solid #000;padding-bottom:10px">Haftalık Çalışma Notu Şablonu</h1>
+      <p>Ders: ____________________ | Hafta: ____ | Tarih: __/__/20__</p>
+      <h3>📌 Kilit Terimler</h3>
+      <div style="border:1px solid #ddd;height:200px;margin-bottom:20px"></div>
+      <h3>📝 Önemli Notlar</h3>
+      <div style="border:1px solid #ddd;height:300px;margin-bottom:20px"></div>
+      <h3>🚀 Aksiyon Planı</h3>
+      <ul style="list-style:square">
+        <li>Flashcard çalışması yapılacak</li>
+        <li>Quiz çözülecek</li>
+        <li>____________________</li>
+      </ul>
+      <button onclick="window.print()" class="hbtn" style="margin-top:20px">Yazdır / PDF Kaydet</button>
+      <button onclick="this.parentElement.parentElement.remove()" class="hbtn" style="background:#eee;color:#333;margin-left:10px">Kapat</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+// ════════════════════════════════════════════════
+// CONFETTI EFFECT
+// ════════════════════════════════════════════════
+function fireConfetti() {
+  const canvas = document.createElement('canvas');
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '100000';
+  document.body.appendChild(canvas);
+
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = window.innerWidth * dpr;
+  canvas.height = window.innerHeight * dpr;
+  ctx.scale(dpr, dpr);
+
+  const particles = [];
+  const colors = ['#c8f135', '#38bdf8', '#a78bfa', '#f87171', '#fbbf24', '#f97316'];
+
+  for (let i = 0; i < 150; i++) {
+    particles.push({
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+      vx: (Math.random() - 0.5) * 20,
+      vy: (Math.random() - 0.5) * 20 - 5,
+      r: Math.random() * 6 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      angle: Math.random() * 360,
+      spin: (Math.random() - 0.5) * 10,
+      life: 1
+    });
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.4; // gravity
+      p.vx *= 0.98;
+      p.life -= 0.012;
+      p.angle += p.spin;
+
+      if (p.life > 0) {
+        alive = true;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle * Math.PI / 180);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life;
+        ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r);
+        ctx.restore();
+      }
+    });
+
+    if (alive) requestAnimationFrame(render);
+    else document.body.removeChild(canvas);
+  }
+
+  render();
+}
+
+// ════════════════════════════════════════════════
+// AUTOMATIC THEME (Time-based)
+// ════════════════════════════════════════════════
+function initAutoTheme() {
+  const autoThemeEnabled = localStorage.getItem('tariktanta-autotheme') !== 'false';
+  if (!autoThemeEnabled) return;
+
+  const now = new Date();
+  const hour = now.getHours();
+  const isNight = hour >= 20 || hour < 7;
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+
+  if (isNight && currentTheme !== 'dark') {
+    toggleTheme();
+    showBackupToast('🌙 Gece modu otomatik aktif edildi');
+  } else if (!isNight && currentTheme === 'dark' && !localStorage.getItem('tariktanta-theme')) {
+    // Only auto-switch to light if user hasn't explicitly set a preference before
+    toggleTheme();
+  }
+}
+
+// ════════════════════════════════════════════════
+// EXPANDED KEYBOARD SHORTCUTS
+// ════════════════════════════════════════════════
+document.addEventListener('keydown', function (e) {
+  // Global search (Cmd/Ctrl + K) is already handled or common
+  // Add new shortcuts:
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+  const key = e.key.toLowerCase();
+
+  // F: Focus Mode
+  if (key === 'f') {
+    toggleFocusMode();
+  }
+
+  // P: Start/Pause Pomodoro
+  if (key === 'p') {
+    const btn = document.getElementById('pomoStartBtn');
+    if (btn) btn.click();
+  }
+
+  // S: Toggle Stats (Scroll to them)
+  if (key === 's') {
+    const stats = document.querySelector('.stats-widget');
+    if (stats) stats.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // 1-8: Open course panels (handled elsewhere maybe, checking...)
+});
+
+// ════════════════════════════════════════════════
+// WORK STATISTICS TRACKING
+// ════════════════════════════════════════════════
+let _stats = {
+  pomoSessions: 0,
+  knownCards: 0,
+  quizScores: [],
+  totalWorkMinutes: 0
+};
+
+function initWorkStats() {
+  const saved = localStorage.getItem('tariktanta-stats');
+  if (saved) {
+    try {
+      _stats = JSON.parse(saved);
+    } catch (e) {
+      console.error('Stats parse error', e);
+    }
+  }
+  updateStatsUI();
+}
+
+function saveStats() {
+  localStorage.setItem('tariktanta-stats', JSON.stringify(_stats));
+  updateStatsUI();
+}
+
+function updateStatsUI() {
+  const elPomo = document.getElementById('stat-pomo');
+  const elKnown = document.getElementById('stat-known');
+  const elQuiz = document.getElementById('stat-quiz');
+  const elTime = document.getElementById('stat-time');
+
+  if (elPomo) elPomo.textContent = _stats.pomoSessions || 0;
+  if (elKnown) elKnown.textContent = _stats.knownCards || 0;
+
+  if (elQuiz) {
+    if (_stats.quizScores && _stats.quizScores.length > 0) {
+      const avg = _stats.quizScores.reduce((a, b) => a + b, 0) / _stats.quizScores.length;
+      elQuiz.textContent = Math.round(avg) + '%';
+    } else {
+      elQuiz.textContent = '0%';
+    }
+  }
+
+  if (elTime) {
+    const hours = (_stats.totalWorkMinutes || 0) / 60;
+    elTime.textContent = hours.toFixed(1) + 'h';
+  }
+}
+
+// Trackers
+function trackPomoSession() {
+  _stats.pomoSessions = (_stats.pomoSessions || 0) + 1;
+  _stats.totalWorkMinutes = (_stats.totalWorkMinutes || 0) + 25; // Default 25m
+  saveStats();
+}
+
+function trackKnownCard() {
+  _stats.knownCards = (_stats.knownCards || 0) + 1;
+  saveStats();
+}
+
+function trackQuizScore(correct, total) {
+  const pct = (correct / total) * 100;
+  if (!_stats.quizScores) _stats.quizScores = [];
+  _stats.quizScores.push(pct);
+  if (_stats.quizScores.length > 20) _stats.quizScores.shift(); // Keep last 20
+  saveStats();
+}
+
+// Hook into existing functions
+// Note: I need to wrap or modify existing markKnow / markDunno / quizEnd functions
+// For now, I'll add calls to these trackers in the respective existing functions.
+
