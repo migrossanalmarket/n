@@ -5,14 +5,14 @@ const SCHEDULE = {
   'Perşembe': [{ name: 'Rusça IV', time: '11:30–14:15', panel: 'rusca4', color: '#38bdf8', icon: '🇷🇺' }, { name: 'Rusça VI', time: '14:30–17:15', panel: 'rusca6', color: '#38bdf8', icon: '🇷🇺' }]
 };
 const COURSES = [
-  { id: 'hukuk', name: 'Hukuk Çevirisi', icon: '⚖️', color: '#e8c547', desc: 'Deborah Cao · AB Mevzuatı Çeviri Rehberi', day: 'Pazartesi', time: '13:30–16:15', available: true },
-  { id: 'davos', name: 'Ardıl Çeviriye Giriş', icon: '🎙️', color: '#c8f135', desc: 'Davos 2026 · WEF terminoloji ve pratik', day: 'Pazartesi', time: '09:30–13:15', available: true },
-  { id: 'gobilim', name: 'Çeviri Göstergebilimi II', icon: '📐', color: '#a78bfa', desc: 'Göstergebilim · Öztürk Kasar modeli', day: 'Salı', time: '11:30–14:30', available: false },
-  { id: 'rusca6', name: 'Rusça VI', icon: '🇷🇺', color: '#38bdf8', desc: 'İleri düzey Rusça terminoloji', day: 'Perşembe', time: '14:30–17:15', available: false },
-  { id: 'etik', name: 'Çeviride Etik', icon: '⚡', color: '#f97316', desc: 'Mesleki sorumluluklar · Etik ilkeler', day: 'Çarşamba', time: '08:30–11:15', available: false },
-  { id: 'isaret', name: 'Türk İşaret Dili', icon: '🤟', color: '#4ade80', desc: 'TİD terminoloji ve görseller', day: 'Çarşamba', time: '09:30–12:15', available: false },
-  { id: 'tibbi', name: 'Tıbbi Bitki (Seçmeli)', icon: '🌿', color: '#fb923c', desc: 'Tıbbi terminoloji · Bitki sözlüğü', day: 'Çarşamba', time: '13:00–14:45', available: false },
-  { id: 'rusca4', name: 'Rusça IV', icon: '🇷🇺', color: '#38bdf8', desc: 'Orta ileri Rusça terminoloji', day: 'Perşembe', time: '11:30–14:15', available: false },
+  { id: 'davos',   name: 'Ardıl Çeviriye Giriş',           icon: '🎙️', color: '#c8f135', desc: 'Davos 2026 · WEF terminoloji ve pratik',     room: 'FEF 228',  day: 'Pazartesi', time: '09:30–13:15', available: true  },
+  { id: 'hukuk',   name: 'Hukuk Çevirisi (Seçmeli)',        icon: '⚖️',  color: '#e8c547', desc: 'Deborah Cao · AB Mevzuatı Çeviri Rehberi', room: 'FEF 140',  day: 'Pazartesi', time: '13:30–16:15', available: true  },
+  { id: 'gobilim', name: 'Çeviri Göstergebilimi II',         icon: '📐',  color: '#a78bfa', desc: 'Göstergebilim · Öztürk Kasar modeli',        room: 'FEF 228',  day: 'Salı',      time: '13:30–14:30', available: false },
+  { id: 'etik',    name: 'Çeviride Etik',                   icon: '⚡',  color: '#f97316', desc: 'Mesleki sorumluluklar · Etik ilkeler',       room: 'FEF 33',   day: 'Çarşamba',  time: '08:30–11:15', available: false },
+  { id: 'isaret',  name: 'Türk İşaret Dili (Seçmeli)',      icon: '🤟',  color: '#4ade80', desc: 'TİD terminoloji ve görseller',               room: '225',      day: 'Çarşamba',  time: '09:30–12:15', available: false },
+  { id: 'tibbi',   name: 'Tıbbi Bitki (Seçmeli)',            icon: '🌿',  color: '#fb923c', desc: 'Tıbbi terminoloji · Bitki sözlüğü',          room: '',         day: 'Çarşamba',  time: '13:00–14:45', available: false },
+  { id: 'rusca4',  name: 'Rusça IV',                         icon: '🇷🇺', color: '#38bdf8', desc: 'Orta ileri Rusça terminoloji',              room: 'YDYO 226', day: 'Perşembe',  time: '11:30–14:15', available: false },
+  { id: 'rusca6',  name: 'Rusça VI',                         icon: '🇷🇺', color: '#38bdf8', desc: 'İleri düzey Rusça terminoloji',             room: 'YDYO 226', day: 'Perşembe',  time: '14:30–17:15', available: false },
 ];
 
 const hCards = [
