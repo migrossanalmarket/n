@@ -29,13 +29,11 @@ window.addEventListener('load', function () {
     initApp();
     return;
   }
-  // Şifre girilince otomatik kontrol — Enter bekleme yok
   var inp = document.getElementById('lock-input');
   if (inp) {
     inp.addEventListener('input', function () {
       if (inp.value.length >= 4) lockCheck();
     });
-    // iOS'ta klavye açılsın
     setTimeout(function () { inp.focus(); }, 300);
   }
 });
@@ -61,7 +59,7 @@ const COURSES = [
 ];
 
 // ════════════════════════════════════════════════
-// DROPDOWN — temiz, hem Windows hem iOS
+// DROPDOWN
 // ════════════════════════════════════════════════
 
 function _positionMenu(dd) {
@@ -95,19 +93,16 @@ function toggleDrop(id) {
 }
 
 function initDropdowns() {
-  // ── MASAÜSTÜ DIŞINDA BÜTÜN MENÜLERİ BODY İÇİNE TAŞI (iOS CLIPPING SORUNU ÇÖZÜMÜ) ──
   document.querySelectorAll('.app-switcher .dropdown').forEach(function (dd) {
     if (!dd.id) return;
     var menu = dd.querySelector('.drop-menu');
     if (menu) {
       menu.dataset.parentId = dd.id;
       menu.classList.add('body-menu');
-      // .app-switcher yatay scroll clipping sorununu engellemek için body'e taşıyoruz
       document.body.appendChild(menu);
     }
   });
 
-  // ── Scroll'da kapat (iOS'ta dokunurken olan mikro kaymaları yok saymak için) ──
   var switcher = document.querySelector('.app-switcher');
   if (switcher) {
     var lastScroll = switcher.scrollLeft;
@@ -119,42 +114,44 @@ function initDropdowns() {
     }, { passive: true });
   }
 
-  // ── HEM MASAÜSTÜ HEM iOS: drop-label'a click & touchstart ──
-  // iOS'ta daha hızlı ve kesin açılması için touchstart da eklendi.
   const COURSE_DROP_MAP = {
-  'drop-davos': 'davos', 'drop-hukuk': 'hukuk', 'drop-gobilim': 'gobilim',
-  'drop-etik': 'etik', 'drop-termin': 'termin', 'drop-tibbi': 'tibbi',
-  'drop-rusca4': 'rusca4', 'drop-rusca6': 'rusca6'
-};
+    'drop-davos':   'davos',
+    'drop-hukuk':   'hukuk',
+    'drop-gobilim': 'gobilim',
+    'drop-etik':    'etik',
+    'drop-termin':  'termin',
+    'drop-tibbi':   'tibbi',
+    'drop-rusca4':  'rusca4',
+    'drop-rusca6':  'rusca6'
+  };
 
-document.querySelectorAll('.drop-label').forEach(function (btn) {
-  var dropId = btn.getAttribute('data-drop-id');
-  function handleToggle(e) {
-    e.stopPropagation();
-    if (e.type === 'touchstart') {
-      btn.dataset.touched = '1';
-      btn.dataset.touchX = e.touches[0].clientX;
-      btn.dataset.touchY = e.touches[0].clientY;
-      return;
-    } else if (e.type === 'click' && btn.dataset.touched === '1') {
-      btn.dataset.touched = '0';
-      const dx = Math.abs(e.clientX - parseFloat(btn.dataset.touchX || 0));
-      const dy = Math.abs(e.clientY - parseFloat(btn.dataset.touchY || 0));
-      if (dx > 10 || dy > 10) return;
+  document.querySelectorAll('.drop-label').forEach(function (btn) {
+    var dropId = btn.getAttribute('data-drop-id');
+    function handleToggle(e) {
+      e.stopPropagation();
+      if (e.type === 'touchstart') {
+        btn.dataset.touched = '1';
+        btn.dataset.touchX = e.touches[0].clientX;
+        btn.dataset.touchY = e.touches[0].clientY;
+        return;
+      } else if (e.type === 'click' && btn.dataset.touched === '1') {
+        btn.dataset.touched = '0';
+        const dx = Math.abs(e.clientX - parseFloat(btn.dataset.touchX || 0));
+        const dy = Math.abs(e.clientY - parseFloat(btn.dataset.touchY || 0));
+        if (dx > 10 || dy > 10) return;
+      }
+      if (dropId === 'apps-menu') {
+        toggleAppsMenu();
+      } else if (dropId && COURSE_DROP_MAP[dropId]) {
+        openWeekOverlay(COURSE_DROP_MAP[dropId]);
+      } else if (dropId) {
+        toggleDrop(dropId);
+      }
     }
-    if (dropId === 'apps-menu') {
-      toggleAppsMenu();
-    } else if (dropId && COURSE_DROP_MAP[dropId]) {
-      openWeekOverlay(COURSE_DROP_MAP[dropId]);
-    } else if (dropId) {
-      toggleDrop(dropId);
-    }
-  }
-  btn.addEventListener('click', handleToggle);
-  btn.addEventListener('touchstart', handleToggle, { passive: true });
-});
+    btn.addEventListener('click', handleToggle);
+    btn.addEventListener('touchstart', handleToggle, { passive: true });
+  });
 
-  // ── drop-item'lara click ──
   document.querySelectorAll('.drop-item').forEach(function (btn) {
     var app = btn.getAttribute('data-app');
     var label = btn.getAttribute('data-label');
@@ -168,7 +165,6 @@ document.querySelectorAll('.drop-label').forEach(function (btn) {
     }
   });
 
-  // ── app-logo click ──
   var logo = document.querySelector('.app-logo');
   if (logo) {
     logo.addEventListener('click', function () {
@@ -177,13 +173,11 @@ document.querySelectorAll('.drop-label').forEach(function (btn) {
     });
   }
 
-  // ── search butonu ──
   var searchBtn = document.getElementById('search-btn-main');
   if (searchBtn) {
     searchBtn.addEventListener('click', openSearch);
   }
 
-  // ── Dışarı tıklayınca kapat ──
   document.addEventListener('click', function (e) {
     if (!e.target.closest('.dropdown') && !e.target.closest('#apps-popup') && !e.target.closest('.body-menu')) {
       closeAllDrops();
@@ -192,9 +186,8 @@ document.querySelectorAll('.drop-label').forEach(function (btn) {
 }
 
 // ════════════════════════════════════════════════
-// APP SWITCHER + localStorage SON PANEL
+// APP SWITCHER
 // ════════════════════════════════════════════════
-// Ardıl nav scroll gizle/göster
 (function () {
   let lastY = 0;
   window.addEventListener('scroll', function () {
@@ -224,7 +217,6 @@ function switchApp(app, label, dropId, fromPopState) {
       });
     }
   }
-  // Tarayıcı history — geri tuşu çalışsın
   if (!fromPopState) {
     try { const _urlId = app === 'davos' ? 'ardil' : app; history.pushState({ app, dropId }, '', '#' + _urlId); } catch (e) { }
   }
@@ -232,7 +224,6 @@ function switchApp(app, label, dropId, fromPopState) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Geri/ileri tuşu
 window.addEventListener('popstate', function (e) {
   if (e.state && e.state.app) {
     switchApp(e.state.app, '', e.state.dropId || '', true);
@@ -246,8 +237,6 @@ function restoreLastPanel() {
     const saved = localStorage.getItem('tariktanta-lastpanel');
     if (saved) {
       const { app, dropId } = JSON.parse(saved);
-      // Her zaman dashboard'da başla
-      // if (app && app !== 'dashboard') { switchApp(app, '', dropId); return; }
     }
   } catch (e) { }
 }
@@ -269,7 +258,7 @@ let pomoRunning = false;
 let pomoIsBreak = false;
 let pomoSession = 0;
 let pomoTimer = null;
-const POMO_CIRC = 2 * Math.PI * 27; // r=27
+const POMO_CIRC = 2 * Math.PI * 27;
 
 function pomoRender() {
   const min = String(Math.floor(pomoRemaining / 60)).padStart(2, '0');
@@ -295,7 +284,6 @@ function pomoRender() {
     const dot = document.getElementById('pd' + i);
     if (dot) dot.className = 'pomo-dot' + (i < pomoSession % 4 || (pomoSession > 0 && i < pomoSession && !pomoIsBreak) ? ' done' : '');
   }
-  // Güncelle: tamamlanan oturumları dot olarak göster
   const completedInCycle = pomoIsBreak ? Math.min(4, (pomoSession)) : Math.min(4, pomoSession);
   for (let i = 0; i < 4; i++) {
     const dot = document.getElementById('pd' + i);
@@ -317,14 +305,12 @@ function pomoToggle() {
           pomoSession++;
           pomoIsBreak = true;
           pomoRemaining = (pomoSession % 4 === 0) ? POMO_LONG : POMO_SHORT;
-          // Bildirim sesi (beep)
           try { const ctx = new AudioContext(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value = 880; g.gain.setValueAtTime(0.3, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5); o.start(); o.stop(ctx.currentTime + 0.5); } catch (e) { }
         } else {
           pomoIsBreak = false;
           pomoRemaining = POMO_WORK;
           try { const ctx = new AudioContext(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value = 440; g.gain.setValueAtTime(0.3, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5); o.start(); o.stop(ctx.currentTime + 0.5); } catch (e) { }
         }
-        // Tekrar başlat
         pomoRunning = true;
         pomoTimer = setInterval(arguments.callee, 1000);
       }
@@ -351,9 +337,6 @@ function initDashboard() {
   const todayIdx = now.getDay();
   const today = days[todayIdx];
 
-  // 18:00'dan sonra yarını göster
-  // Pazar 12:00'dan sonra yarını göster
-  // Perşembe 18:00'dan sonra "tatil" göster
   let showDay, showLabel, isTomorrow = false;
   const isPazar = todayIdx === 0;
   const isPersembe = todayIdx === 4;
@@ -373,7 +356,6 @@ function initDashboard() {
   document.getElementById('today-day-name').textContent = showLabel;
   const tc = document.getElementById('today-courses');
   if (todayCourses.length === 0) {
-    // Perşembe 18'den sonra = tatil
     const msg = (isPersembe && hour >= 18) ? '🎉 Hafta sonu — iyi dinlenmeler!' : 'Bugün ders yok 🎉';
     tc.innerHTML = `<span style="font-size:13px;color:var(--theme-muted);font-family:DM Sans,sans-serif">${msg}</span>`;
   } else {
@@ -423,7 +405,6 @@ function toggleAppsMenu() {
   popup.style.display = isOpen ? 'none' : 'flex';
   popup.style.flexDirection = 'column';
   if (!isOpen) {
-    // Dışarı tıklayınca kapat
     setTimeout(() => {
       document.addEventListener('click', function handler(e) {
         if (!popup.contains(e.target) && !e.target.closest('#drop-apps')) {
@@ -435,7 +416,6 @@ function toggleAppsMenu() {
   }
 }
 
-
 // ── DİL SEÇİCİ ──
 let _currentLang = localStorage.getItem('tariktanta-lang') || 'tr';
 function setLang(lang) {
@@ -443,31 +423,25 @@ function setLang(lang) {
   localStorage.setItem('tariktanta-lang', lang);
   const isEN = lang === 'en';
 
-  // Bayraklar
   const ftr = document.getElementById('flag-tr');
   const fen = document.getElementById('flag-en');
   if (ftr) ftr.style.opacity = isEN ? '0.4' : '1';
   if (fen) fen.style.opacity = isEN ? '1' : '0.4';
 
-  // Greeting
   const hour = new Date().getHours();
   const greet = hour < 12 ? 'Good morning, my lord' : hour < 18 ? 'Good afternoon, my lord' : 'Good evening, my lord';
   const greetEl = document.getElementById('dash-greeting');
   if (greetEl) greetEl.textContent = greet;
 
-  // Subtitle
   const sub = document.getElementById('dash-subtitle');
   if (sub) sub.textContent = isEN ? 'Final year — 8 courses, 1 goal.' : 'Son sinif — 8 ders, 1 hedef.';
 
-  // Today label
   const todayLabel = document.querySelector('.today-label');
   if (todayLabel) todayLabel.textContent = isEN ? '📅 Today\'s Classes' : '📅 Bugunun Dersleri';
 
-  // Apps label
   const appsLabel = document.querySelector('#drop-apps .drop-label');
   if (appsLabel) appsLabel.textContent = isEN ? 'APPS' : 'UYGULAMALAR';
 
-  // Nav labels
   const navLabels = {
     'droplabel-hukuk': isEN ? 'LAW' : 'HUKUK',
     'droplabel-davos': isEN ? 'CONSEC.' : 'ARDIL',
@@ -476,14 +450,14 @@ function setLang(lang) {
     const el = document.getElementById(entry[0]);
     if (el) el.textContent = entry[1];
   });
-  // Nav'daki id'siz drop-label'lar
+
+  // Sıra: drop-gobilim, drop-etik, drop-termin, drop-tibbi, drop-rusca4, drop-rusca6
   const noIdLabels = isEN
-    ? ['SEMIOTICS', 'ETHICS', 'RUSSIAN IV', 'RUSSIAN VI', 'SIGN LANG.', 'MEDICINAL']
-    : ['GOSTERGEBILIM', 'ETIK', 'RUSCA IV', 'RUSCA VI', 'ISARET', 'TIBBI BITKI'];
+    ? ['SEMIOTICS', 'ETHICS', 'TERMINOLOGY', 'MEDICINAL', 'RUSSIAN IV', 'RUSSIAN VI']
+    : ['GÖSTERGEBİLİM', 'ETİK', 'TERMİNOLOJİ', 'TIBBİ BİTKİ', 'RUSÇA IV', 'RUSÇA VI'];
   const allDropLabels = document.querySelectorAll('.app-switcher .dropdown:not(#drop-hukuk):not(#drop-davos):not(#drop-apps) .drop-label');
   allDropLabels.forEach(function (el, i) { if (noIdLabels[i]) el.textContent = noIdLabels[i]; });
 
-  // Ses butonları
   const soundMap = [
     { key: 'none', tr: '🔇 Kapali', en: '🔇 Off' },
     { key: 'rain', tr: '🌧️ Yagmur', en: '🌧️ Rain' },
@@ -498,13 +472,11 @@ function setLang(lang) {
     if (s) btn.textContent = isEN ? s.en : s.tr;
   });
 
-  // Pomodoro
   const pomoStart = document.getElementById('pomoStartBtn');
   if (pomoStart && !pomoStart.classList.contains('running')) {
     pomoStart.textContent = isEN ? '▶ Start' : '▶ Baslat';
   }
 
-  // WOD label
   const wodLabel = document.querySelector('#word-of-day-widget .wod-label');
   if (wodLabel) {
     const isPhrasal = wodLabel.textContent.includes('Phrasal') || wodLabel.textContent.includes('phrasal');
@@ -528,7 +500,6 @@ function openApp(app) {
   const a = apps[app];
   if (!a) return;
   if (isIOS) {
-    // iOS: önce uygulama scheme dene, 1.5sn içinde açılmazsa web'e git
     const start = Date.now();
     window.location.href = a.ios;
     setTimeout(() => {
@@ -838,9 +809,9 @@ function closeWeekOverlay() {
   modal.style.transform = '';
   document.body.style.overflow = '';
 }
+
 function initApp() {
   loadTheme();
-  // iOS'ta ses butonları ve ara butonu gizle
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   if (isIOS) {
     var soundWrap = document.querySelector('.pomo-sound-row-wrap');
@@ -848,9 +819,9 @@ function initApp() {
     var searchBtn = document.getElementById('search-btn-main');
     if (searchBtn) searchBtn.style.display = 'none';
   }
-  initDropdowns();    // ← HOVER DROPDOWN
+  initDropdowns();
   initDashboard();
-  pomoRender();       // ← POMODORO
+  pomoRender();
   hRenderCard();
   dRenderSessions();
   dRenderTerms();
@@ -863,7 +834,7 @@ function initApp() {
   buildSearchIndex();
   registerSW();
   restoreLastPanel();
-  setTimeout(function () { setLang(_currentLang); }, 150); // ← localStorage SON PANEL
+  setTimeout(function () { setLang(_currentLang); }, 150);
   initPremium();
 }
 
@@ -879,11 +850,9 @@ function initPremium() {
   init3DTilt();
 }
 
-// ── CURSOR GLOW ──
 function initCursorGlow() {
   const glow = document.getElementById('cursor-glow');
   if (!glow) return;
-  // Sadece gerçek mouse varsa aktif et (touch-only cihazlarda kapalı)
   let hasMouse = false;
   window.addEventListener('mousemove', function onFirstMove(e) {
     hasMouse = true;
@@ -899,7 +868,6 @@ function initCursorGlow() {
   document.addEventListener('mouseenter', () => { if (hasMouse) glow.style.opacity = '1'; });
 }
 
-// ── GÜNÜN TERİMİ ──
 const WOD_LIST = [
   { term: 'Break down', def: '🔤 Phrasal Verb — Çökmek · "The negotiations broke down." → Müzakereler çöktü.', type: 'phrasal' },
   { term: 'Carry out', def: '🔤 Phrasal Verb — Yürütmek · "Carry out the terms of the contract." → Sözleşmeyi uygulamak.', type: 'phrasal' },
@@ -931,7 +899,6 @@ function initWordOfDay() {
   if (!el) return;
   const idx = Math.floor(Math.random() * WOD_LIST.length);
   const w = WOD_LIST[idx];
-  // Label'ı hemen set et, skeleton bekleme
   const labelEl = document.querySelector('#word-of-day-widget .wod-label');
   if (labelEl) labelEl.textContent = w.type === 'phrasal' ? '🔤 Günün Phrasal Verbi' : '📚 Günün Terimi';
   const termEl = document.getElementById('wod-term');
@@ -940,7 +907,6 @@ function initWordOfDay() {
   if (defEl) defEl.innerHTML = w.def;
 }
 
-// ── PWA BANNER ──
 let _deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
@@ -962,7 +928,6 @@ function initPWABanner() {
   };
 }
 
-// ── PULL TO REFRESH ──
 function initPullToRefresh() {
   let startY = 0, pulling = false;
   const ind = document.getElementById('ptr-indicator');
@@ -982,8 +947,6 @@ function initPullToRefresh() {
   }, { passive: true });
 }
 
-// ── SES MOTORU (YouTube IFrame API) ──
-// Reklamsız ambient YouTube videoları (sadece ses, görünmez player)
 const SOUND_VIDEOS = {
   rain: 'mPZkdNFkNps',
   forest: 'xNN7iTA57jM',
@@ -1105,7 +1068,6 @@ function toggleSoundMute() {
   if (btn) btn.textContent = _isMuted ? '▶' : '⏸';
 }
 
-
 function setSound(btn) {
   document.querySelectorAll('.sound-opt').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -1115,8 +1077,6 @@ function setSound(btn) {
 
 function initSoundEngine() { loadYTApi(); }
 
-
-// ── 3D KART TİLT ──
 function init3DTilt() {
   function applyTilt(el) {
     el.addEventListener('mousemove', e => {
@@ -1129,18 +1089,16 @@ function init3DTilt() {
       el.style.transform = '';
     });
   }
-  // course kartlara uygula
   document.querySelectorAll('.course-card').forEach(applyTilt);
-  // Ardıl session kartlara da
   document.querySelectorAll('.session-card').forEach(applyTilt);
-  // Dinamik eklenen kartlar için observer
   const obs = new MutationObserver(muts => {
     muts.forEach(m => m.addedNodes.forEach(n => {
       if (n.classList && (n.classList.contains('course-card') || n.classList.contains('session-card'))) applyTilt(n);
     }));
   });
   obs.observe(document.body, { childList: true, subtree: true });
-}// ═══ HIZLI SÖZLÜK ═══
+}
+
 async function runDict() {
   const q = document.getElementById('q-dict').value.trim();
   const box = document.getElementById('dict-result');
@@ -1198,7 +1156,6 @@ async function runDict() {
   }
 }
 
-// ═══ PWA — OFFLİNE/ONLİNE ALGILAMA ═══
 (function initOfflineDetect() {
   const toast = document.createElement('div');
   toast.id = 'offline-toast';
@@ -1218,4 +1175,3 @@ async function runDict() {
 
   if (!navigator.onLine) showToast();
 })();
-
