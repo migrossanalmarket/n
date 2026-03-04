@@ -3678,3 +3678,11 @@
       font-size: 32px;
       margin-bottom: -8px
     }
+
+    .schedule-course-room {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--theme-muted);
+      margin-top: 2px;
+      letter-spacing: 0.5px;
+    }

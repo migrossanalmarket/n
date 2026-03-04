@@ -1,3 +1,8 @@
+function showIOSInstallGuide() {
+  var guide = document.getElementById('ios-install-guide');
+  if (guide) guide.style.display = guide.style.display === 'block' ? 'none' : 'block';
+}
+
 function lockCheck() {
   const val = document.getElementById('lock-input').value;
   if (val === '3131') {
@@ -34,19 +39,19 @@ window.addEventListener('load', function () {
 // ════════════════════════════════════════════════
 const SCHEDULE = {
   'Pazartesi': [{ name: 'Ardıl Çeviriye Giriş', time: '09:30–13:15', panel: 'davos', color: '#c8f135', icon: '🎙️' }, { name: 'Hukuk Çevirisi', time: '13:30–16:15', panel: 'hukuk', color: '#e8c547', icon: '⚖️' }],
-  'Salı': [{ name: 'Çeviri Göstergebilimi II', time: '11:30–14:30', panel: 'gobilim', color: '#a78bfa', icon: '📐' }],
+  'Salı': [{ name: 'Çeviri Göstergebilimi II', time: '13:30–14:30', panel: 'gobilim', color: '#a78bfa', icon: '📐' }],
   'Çarşamba': [{ name: 'Çeviride Etik', time: '08:30–11:15', panel: 'etik', color: '#f97316', icon: '⚡' }, { name: 'Türk İşaret Dili', time: '09:30–12:15', panel: 'isaret', color: '#4ade80', icon: '🤟' }, { name: 'Tıbbi Bitki', time: '13:00–14:45', panel: 'tibbi', color: '#fb923c', icon: '🌿' }],
   'Perşembe': [{ name: 'Rusça IV', time: '11:30–14:15', panel: 'rusca4', color: '#38bdf8', icon: '🇷🇺' }, { name: 'Rusça VI', time: '14:30–17:15', panel: 'rusca6', color: '#38bdf8', icon: '🇷🇺' }]
 };
 const COURSES = [
-  { id: 'hukuk', name: 'Hukuk Çevirisi', icon: '⚖️', color: '#e8c547', desc: 'Deborah Cao · AB Mevzuatı Çeviri Rehberi', day: 'Pazartesi', time: '13:30–16:15', available: true },
-  { id: 'davos', name: 'Ardıl Çeviriye Giriş', icon: '🎙️', color: '#c8f135', desc: 'Davos 2026 · WEF terminoloji ve pratik', day: 'Pazartesi', time: '09:30–13:15', available: true },
-  { id: 'gobilim', name: 'Çeviri Göstergebilimi II', icon: '📐', color: '#a78bfa', desc: 'Göstergebilim · Öztürk Kasar modeli', day: 'Salı', time: '11:30–14:30', available: false },
-  { id: 'rusca6', name: 'Rusça VI', icon: '🇷🇺', color: '#38bdf8', desc: 'İleri düzey Rusça terminoloji', day: 'Perşembe', time: '14:30–17:15', available: false },
-  { id: 'etik', name: 'Çeviride Etik', icon: '⚡', color: '#f97316', desc: 'Mesleki sorumluluklar · Etik ilkeler', day: 'Çarşamba', time: '08:30–11:15', available: false },
-  { id: 'isaret', name: 'Türk İşaret Dili', icon: '🤟', color: '#4ade80', desc: 'TİD terminoloji ve görseller', day: 'Çarşamba', time: '09:30–12:15', available: false },
-  { id: 'tibbi', name: 'Tıbbi Bitki (Seçmeli)', icon: '🌿', color: '#fb923c', desc: 'Tıbbi terminoloji · Bitki sözlüğü', day: 'Çarşamba', time: '13:00–14:45', available: false },
-  { id: 'rusca4', name: 'Rusça IV', icon: '🇷🇺', color: '#38bdf8', desc: 'Orta ileri Rusça terminoloji', day: 'Perşembe', time: '11:30–14:15', available: false },
+  { id: 'hukuk',   name: 'Hukuk Çevirisi',           icon: '⚖️',  color: '#e8c547', desc: 'Deborah Cao · AB Mevzuatı Çeviri Rehberi', room: 'FEF 140',   day: 'Pazartesi', time: '13:30–16:15', available: true  },
+  { id: 'davos',   name: 'Ardıl Çeviriye Giriş',      icon: '🎙️', color: '#c8f135', desc: 'Davos 2026 · WEF terminoloji ve pratik',     room: 'FEF 228',   day: 'Pazartesi', time: '09:30–13:15', available: true  },
+  { id: 'gobilim', name: 'Çeviri Göstergebilimi II',   icon: '📐',  color: '#a78bfa', desc: 'Göstergebilim · Öztürk Kasar modeli',        room: 'FEF 228',   day: 'Salı',      time: '13:30–14:30', available: false },
+  { id: 'rusca6',  name: 'Rusça VI',                   icon: '🇷🇺', color: '#38bdf8', desc: 'İleri düzey Rusça terminoloji',              room: 'YDYO 226',  day: 'Perşembe',  time: '14:30–17:15', available: false },
+  { id: 'etik',    name: 'Çeviride Etik',              icon: '⚡',  color: '#f97316', desc: 'Mesleki sorumluluklar · Etik ilkeler',        room: 'FEF 33',    day: 'Çarşamba',  time: '08:30–11:15', available: false },
+  { id: 'isaret',  name: 'Türk İşaret Dili',           icon: '🤟',  color: '#4ade80', desc: 'TİD terminoloji ve görseller',                room: '',          day: 'Çarşamba',  time: '09:30–12:15', available: false },
+  { id: 'tibbi',   name: 'Tıbbi Bitki (Seçmeli)',      icon: '🌿',  color: '#fb923c', desc: 'Tıbbi terminoloji · Bitki sözlüğü',           room: '',          day: 'Çarşamba',  time: '13:00–14:45', available: false },
+  { id: 'rusca4',  name: 'Rusça IV',                   icon: '🇷🇺', color: '#38bdf8', desc: 'Orta ileri Rusça terminoloji',               room: 'YDYO 226',  day: 'Perşembe',  time: '11:30–14:15', available: false },
 ];
 
 // ════════════════════════════════════════════════
@@ -403,7 +408,7 @@ function initDashboard() {
     const pct = c.available ? 25 : 0;
     const r = 18, circ = 2 * Math.PI * r;
     const offset = circ - (pct / 100) * circ;
-    card.innerHTML = `<svg class="course-progress-ring" width="44" height="44"><circle class="progress-ring-bg" cx="22" cy="22" r="${r}"/><circle class="progress-ring-fill" cx="22" cy="22" r="${r}" stroke="${c.color}" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/></svg><div class="course-icon">${c.icon}</div><div class="course-tag">${c.available ? '● Aktif' : '○ Yakında'}</div><div class="course-name">${c.name}</div><div class="course-desc">${c.desc}</div><div class="course-day">📅 ${c.day} · ${c.time}</div>`;
+    card.innerHTML = `<svg class="course-progress-ring" width="44" height="44"><circle class="progress-ring-bg" cx="22" cy="22" r="${r}"/><circle class="progress-ring-fill" cx="22" cy="22" r="${r}" stroke="${c.color}" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/></svg><div class="course-icon">${c.icon}</div><div class="course-tag">${c.available ? '● Aktif' : '○ Yakında'}</div><div class="course-name">${c.name}</div><div class="course-desc">${c.desc}</div><div class="course-day">📅 ${c.day} · ${c.time}${c.room ? ` · <span style="opacity:0.75">🏛 ${c.room}</span>` : ''}</div>`;
     card.onclick = () => { switchApp(c.id, c.name, c.id); };
     grid.appendChild(card);
   });
@@ -414,7 +419,11 @@ function initDashboard() {
     const dc = document.createElement('div');
     dc.className = 'schedule-day-card' + (day === today ? ' is-today' : '');
     let inner = `<div class="schedule-day-header"><span class="day-name">${day}</span>${day === today ? '<span class="today-dot"></span>' : ''}</div>`;
-    courses.forEach(c => { inner += `<div class="schedule-course-item" onclick="switchApp('${c.panel}','${c.name}','${c.panel}')"><div class="schedule-course-name" style="color:${c.color}">${c.icon} ${c.name}</div><div class="schedule-course-time">${c.time}</div></div>`; });
+    courses.forEach(c => {
+      const courseData = COURSES.find(x => x.id === c.panel);
+      const room = courseData && courseData.room ? `<div class="schedule-course-room">🏛 ${courseData.room}</div>` : '';
+      inner += `<div class="schedule-course-item" onclick="switchApp('${c.panel}','${c.name}','${c.panel}')"><div class="schedule-course-name" style="color:${c.color}">${c.icon} ${c.name}</div><div class="schedule-course-time">${c.time}</div>${room}</div>`;
+    });
     dc.innerHTML = inner;
     sgrid.appendChild(dc);
   });
@@ -778,13 +787,16 @@ function registerSW() { if ('serviceWorker' in navigator) { const swCode = `cons
 // ════════════════════════════════════════════════
 function initApp() {
   loadTheme();
-  // iOS'ta ses butonları ve ara butonu gizle
+  // iOS'ta ses butonları gizle, ana ekrana ekle butonu göster
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   if (isIOS) {
     var soundWrap = document.querySelector('.pomo-sound-row-wrap');
     if (soundWrap) soundWrap.style.display = 'none';
-    var searchBtn = document.getElementById('search-btn-main');
-    if (searchBtn) searchBtn.style.display = 'none';
+  }
+  // iOS'ta ana ekrana ekle butonunu göster (standalone değilse)
+  if (isIOS && !window.navigator.standalone) {
+    var addBtn = document.getElementById('ios-add-home-btn');
+    if (addBtn) addBtn.style.display = 'inline-block';
   }
   initDropdowns();    // ← HOVER DROPDOWN
   initDashboard();

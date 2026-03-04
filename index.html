@@ -68,6 +68,18 @@
     <p class="lock-sub">Şifreyi gir</p>
     <input type="password" id="lock-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*"
       autocomplete="off" onkeydown="if(event.key==='Enter') lockCheck()" />
+    <button id="ios-add-home-btn" onclick="showIOSInstallGuide()" style="display:none;margin-top:20px;background:none;border:1px solid rgba(200,241,53,0.4);color:#c8f135;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;padding:10px 20px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
+      📲 Ana Ekrana Ekle
+    </button>
+  </div>
+  <div id="ios-install-guide" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#111318;border-top:1px solid #1e2028;padding:20px 24px;font-family:'Syne',sans-serif;">
+    <div style="font-size:13px;font-weight:700;color:#c8f135;margin-bottom:10px;letter-spacing:1px;">ANA EKRANA EKLE</div>
+    <div style="font-size:13px;color:#e8eaf0;line-height:1.7;">
+      1. Alttaki <strong style="color:#c8f135">Paylaş</strong> butonuna bas <span style="font-size:16px">⬆️</span><br>
+      2. <strong style="color:#c8f135">"Ana Ekrana Ekle"</strong> seçeneğini seç<br>
+      3. Sağ üstten <strong style="color:#c8f135">Ekle</strong>'ye bas
+    </div>
+    <button onclick="document.getElementById('ios-install-guide').style.display='none'" style="margin-top:14px;background:none;border:1px solid #1e2028;color:#555;font-family:'Syne',sans-serif;font-size:11px;padding:8px 16px;border-radius:8px;cursor:pointer;">Kapat</button>
   </div>
 
   <div id="search-overlay">
@@ -204,13 +216,7 @@
       <div class="dropdown" id="drop-apps">
         <button data-drop-id="apps-menu" class="drop-label" style="color:#a78bfa">UYGULAMALAR</button>
       </div>
-      <button class="search-btn" id="search-btn-main">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.35-4.35" />
-        </svg>
-        Ara <kbd>⌘K</kbd>
-      </button>
+
       <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Tema değiştir">🌙</button>
       <div style="display:flex;gap:2px;align-items:center">
         <button onclick="setLang('tr')" id="flag-tr" title="Türkçe"
