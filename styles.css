@@ -96,7 +96,7 @@
       height: 52px;
       gap: 4px;
       overflow-x: auto;
-      overflow-y: clip;
+      overflow-y: visible;
       -webkit-overflow-scrolling: touch;
     }
 
@@ -3675,4 +3675,11 @@
     #lock-logo {
       font-size: 32px;
       margin-bottom: -8px
+    }
+
+    /* iOS'ta ses butonlarını gizle */
+    @supports (-webkit-touch-callout: none) {
+      .pomo-sound-row-wrap {
+        display: none !important;
+      }
     }

@@ -50,31 +50,24 @@ const COURSES = [
 ];
 
 // ════════════════════════════════════════════════
-// DROPDOWN — iOS + Windows (toggleAppsMenu mantığıyla)
+// DROPDOWN — Windows hover + iOS click
 // ════════════════════════════════════════════════
 
+// Tüm açık menüleri kapat
 function closeAllDrops() {
   document.querySelectorAll('.dropdown').forEach(function (d) { d.classList.remove('open'); });
   document.querySelectorAll('.drop-menu').forEach(function (m) { m.style.display = 'none'; });
 }
 
+// Belirli dropdown'ı aç/kapat
 function toggleDrop(id) {
   var dd = document.getElementById(id);
   if (!dd) return;
-  var menu = dd.querySelector('.drop-menu');
+  var menu = dd._menu;
   if (!menu) return;
-
   var isOpen = dd.classList.contains('open');
   closeAllDrops();
-
   if (!isOpen) {
-    // Menüyü body'e taşı (bir kez)
-    if (!menu._movedToBody) {
-      menu._ddId = id;
-      document.body.appendChild(menu);
-      menu._movedToBody = true;
-    }
-    // Konumla
     var rect = dd.getBoundingClientRect();
     menu.style.position = 'fixed';
     menu.style.top = '52px';
@@ -83,44 +76,66 @@ function toggleDrop(id) {
     if (left < 4) left = 4;
     menu.style.left = left + 'px';
     menu.style.display = 'flex';
-    menu.style.flexDirection = 'column';
     dd.classList.add('open');
-
-    // Dışarı tıklayınca kapat (toggleAppsMenu ile aynı mantık)
-    setTimeout(function () {
-      document.addEventListener('click', function handler(e) {
-        if (!menu.contains(e.target) && !dd.contains(e.target)) {
-          menu.style.display = 'none';
-          dd.classList.remove('open');
-          document.removeEventListener('click', handler);
-        }
-      });
-    }, 10);
   }
 }
 
 function initDropdowns() {
+  // Her dropdown'ın menüsünü body'e taşı, referansı sakla
+  document.querySelectorAll('.app-switcher .dropdown').forEach(function (dd) {
+    if (!dd.id) return;
+    var menu = dd.querySelector('.drop-menu');
+    if (!menu) return;
+    dd._menu = menu;          // hızlı erişim için
+    menu._dd = dd;            // geriye referans
+    menu.style.display = 'none';
+    document.body.appendChild(menu);
+  });
+
+  // Scroll'da kapat
   var switcher = document.querySelector('.app-switcher');
   if (switcher) {
     switcher.addEventListener('scroll', closeAllDrops, { passive: true });
   }
 
-  // MASAÜSTÜ: hover (sadece mouse cihazlarda)
-  if (matchMedia('(hover: hover)').matches) {
-    document.querySelectorAll('.dropdown').forEach(function (dd) {
-      if (!dd.id) return;
+  // WINDOWS: hover — hem dd hem menü üzerindeyken açık tut
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.querySelectorAll('.app-switcher .dropdown').forEach(function (dd) {
+      if (!dd._menu) return;
+      var menu = dd._menu;
       var leaveTimer;
-      dd.addEventListener('mouseenter', function () {
+
+      function openMenu() {
         clearTimeout(leaveTimer);
-        toggleDrop(dd.id);
-      });
-      dd.addEventListener('mouseleave', function () {
-        leaveTimer = setTimeout(closeAllDrops, 200);
-      });
+        // Diğerlerini kapat ama bu dd'yi aç
+        document.querySelectorAll('.dropdown').forEach(function (d) {
+          if (d !== dd) { d.classList.remove('open'); if (d._menu) d._menu.style.display = 'none'; }
+        });
+        var rect = dd.getBoundingClientRect();
+        menu.style.position = 'fixed';
+        menu.style.top = '52px';
+        var left = rect.left;
+        if (left + 260 > window.innerWidth) left = window.innerWidth - 268;
+        if (left < 4) left = 4;
+        menu.style.left = left + 'px';
+        menu.style.display = 'flex';
+        dd.classList.add('open');
+      }
+      function scheduleClose() {
+        leaveTimer = setTimeout(function () {
+          dd.classList.remove('open');
+          menu.style.display = 'none';
+        }, 150);
+      }
+
+      dd.addEventListener('mouseenter', openMenu);
+      dd.addEventListener('mouseleave', scheduleClose);
+      menu.addEventListener('mouseenter', function () { clearTimeout(leaveTimer); });
+      menu.addEventListener('mouseleave', scheduleClose);
     });
   }
 
-  // HEM MASAÜSTÜ HEM iOS: click
+  // HEM WINDOWS HEM iOS: click
   document.querySelectorAll('.drop-label').forEach(function (btn) {
     var dropId = btn.getAttribute('data-drop-id');
     btn.addEventListener('click', function (e) {
@@ -159,8 +174,14 @@ function initDropdowns() {
   // search
   var searchBtn = document.getElementById('search-btn-main');
   if (searchBtn) searchBtn.addEventListener('click', openSearch);
-}
 
+  // Dışarı tıklayınca kapat
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.dropdown') && !e.target.closest('#apps-popup') && !e.target.closest('.drop-menu')) {
+      closeAllDrops();
+    }
+  });
+}
 
 // ════════════════════════════════════════════════
 // APP SWITCHER + localStorage SON PANEL
@@ -886,12 +907,12 @@ const SOUND_VIDEOS = {
   ocean: 'bn9F19Hi1Lk',
 };
 const SOUND_MP3 = {
-  rain: 'https://assets.mixkit.co/active_storage/sfx/212/212.mp3',
-  forest: 'https://assets.mixkit.co/active_storage/sfx/2515/2515.mp3',
-  wind: 'https://assets.mixkit.co/active_storage/sfx/2520/2520.mp3',
-  fire: 'https://assets.mixkit.co/active_storage/sfx/1004/1004.mp3',
-  piano: 'https://assets.mixkit.co/active_storage/sfx/2519/2519.mp3',
-  ocean: 'https://assets.mixkit.co/active_storage/sfx/2352/2352.mp3',
+  rain: 'https://cdn.freesound.org/previews/346/346170_5121236-lq.mp3',
+  forest: 'https://cdn.freesound.org/previews/416/416079_7037-lq.mp3',
+  wind: 'https://cdn.freesound.org/previews/553/553736_6381832-lq.mp3',
+  fire: 'https://cdn.freesound.org/previews/349/349813_5121236-lq.mp3',
+  piano: 'https://cdn.freesound.org/previews/476/476178_8418129-lq.mp3',
+  ocean: 'https://cdn.freesound.org/previews/402/402543_6381832-lq.mp3',
 };
 const SOUND_ICONS = { rain: '🌧️', forest: '🐦', wind: '💨', fire: '🔥', piano: '🎹', ocean: '🌊' };
 const _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -964,12 +985,7 @@ function playAmbient(type) {
     if (!url) return;
     audio.src = url;
     audio.volume = vol / 100;
-    audio.play().catch(function (err) {
-      console.warn('iOS ses hatası:', err);
-      // Kullanıcıya bildir
-      var icon = document.getElementById('sound-icon');
-      if (icon) icon.textContent = '❌';
-    });
+    audio.play().catch(function () { });
   } else {
     const videoId = SOUND_VIDEOS[type];
     if (!videoId) return;
