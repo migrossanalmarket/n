@@ -50,109 +50,123 @@ const COURSES = [
 ];
 
 // ════════════════════════════════════════════════
-// DROPDOWN — Windows hover + iOS click
+// DROPDOWN — temiz, hem Windows hem iOS
 // ════════════════════════════════════════════════
 
-// Tüm açık menüleri kapat
-function closeAllDrops() {
-  document.querySelectorAll('.dropdown').forEach(function (d) { d.classList.remove('open'); });
-  document.querySelectorAll('.drop-menu').forEach(function (m) { m.style.display = 'none'; });
+function _positionMenu(dd) {
+  var menu = document.querySelector('.drop-menu[data-parent-id="' + dd.id + '"]') || dd.querySelector('.drop-menu');
+  if (!menu) return;
+  var rect = dd.getBoundingClientRect();
+  menu.style.position = 'fixed';
+  menu.style.top = '52px';
+  var leftPos = rect.left;
+  if (leftPos + 260 > window.innerWidth) leftPos = window.innerWidth - 268;
+  if (leftPos < 4) leftPos = 4;
+  menu.style.left = leftPos + 'px';
 }
 
-// Belirli dropdown'ı aç/kapat
+function closeAllDrops() {
+  document.querySelectorAll('.dropdown').forEach(function (d) { d.classList.remove('open'); });
+  document.querySelectorAll('.body-menu').forEach(function (m) { m.style.display = 'none'; });
+}
+
 function toggleDrop(id) {
   var dd = document.getElementById(id);
   if (!dd) return;
-  var menu = dd._menu;
-  if (!menu) return;
   var isOpen = dd.classList.contains('open');
   closeAllDrops();
   if (!isOpen) {
-    var rect = dd.getBoundingClientRect();
-    menu.style.position = 'fixed';
-    menu.style.top = '52px';
-    var left = rect.left;
-    if (left + 260 > window.innerWidth) left = window.innerWidth - 268;
-    if (left < 4) left = 4;
-    menu.style.left = left + 'px';
-    menu.style.display = 'flex';
+    _positionMenu(dd);
     dd.classList.add('open');
+    var menu = document.querySelector('.drop-menu[data-parent-id="' + id + '"]');
+    if (menu) menu.style.display = 'flex';
   }
 }
 
 function initDropdowns() {
-  // Her dropdown'ın menüsünü body'e taşı, referansı sakla
+  // ── MASAÜSTÜ DIŞINDA BÜTÜN MENÜLERİ BODY İÇİNE TAŞI (iOS CLIPPING SORUNU ÇÖZÜMÜ) ──
   document.querySelectorAll('.app-switcher .dropdown').forEach(function (dd) {
     if (!dd.id) return;
     var menu = dd.querySelector('.drop-menu');
-    if (!menu) return;
-    dd._menu = menu;          // hızlı erişim için
-    menu._dd = dd;            // geriye referans
-    menu.style.display = 'none';
-    document.body.appendChild(menu);
+    if (menu) {
+      menu.dataset.parentId = dd.id;
+      menu.classList.add('body-menu');
+      // .app-switcher yatay scroll clipping sorununu engellemek için body'e taşıyoruz
+      document.body.appendChild(menu);
+    }
   });
 
-  // Scroll'da kapat
+  // ── Scroll'da kapat (iOS'ta dokunurken olan mikro kaymaları yok saymak için) ──
   var switcher = document.querySelector('.app-switcher');
   if (switcher) {
-    switcher.addEventListener('scroll', closeAllDrops, { passive: true });
+    var lastScroll = switcher.scrollLeft;
+    switcher.addEventListener('scroll', function () {
+      if (Math.abs(switcher.scrollLeft - lastScroll) > 10) {
+        closeAllDrops();
+      }
+      lastScroll = switcher.scrollLeft;
+    }, { passive: true });
   }
 
-  // WINDOWS: hover — hem dd hem menü üzerindeyken açık tut
-  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    document.querySelectorAll('.app-switcher .dropdown').forEach(function (dd) {
-      if (!dd._menu) return;
-      var menu = dd._menu;
+  // ── MASAÜSTÜ: hover ile aç/kapat ──
+  var isTouch = window.matchMedia('(pointer: coarse)').matches;
+  if (!isTouch) {
+    document.querySelectorAll('.dropdown').forEach(function (dd) {
       var leaveTimer;
+      var menu = document.querySelector('.drop-menu[data-parent-id="' + dd.id + '"]');
 
-      function openMenu() {
+      function onEnter() {
         clearTimeout(leaveTimer);
-        // Diğerlerini kapat ama bu dd'yi aç
-        document.querySelectorAll('.dropdown').forEach(function (d) {
-          if (d !== dd) { d.classList.remove('open'); if (d._menu) d._menu.style.display = 'none'; }
-        });
-        var rect = dd.getBoundingClientRect();
-        menu.style.position = 'fixed';
-        menu.style.top = '52px';
-        var left = rect.left;
-        if (left + 260 > window.innerWidth) left = window.innerWidth - 268;
-        if (left < 4) left = 4;
-        menu.style.left = left + 'px';
-        menu.style.display = 'flex';
+        closeAllDrops();
+        _positionMenu(dd);
         dd.classList.add('open');
+        if (menu) menu.style.display = 'flex';
       }
-      function scheduleClose() {
+      function onLeave() {
         leaveTimer = setTimeout(function () {
           dd.classList.remove('open');
-          menu.style.display = 'none';
+          if (menu) menu.style.display = 'none';
         }, 150);
       }
 
-      dd.addEventListener('mouseenter', openMenu);
-      dd.addEventListener('mouseleave', scheduleClose);
-      menu.addEventListener('mouseenter', function () { clearTimeout(leaveTimer); });
-      menu.addEventListener('mouseleave', scheduleClose);
+      dd.addEventListener('mouseenter', onEnter);
+      dd.addEventListener('mouseleave', onLeave);
+      if (menu) {
+        menu.addEventListener('mouseenter', onEnter);
+        menu.addEventListener('mouseleave', onLeave);
+      }
     });
   }
 
-  // HEM WINDOWS HEM iOS: click
+  // ── HEM MASAÜSTÜ HEM iOS: drop-label'a click & touchstart ──
+  // iOS'ta daha hızlı ve kesin açılması için touchstart da eklendi.
   document.querySelectorAll('.drop-label').forEach(function (btn) {
     var dropId = btn.getAttribute('data-drop-id');
-    btn.addEventListener('click', function (e) {
+    function handleToggle(e) {
       e.stopPropagation();
+      // Eğer touchstart çalıştıysa click'i yoksaymak için bayrak koyuyoruz
+      if (e.type === 'touchstart') {
+        btn.dataset.touched = '1';
+      } else if (e.type === 'click' && btn.dataset.touched === '1') {
+        btn.dataset.touched = '0';
+        return;
+      }
+
       if (dropId === 'apps-menu') {
         toggleAppsMenu();
       } else if (dropId) {
         toggleDrop(dropId);
       }
-    });
+    }
+    btn.addEventListener('click', handleToggle);
+    btn.addEventListener('touchstart', handleToggle, { passive: true });
   });
 
-  // drop-item click
+  // ── drop-item'lara click ──
   document.querySelectorAll('.drop-item').forEach(function (btn) {
-    var app   = btn.getAttribute('data-app');
-    var label = btn.getAttribute('data-label') || '';
-    var drop  = btn.getAttribute('data-drop') || '';
+    var app = btn.getAttribute('data-app');
+    var label = btn.getAttribute('data-label');
+    var drop = btn.getAttribute('data-drop');
     if (app !== null) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -162,7 +176,7 @@ function initDropdowns() {
     }
   });
 
-  // app-logo
+  // ── app-logo click ──
   var logo = document.querySelector('.app-logo');
   if (logo) {
     logo.addEventListener('click', function () {
@@ -171,13 +185,15 @@ function initDropdowns() {
     });
   }
 
-  // search
+  // ── search butonu ──
   var searchBtn = document.getElementById('search-btn-main');
-  if (searchBtn) searchBtn.addEventListener('click', openSearch);
+  if (searchBtn) {
+    searchBtn.addEventListener('click', openSearch);
+  }
 
-  // Dışarı tıklayınca kapat
+  // ── Dışarı tıklayınca kapat ──
   document.addEventListener('click', function (e) {
-    if (!e.target.closest('.dropdown') && !e.target.closest('#apps-popup') && !e.target.closest('.drop-menu')) {
+    if (!e.target.closest('.dropdown') && !e.target.closest('#apps-popup') && !e.target.closest('.body-menu')) {
       closeAllDrops();
     }
   });
@@ -762,6 +778,14 @@ function registerSW() { if ('serviceWorker' in navigator) { const swCode = `cons
 // ════════════════════════════════════════════════
 function initApp() {
   loadTheme();
+  // iOS'ta ses butonları ve ara butonu gizle
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS) {
+    var soundWrap = document.querySelector('.pomo-sound-row-wrap');
+    if (soundWrap) soundWrap.style.display = 'none';
+    var searchBtn = document.getElementById('search-btn-main');
+    if (searchBtn) searchBtn.style.display = 'none';
+  }
   initDropdowns();    // ← HOVER DROPDOWN
   initDashboard();
   pomoRender();       // ← POMODORO
