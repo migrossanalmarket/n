@@ -205,7 +205,13 @@ function initDropdowns() {
 function switchApp(app, label, dropId, fromPopState) {
   document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('visible'));
   const panel = document.getElementById('panel-' + app);
-  if (panel) panel.classList.add('visible');
+  if (panel) {
+    panel.classList.add('visible');
+    panel.classList.remove('panel-enter');
+    void panel.offsetWidth;
+    panel.classList.add('panel-enter');
+    setTimeout(() => panel.classList.remove('panel-enter'), 400);
+  }
   document.querySelectorAll('.drop-item').forEach(b => b.classList.remove('active-item'));
   document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('has-active', 'open'));
   if (dropId) {
@@ -727,7 +733,7 @@ function dStartQuiz() { dQuizQuestions = [...QUIZ_Q].sort(() => Math.random() - 
 function dRenderQuizQ() { if (dQuizCur >= dQuizQuestions.length) { dEndQuiz(); return; } dQuizAnswered = false; const q = dQuizQuestions[dQuizCur]; document.getElementById('dQuizCurrent').textContent = dQuizCur + 1; const opts = q.opts.map((o, i) => `<button class="quiz-option" onclick="dAnswerQuiz(${i})">${o}</button>`).join(''); document.getElementById('dQuizCard').innerHTML = `<div class="quiz-type">SORU ${dQuizCur + 1} / ${dQuizQuestions.length}</div><div class="quiz-q">${q.q}</div><div class="quiz-options">${opts}</div><div class="quiz-feedback" id="dqfb"></div><button class="quiz-next" id="dqnext" onclick="dNextQuizQ()">Sonraki Soru →</button>`; }
 function dAnswerQuiz(i) { if (dQuizAnswered) return; dQuizAnswered = true; const q = dQuizQuestions[dQuizCur]; const opts = document.querySelectorAll('#dQuizCard .quiz-option'); opts.forEach(o => o.disabled = true); const fb = document.getElementById('dqfb'); if (i === q.ans) { opts[i].classList.add('correct'); dQuizScore++; document.getElementById('dQuizScore').textContent = dQuizScore; fb.className = 'quiz-feedback correct-fb show'; fb.textContent = '✓ Doğru! ' + q.exp; } else { opts[i].classList.add('wrong'); opts[q.ans].classList.add('correct'); fb.className = 'quiz-feedback wrong-fb show'; fb.textContent = '✗ Yanlış. ' + q.exp; } document.getElementById('dqnext').classList.add('show'); }
 function dNextQuizQ() { dQuizCur++; if (dQuizCur >= dQuizQuestions.length) dEndQuiz(); else dRenderQuizQ(); }
-function dEndQuiz() { document.getElementById('dQuizCard').style.display = 'none'; const comp = document.getElementById('dQuizComplete'); comp.style.display = 'block'; document.getElementById('dFinalScore').textContent = dQuizScore + ' / ' + dQuizQuestions.length; sessionStorage.setItem('dQuizDone', '1'); dUpdateProgress(); }
+function dEndQuiz() { document.getElementById('dQuizCard').style.display = 'none'; const comp = document.getElementById('dQuizComplete'); comp.style.display = 'block'; document.getElementById('dFinalScore').textContent = dQuizScore + ' / ' + dQuizQuestions.length; sessionStorage.setItem('dQuizDone', '1'); dUpdateProgress(); launchConfetti(); }
 const D_SECTIONS = ['oturumlar', 'terminoloji', 'kaliplar', 'flashcard', 'quiz', 'pratik', 'konusmaci'];
 function dShowSection(id, btn) { D_SECTIONS.forEach(s => { document.getElementById('dsec-' + s).classList.remove('active'); }); document.querySelectorAll('.dnav-btn').forEach(b => b.classList.remove('active')); const target = document.getElementById('dsec-' + id); target.classList.add('active'); if (btn) btn.classList.add('active'); sessionStorage.setItem('dvisited_' + id, '1'); dUpdateProgress(); setTimeout(() => { const top = target.getBoundingClientRect().top + window.pageYOffset - 160; window.scrollTo({ top, behavior: 'smooth' }); }, 50); }
 function dUpdateProgress() { let score = 0, total = 10; D_SECTIONS.forEach(s => { if (sessionStorage.getItem('dvisited_' + s)) score += 1; }); SESSIONS.forEach((_, i) => { if (dIsTracked('sess_' + i)) score += 0.1; }); if (sessionStorage.getItem('dQuizDone')) score += 2; const pct = Math.min(100, Math.round((score / total) * 100)); document.getElementById('dProgressFill').style.width = pct + '%'; document.getElementById('dProgressPct').textContent = pct + '%'; }
@@ -848,6 +854,17 @@ function initPremium() {
   initPullToRefresh();
   initSoundEngine();
   init3DTilt();
+  initAurora();
+  initLiveClock();
+  initStreak();
+  initMotivationQuote();
+  initTypingCursor();
+  initRipple();
+  initMagneticBtns();
+  initPageTransition();
+  initParallax();
+  initStatCounters();
+  initConfetti();
 }
 
 function initCursorGlow() {
@@ -1175,3 +1192,320 @@ async function runDict() {
 
   if (!navigator.onLine) showToast();
 })();
+
+// ════════════════════════════════════════════════
+// 🌌 AURORA ARKA PLAN
+// ════════════════════════════════════════════════
+function initAurora() {
+  const canvas = document.getElementById('aurora-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  const orbs = [
+    { x: 0.2, y: 0.3, r: 0.45, color: [200, 241, 53],  speed: 0.00018, phase: 0 },
+    { x: 0.7, y: 0.2, r: 0.40, color: [56, 189, 248],   speed: 0.00023, phase: 2 },
+    { x: 0.5, y: 0.7, r: 0.38, color: [167, 139, 250],  speed: 0.00015, phase: 4 },
+    { x: 0.85,y: 0.6, r: 0.30, color: [249, 115, 22],   speed: 0.00020, phase: 1 },
+  ];
+
+  let t = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const W = canvas.width, H = canvas.height;
+
+    orbs.forEach(orb => {
+      const px = (orb.x + Math.sin(t * orb.speed * 1000 + orb.phase) * 0.18) * W;
+      const py = (orb.y + Math.cos(t * orb.speed * 800 + orb.phase) * 0.14) * H;
+      const radius = orb.r * Math.min(W, H);
+
+      const grad = ctx.createRadialGradient(px, py, 0, px, py, radius);
+      grad.addColorStop(0, `rgba(${orb.color[0]},${orb.color[1]},${orb.color[2]},0.55)`);
+      grad.addColorStop(0.4, `rgba(${orb.color[0]},${orb.color[1]},${orb.color[2]},0.18)`);
+      grad.addColorStop(1, `rgba(${orb.color[0]},${orb.color[1]},${orb.color[2]},0)`);
+
+      ctx.beginPath();
+      ctx.fillStyle = grad;
+      ctx.arc(px, py, radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    t = performance.now();
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ════════════════════════════════════════════════
+// 🕐 LIVE CLOCK
+// ════════════════════════════════════════════════
+function initLiveClock() {
+  const el = document.getElementById('live-clock');
+  if (!el) return;
+
+  function tick() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    el.textContent = h + ':' + m + ':' + s;
+
+    const hour = now.getHours();
+    el.className = '';
+    if (hour >= 0  && hour < 6)  el.classList.add('late-night');
+    else if (hour >= 6  && hour < 12) el.classList.add('morning');
+    else if (hour >= 12 && hour < 18) el.classList.add('afternoon');
+    else el.classList.add('evening');
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ════════════════════════════════════════════════
+// 🔥 STREAK SAYACI
+// ════════════════════════════════════════════════
+function initStreak() {
+  const badge = document.getElementById('streak-badge');
+  const countEl = document.getElementById('streak-count');
+  if (!badge || !countEl) return;
+
+  const today = new Date().toDateString();
+  const lastVisit = localStorage.getItem('tariktanta-lastvisit');
+  let streak = parseInt(localStorage.getItem('tariktanta-streak') || '0');
+
+  if (lastVisit === today) {
+    // Bugün zaten açılmış, streak aynı
+  } else if (lastVisit === new Date(Date.now() - 86400000).toDateString()) {
+    // Dün açılmış, streak artar
+    streak++;
+    localStorage.setItem('tariktanta-streak', streak);
+  } else if (!lastVisit) {
+    // İlk kez
+    streak = 1;
+    localStorage.setItem('tariktanta-streak', streak);
+  } else {
+    // Seri bozulmuş
+    streak = 1;
+    localStorage.setItem('tariktanta-streak', streak);
+  }
+  localStorage.setItem('tariktanta-lastvisit', today);
+
+  countEl.textContent = streak;
+
+  if (streak >= 7)       badge.style.borderColor = '#f97316';
+  else if (streak >= 3)  badge.style.borderColor = '#fbbf24';
+
+  badge.title = streak + ' gün üst üste açtın!';
+}
+
+// ════════════════════════════════════════════════
+// 💬 MOTİVASYON QUOTE ROTASYONU
+// ════════════════════════════════════════════════
+const MOTIVATION_QUOTES = [
+  '"Bilgi güçtür, çeviri ise o gücü dünyayla paylaşmaktır."',
+  '"Her yeni kelime, yeni bir dünyanın kapısıdır."',
+  '"Son sınıf. Bitmek üzere. Devam et."',
+  '"Çevirmen sadece dil değil, kültür taşır."',
+  '"Bugün öğrendiğin, yarın seni öne çıkarır."',
+  '"Zorluk seviye atlattırır, pes etmek ise yerinde sayar."',
+  '"If you\'re not at the table, you\'re on the menu. — Carney"',
+  '"We are not in Kansas anymore. — Georgieva"',
+  '"Küçük adımlar, büyük mesafeler eder."',
+  '"Bir dil, bir insan. İki dil, iki insan."',
+  '"Sınav tarihi yaklaşıyor — notları şimdi al."',
+  '"To exist is to change. — Parmelin"',
+];
+
+function initMotivationQuote() {
+  const el = document.getElementById('motivation-quote');
+  if (!el) return;
+
+  let idx = Math.floor(Math.random() * MOTIVATION_QUOTES.length);
+  el.textContent = MOTIVATION_QUOTES[idx];
+  el.classList.add('fade-in');
+
+  setInterval(() => {
+    el.classList.remove('fade-in');
+    el.classList.add('fade-out');
+    setTimeout(() => {
+      idx = (idx + 1) % MOTIVATION_QUOTES.length;
+      el.textContent = MOTIVATION_QUOTES[idx];
+      el.classList.remove('fade-out');
+      el.classList.add('fade-in');
+    }, 500);
+  }, 8000);
+}
+
+// ════════════════════════════════════════════════
+// ⌨️ TYPING CURSOR EFEKTİ
+// ════════════════════════════════════════════════
+function initTypingCursor() {
+  const textEl = document.getElementById('greeting-text');
+  if (!textEl) return;
+
+  const fullText = textEl.textContent;
+  textEl.textContent = '';
+  let i = 0;
+
+  function type() {
+    if (i < fullText.length) {
+      textEl.textContent += fullText[i];
+      i++;
+      setTimeout(type, 80 + Math.random() * 40);
+    }
+  }
+  setTimeout(type, 400);
+}
+
+// ════════════════════════════════════════════════
+// 💧 RİPPLE EFEKTİ
+// ════════════════════════════════════════════════
+function initRipple() {
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.ripple-container');
+    if (!btn) return;
+
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple-wave';
+
+    const rect = btn.getBoundingClientRect();
+    ripple.style.left = (e.clientX - rect.left) + 'px';
+    ripple.style.top  = (e.clientY - rect.top)  + 'px';
+
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 650);
+  });
+}
+
+// ════════════════════════════════════════════════
+// 🧲 MAGNETİK BUTON
+// ════════════════════════════════════════════════
+function initMagneticBtns() {
+  document.querySelectorAll('.magnetic-btn').forEach(btn => {
+    btn.addEventListener('mousemove', function(e) {
+      const rect = btn.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top  + rect.height / 2;
+      const dx = (e.clientX - cx) * 0.3;
+      const dy = (e.clientY - cy) * 0.3;
+      btn.style.transform = `translate(${dx}px, ${dy}px)`;
+    });
+    btn.addEventListener('mouseleave', function() {
+      btn.style.transform = '';
+    });
+  });
+}
+
+// ════════════════════════════════════════════════
+// 🎭 PAGE TRANSİTİON
+// ════════════════════════════════════════════════
+function initPageTransition() {
+  // switchApp içine entegre edildi
+}
+
+// ════════════════════════════════════════════════
+// 📜 PARALLAX SCROLL
+// ════════════════════════════════════════════════
+function initParallax() {
+  const hero = document.querySelector('.dash-hero');
+  if (!hero) return;
+
+  window.addEventListener('scroll', function() {
+    const panel = document.getElementById('panel-dashboard');
+    if (!panel || !panel.classList.contains('visible')) return;
+    const y = window.scrollY;
+    hero.style.transform = `translateY(${y * 0.25}px)`;
+    hero.style.opacity = Math.max(0, 1 - y / 320);
+  }, { passive: true });
+}
+
+// ════════════════════════════════════════════════
+// 🔢 STAT COUNTER ANİMASYON
+// ════════════════════════════════════════════════
+function initStatCounters() {
+  // Stat sayaçları değişince bump animasyonu
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(m => {
+      if (m.type === 'childList' || m.type === 'characterData') {
+        const el = m.target.nodeType === 3 ? m.target.parentElement : m.target;
+        if (el && el.classList.contains('stat-count')) {
+          el.classList.remove('bump');
+          void el.offsetWidth;
+          el.classList.add('bump');
+          setTimeout(() => el.classList.remove('bump'), 350);
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.stat-count').forEach(el => {
+    observer.observe(el, { childList: true, subtree: true, characterData: true });
+  });
+}
+
+// ════════════════════════════════════════════════
+// 🎊 CONFETTİ
+// ════════════════════════════════════════════════
+function initConfetti() {
+  // launchConfetti() dEndQuiz ve flashcard tamamlama içinden çağrılır
+}
+
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  if (!canvas) return;
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const COLORS = ['#c8f135','#38bdf8','#a78bfa','#f97316','#f87171','#fbbf24','#4ade80'];
+  const pieces = Array.from({ length: 120 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height * 0.5,
+    w: Math.random() * 10 + 5,
+    h: Math.random() * 6 + 3,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    vx: (Math.random() - 0.5) * 4,
+    vy: Math.random() * 4 + 2,
+    angle: Math.random() * 360,
+    spin: (Math.random() - 0.5) * 8,
+    alpha: 1,
+  }));
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = 0;
+    pieces.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.angle += p.spin;
+      if (p.y > canvas.height * 0.7) p.alpha -= 0.02;
+      if (p.alpha <= 0) return;
+      alive++;
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+    frame++;
+    if (alive > 0 && frame < 300) {
+      requestAnimationFrame(draw);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.style.display = 'none';
+    }
+  }
+  draw();
+}
+
+// Confetti: quiz bitince otomatik tetiklenir (dEndQuiz override kaldırıldı, güvenli versiyon aşağıda)

@@ -26,6 +26,8 @@
 </head>
 
 <body>
+  <canvas id="aurora-canvas"></canvas>
+  <canvas id="confetti-canvas"></canvas>
   <div id="cursor-glow"></div>
   <div id="apps-popup"
     style="display:none;position:fixed;top:52px;right:12px;background:var(--theme-surface);border:1px solid var(--theme-border);border-radius:16px;padding:12px;min-width:280px;z-index:99999;box-shadow:0 12px 40px rgba(0,0,0,0.6);">
@@ -227,9 +229,12 @@
 
   <div class="app-panel visible" id="panel-dashboard">
     <div class="dash-hero">
-      <div class="dash-greeting" id="dash-greeting">MERHABA TARIK</div>
+      <div class="dash-greeting" id="dash-greeting"><span id="greeting-text">MERHABA TARIK</span><span id="typing-cursor"></span></div>
+      <div id="live-clock">00:00:00</div>
+      <div id="streak-badge"><span class="streak-fire">🔥</span><span id="streak-count">0</span> günlük seri</div>
       <div class="dash-title">Привет,<br><span>мальчик</span></div>
       <div class="dash-subtitle" id="dash-subtitle">Son sınıf — 8 ders, 1 hedef.</div>
+      <div id="motivation-quote"></div>
     </div>
     <div class="today-banner" id="today-banner">
       <div>
@@ -252,8 +257,8 @@
           <div class="pomo-mode" id="pomoMode">Çalışma · 0/4</div>
         </div>
         <div class="pomo-controls">
-          <button class="pomo-btn" id="pomoStartBtn" onclick="pomoToggle()">▶ Başlat</button>
-          <button class="pomo-btn" onclick="pomoReset()">↺ Sıfırla</button>
+          <button class="pomo-btn ripple-container magnetic-btn" id="pomoStartBtn" onclick="pomoToggle()">▶ Başlat</button>
+          <button class="pomo-btn ripple-container magnetic-btn" onclick="pomoReset()">↺ Sıfırla</button>
         </div>
         <div class="pomo-sessions" id="pomoDotsWrap">
           <div class="pomo-dot" id="pd0"></div>
@@ -758,15 +763,16 @@
             </div>
           </div>
           <div class="fc-controls">
-            <button class="hbtn btn-p" onclick="hRevealCard()">👁 Göster</button>
-            <button class="hbtn btn-know" onclick="hMarkKnow()">✓ Biliyorum</button>
-            <button class="hbtn btn-dunno" onclick="hMarkDunno()">✗ Bilmiyorum</button>
-            <button class="hbtn btn-muted" onclick="hShuffleCards()">⇄ Karıştır</button>
+            <button class="hbtn btn-p ripple-container" onclick="hRevealCard()">👁 Göster</button>
+            <button class="hbtn btn-know ripple-container" onclick="hMarkKnow()">✓ Biliyorum</button>
+            <button class="hbtn btn-dunno ripple-container" onclick="hMarkDunno()">✗ Bilmiyorum</button>
+            <button class="hbtn btn-muted ripple-container" onclick="hShuffleCards()">⇄ Karıştır</button>
           </div>
+          <div class="swipe-hint"><span>✗ sola kaydır</span><span>·</span><span>sağa kaydır ✓</span></div>
           <div class="leitner-stats" id="h-leitner-stats">
-            <span>📦 Bekleyen: <strong id="h-stat-pending">20</strong></span>
-            <span>✅ Bilen: <strong id="h-stat-known">0</strong></span>
-            <span>🔁 Tekrar: <strong id="h-stat-retry">0</strong></span>
+            <span>📦 Bekleyen: <strong class="stat-count" id="h-stat-pending">20</strong></span>
+            <span>✅ Bilen: <strong class="stat-count" id="h-stat-known">0</strong></span>
+            <span>🔁 Tekrar: <strong class="stat-count" id="h-stat-retry">0</strong></span>
           </div>
           <div class="fc-counter" id="hfc-counter">1 / 20</div>
         </div>
@@ -838,17 +844,18 @@
             </div>
           </div>
           <div class="flash-controls">
-            <button class="flash-btn" onclick="dPrevCard()">← Önceki</button>
+            <button class="flash-btn ripple-container" onclick="dPrevCard()">← Önceki</button>
             <span class="flash-counter" id="dFlashCounter">1 / ?</span>
-            <button class="flash-btn primary" onclick="dNextCard()">Sonraki →</button>
+            <button class="flash-btn primary ripple-container" onclick="dNextCard()">Sonraki →</button>
           </div>
           <div class="flash-controls" style="margin-top:12px">
-            <button class="flash-btn know-btn" onclick="dMarkKnow()">✓ Biliyorum</button>
-            <button class="flash-btn dunno-btn" onclick="dMarkDunno()">✗ Bilmiyorum</button>
+            <button class="flash-btn know-btn ripple-container" onclick="dMarkKnow()">✓ Biliyorum</button>
+            <button class="flash-btn dunno-btn ripple-container" onclick="dMarkDunno()">✗ Bilmiyorum</button>
           </div>
+          <div class="swipe-hint"><span>✗ sola kaydır</span><span>·</span><span>sağa kaydır ✓</span></div>
           <div class="leitner-stats" id="d-leitner-stats">
-            <span>📦 Bekleyen: <strong id="d-stat-pending">?</strong></span>
-            <span>✅ Bilen: <strong id="d-stat-known">0</strong></span>
+            <span>📦 Bekleyen: <strong class="stat-count" id="d-stat-pending">?</strong></span>
+            <span>✅ Bilen: <strong class="stat-count" id="d-stat-known">0</strong></span>
             <span>🔁 Tekrar: <strong id="d-stat-retry">0</strong></span>
           </div>
         </div>
