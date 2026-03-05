@@ -1,3 +1,27 @@
+// ════════════════════════════════════════════════
+// ⚡ UTILITY: DEBOUNCE & THROTTLE
+// ════════════════════════════════════════════════
+function debounce(fn, ms) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), ms);
+  };
+}
+
+function throttle(fn, ms) {
+  let last = 0;
+  return function(...args) {
+    const now = performance.now();
+    if (now - last >= ms) {
+      last = now;
+      fn.apply(this, args);
+    }
+  };
+}
+
+let _davosRendered = false;
+
 const WEEK_AVAILABILITY = {
   'davos':   { 2: true,  3: false, 4: false, 5: false, 6: false, 7: false },
   'hukuk':   { 2: true,  3: false, 4: false, 5: false, 6: false, 7: false },
@@ -190,7 +214,7 @@ function initDropdowns() {
 // ════════════════════════════════════════════════
 (function () {
   let lastY = 0;
-  window.addEventListener('scroll', function () {
+  window.addEventListener('scroll', throttle(function () {
     const nav = document.querySelector('#panel-davos nav');
     if (!nav) return;
     const panel = document.getElementById('panel-davos');
@@ -199,7 +223,10 @@ function initDropdowns() {
     if (y > lastY && y > 100) nav.classList.add('nav-hidden');
     else nav.classList.remove('nav-hidden');
     lastY = y;
-  }, { passive: true });
+    // Nav scrolled shadow
+    const switcher = document.querySelector('.app-switcher');
+    if (switcher) switcher.classList.toggle('scrolled', y > 20);
+  }, 16), { passive: true });
 })();
 
 function switchApp(app, label, dropId, fromPopState) {
@@ -744,7 +771,58 @@ function dToggleTracked(key, elId) { if (dIsTracked(key)) sessionStorage.removeI
 // ════════════════════════════════════════════════
 // PWA
 // ════════════════════════════════════════════════
-function registerSW() { if ('serviceWorker' in navigator) { const swCode = `const CACHE='tariktanta-v2';const ASSETS=['/'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const clone=res.clone();caches.open(CACHE).then(c=>c.put(e.request,clone));return res;}).catch(()=>caches.match('/')))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));`; const blob = new Blob([swCode], { type: 'application/javascript' }); const url = URL.createObjectURL(blob); navigator.serviceWorker.register(url).catch(() => { }); } }
+function registerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  const swCode = `
+    const CACHE = 'tariktanta-v4';
+    const ASSETS = ['/', '/index.html', '/app.js', '/styles.css'];
+
+    // Install: tüm kritik dosyaları cache'e al
+    self.addEventListener('install', e => {
+      e.waitUntil(
+        caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => {}))
+      );
+      self.skipWaiting();
+    });
+
+    // Activate: eski cache'leri temizle
+    self.addEventListener('activate', e => {
+      e.waitUntil(
+        caches.keys().then(keys =>
+          Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+        )
+      );
+      self.clients.claim();
+    });
+
+    // Fetch: stale-while-revalidate — önce cache'den ver, arka planda güncelle
+    self.addEventListener('fetch', e => {
+      if (e.request.method !== 'GET') return;
+      const url = new URL(e.request.url);
+      // Sadece kendi origin'den gelen istekleri handle et
+      if (url.origin !== location.origin) return;
+
+      e.respondWith(
+        caches.open(CACHE).then(cache =>
+          cache.match(e.request).then(cached => {
+            const fetchPromise = fetch(e.request).then(res => {
+              if (res && res.status === 200) {
+                cache.put(e.request, res.clone());
+              }
+              return res;
+            }).catch(() => cached);
+
+            // Cache varsa anında ver, arka planda güncelle
+            return cached || fetchPromise;
+          })
+        )
+      );
+    });
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const url = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url).catch(() => {});
+}
 
 // ════════════════════════════════════════════════
 // INIT
@@ -829,14 +907,8 @@ function initApp() {
   initDashboard();
   pomoRender();
   hRenderCard();
-  dRenderSessions();
-  dRenderTerms();
-  dRenderPhrases();
-  dRenderPractice();
-  dRenderSpeakers();
-  dRenderFlashcard();
-  dStartQuiz();
-  dUpdateProgress();
+  // Lazy render: Davos paneli ilk açılınca render et
+  _davosRendered = false;
   buildSearchIndex();
   registerSW();
   restoreLastPanel();
@@ -1206,7 +1278,7 @@ function initAurora() {
     canvas.height = window.innerHeight;
   }
   resize();
-  window.addEventListener('resize', resize, { passive: true });
+  window.addEventListener('resize', debounce(resize, 150), { passive: true });
 
   const orbs = [
     { x: 0.2, y: 0.3, r: 0.45, color: [200, 241, 53],  speed: 0.00018, phase: 0 },
@@ -1416,13 +1488,13 @@ function initParallax() {
   const hero = document.querySelector('.dash-hero');
   if (!hero) return;
 
-  window.addEventListener('scroll', function() {
+  window.addEventListener('scroll', throttle(function() {
     const panel = document.getElementById('panel-dashboard');
     if (!panel || !panel.classList.contains('visible')) return;
     const y = window.scrollY;
     hero.style.transform = `translateY(${y * 0.25}px)`;
     hero.style.opacity = Math.max(0, 1 - y / 320);
-  }, { passive: true });
+  }, 16), { passive: true });
 }
 
 // ════════════════════════════════════════════════

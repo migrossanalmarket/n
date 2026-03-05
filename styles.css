@@ -4282,3 +4282,229 @@ body::after {
   #aurora-canvas { display: none; }
 }
 
+
+/* ═══════════════════════════════════════════════════════════
+   ⚡ PERFORMANS & HIZLANMA
+═══════════════════════════════════════════════════════════ */
+
+/* content-visibility: uzun panellerde görünmeyen bölümler render edilmez */
+#panel-hukuk .card-grid,
+#panel-davos .term-section,
+#panel-davos .practice-card,
+#panel-davos .speaker-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 200px;
+}
+
+/* will-change: animasyonlu elementlere GPU katmanı */
+.course-card,
+.session-card,
+.week-card,
+#panel-hukuk .card,
+.hflashcard,
+.dflashcard,
+.today-pill,
+.pomo-btn {
+  will-change: transform;
+}
+
+/* overscroll-behavior: tarayıcı bounce sitenin scrollunu bozmasın */
+body {
+  overscroll-behavior: contain;
+}
+.app-panel {
+  overscroll-behavior: contain;
+}
+
+/* subpixel rendering fix: retina'da metin ve border bulanıklığı */
+.course-card,
+.session-card,
+#panel-hukuk .card,
+.week-card,
+.hflashcard,
+.dflashcard {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   🎯 EASING STANDARDİZASYONU — iOS spring
+═══════════════════════════════════════════════════════════ */
+:root {
+  --ease-spring: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast:   180ms;
+  --duration-normal: 320ms;
+  --duration-slow:   480ms;
+}
+
+/* Tüm transition'ları standartlaştır */
+.course-card       { transition: transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal) var(--ease-out), border-color var(--duration-fast) var(--ease-out) !important; }
+.today-pill        { transition: transform var(--duration-fast) var(--ease-spring), box-shadow var(--duration-fast) var(--ease-out) !important; }
+.pomo-btn          { transition: transform var(--duration-fast) var(--ease-spring), box-shadow var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out) !important; }
+.hbtn, .flash-btn  { transition: transform var(--duration-fast) var(--ease-spring), box-shadow var(--duration-fast) var(--ease-out) !important; }
+.drop-label        { transition: color var(--duration-fast) var(--ease-out), text-shadow var(--duration-fast) var(--ease-out) !important; }
+.speaker-card,
+.number-card,
+.abbr-card         { transition: transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal) var(--ease-out), border-color var(--duration-fast) var(--ease-out) !important; }
+.app-panel         { transition: opacity var(--duration-fast) var(--ease-out) !important; }
+body, html         { transition: background var(--duration-normal) var(--ease-out), color var(--duration-normal) var(--ease-out) !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   🎹 FOCUS VISIBLE — klavye navigasyonu
+═══════════════════════════════════════════════════════════ */
+:focus { outline: none; }
+
+:focus-visible {
+  outline: 2px solid var(--theme-accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 4px rgba(200, 241, 53, 0.15);
+}
+
+button:focus-visible,
+.drop-label:focus-visible,
+.drop-item:focus-visible {
+  outline: 2px solid var(--theme-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(200, 241, 53, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   📌 SCROLL SNAP — hafta kartları
+═══════════════════════════════════════════════════════════ */
+.week-overlay-cards {
+  scroll-snap-type: x mandatory;
+  overflow-x: auto;
+  display: flex;
+  gap: 12px;
+  padding-bottom: 4px;
+  /* grid'i override ediyoruz mobilde */
+}
+
+@media (max-width: 600px) {
+  .week-overlay-cards {
+    display: flex !important;
+    flex-wrap: nowrap;
+    grid-template-columns: unset;
+  }
+  .week-card {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    width: 160px;
+  }
+}
+
+/* App switcher scroll snap */
+.app-switcher {
+  scroll-snap-type: x proximity;
+}
+.dropdown {
+  scroll-snap-align: start;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   🌓 COLOR SCHEME & SYSTEM UI
+═══════════════════════════════════════════════════════════ */
+:root {
+  color-scheme: dark light;
+}
+[data-theme="dark"]  { color-scheme: dark; }
+[data-theme="light"] { color-scheme: light; }
+
+/* ═══════════════════════════════════════════════════════════
+   🔠 FONT DISPLAY SWAP (inline fallback)
+═══════════════════════════════════════════════════════════ */
+@font-face {
+  font-family: 'Syne';
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-display: swap;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   🚀 GENEL SMOOTH & PREMIUM DOKUNUŞLAR
+═══════════════════════════════════════════════════════════ */
+
+/* Daha akıcı scroll */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Seçim rengi */
+::selection {
+  background: rgba(200, 241, 53, 0.25);
+  color: var(--theme-text);
+}
+
+/* Image rendering */
+img {
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Kart içi elementlerin will-change'i temizle (performans) */
+.course-card:not(:hover) {
+  will-change: auto;
+}
+
+/* Nav transition daha smooth */
+.app-switcher {
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+.app-switcher.scrolled {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+/* Placeholder paneller daha premium */
+.panel-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  animation: placeholderFadeIn 0.5s var(--ease-spring) forwards;
+}
+@keyframes placeholderFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Leitner stats daha okunaklı */
+.leitner-stats {
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+/* Quiz option daha hızlı feedback */
+.quiz-option {
+  transition: transform var(--duration-fast) var(--ease-spring),
+              background var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out) !important;
+}
+
+/* Dropdown menu daha smooth */
+.drop-menu, .body-menu {
+  transition: opacity var(--duration-fast) var(--ease-out),
+              transform var(--duration-fast) var(--ease-spring) !important;
+}
+
+/* Week overlay modal daha smooth */
+.week-overlay-modal {
+  transition: transform var(--duration-normal) var(--ease-spring) !important;
+}
+

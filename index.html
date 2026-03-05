@@ -4,9 +4,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#08090d" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f8f7f4" media="(prefers-color-scheme: light)">
   <title>Tariktanta · Çalışma İstasyonu</title>
   <meta name="description" content="Tarık'ın çevirmen çalışma istasyonu">
-  <meta name="theme-color" content="#08090d">
+  <!-- Resource hints: kritik dosyaları önceden yükle -->
+  <link rel="preload" href="styles.css" as="style">
+  <link rel="preload" href="app.js" as="script">
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.json">
@@ -18,10 +25,19 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="styles.css">
   <style>
+    /* Critical CSS — FOUC önleme */
+    html{background:#08090d;color:#e8eaf0}
+    [data-theme="light"]{background:#f8f7f4;color:#1e1e2e}
+    body{margin:0;padding:0;min-height:100vh}
+    .app-panel{display:none}
+    .app-panel.visible{display:block}
+    .app-switcher{position:fixed;top:0;left:0;right:0;height:52px;background:#08090d;border-bottom:1px solid #1e2028;z-index:9999}
     #lockscreen{position:fixed;inset:0;background:#08090d;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;gap:12px}
     #lockscreen h2{font-size:28px;font-weight:800;color:#e8eaf0;letter-spacing:2px}
     .lock-sub{font-size:13px;color:#555;letter-spacing:1px}
     #lock-input{background:#111318;border:1px solid #1e2028;border-radius:12px;color:#e8eaf0;font-size:28px;letter-spacing:8px;padding:14px 20px;text-align:center;width:160px;outline:none}
+    #aurora-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.18;mix-blend-mode:screen}
+    #confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99999;display:none}
   </style>
 </head>
 
@@ -957,7 +973,7 @@
   <div class="app-panel" id="panel-tibbi-w7"><div class="panel-placeholder" style="background:#0a1100;min-height:100vh"><div class="placeholder-icon">🔬</div><div class="placeholder-title" style="color:#fb923c">Araştırma Becerileri — 7. Hafta</div><div class="placeholder-sub" style="color:#7a8090">Bu haftanın notları henüz eklenmedi.</div><span class="placeholder-badge" style="border-color:#fb923c;color:#fb923c">Yakında · Hafta notlarını at</span></div></div>
 
   <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js" defer></script>
 
   <!-- HAFTA OVERLAY -->
   <div id="week-overlay">
