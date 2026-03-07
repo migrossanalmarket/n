@@ -127,8 +127,9 @@
       margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-shrink: 0;
+      padding-right: 10px;
     }
 
     .theme-toggle {
@@ -201,10 +202,10 @@
       font-family: 'Syne', sans-serif;
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
       color: var(--theme-muted);
-      padding: 8px 12px;
+      padding: 8px 10px;
       cursor: pointer;
       border-radius: 8px;
       transition: color 0.2s;
@@ -3456,9 +3457,15 @@
       }
       .drop-label {
         font-size: 10px !important;
-        padding: 6px 8px !important;
-        letter-spacing: 0.8px !important;
+        padding: 6px 7px !important;
+        letter-spacing: 0.5px !important;
       }
+      .app-logo-fixed {
+        font-size: 11px !important;
+        padding: 0 8px 0 10px !important;
+      }
+      .search-btn { display: none !important; }
+      .theme-toggle { width: 30px !important; height: 30px !important; }
       /* Hero */
       .dash-hero {
         padding: 24px 20px 18px !important;
