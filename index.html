@@ -245,25 +245,116 @@
   </div>
 
   <div class="app-panel visible" id="panel-dashboard">
+
+    <!-- ░░░ HERO — Full viewport ░░░ -->
     <div class="dash-hero">
-      <div class="dash-greeting" id="dash-greeting"><span id="greeting-text">MERHABA TARIK</span><span id="typing-cursor"></span></div>
-      <div id="live-clock">00:00:00</div>
-      <div id="streak-badge"><span class="streak-fire">🔥</span><span id="streak-count">0</span> günlük seri</div>
-      <div class="dash-title">Привет,<br><span>мальчик</span></div>
-      <div class="dash-subtitle" id="dash-subtitle">Son sınıf — 8 ders, 1 hedef.</div>
-      <div id="motivation-quote"></div>
+      <div class="hero-bg-overlay"></div>
+      <div class="hero-center">
+        <div class="hero-clock-wrap">
+          <div id="live-clock">00:00:00</div>
+          <div class="hero-date" id="hero-date">—</div>
+        </div>
+        <div class="dash-greeting" id="dash-greeting">
+          <span id="greeting-text">MERHABA TARIK</span><span id="typing-cursor"></span>
+        </div>
+        <div id="motivation-quote"></div>
+        <div class="hero-meta">
+          <div id="streak-badge"><span class="streak-fire">🔥</span><span id="streak-count">0</span> gün</div>
+          <div class="hero-meta-sep">·</div>
+          <div class="hero-session-info">Son sınıf · 8 ders</div>
+        </div>
+        <div class="hero-today" id="today-courses-hero"></div>
+      </div>
+      <div class="hero-scroll-hint">
+        <div class="scroll-hint-line"></div>
+        <span>kaydır</span>
+        <div class="scroll-hint-line"></div>
+      </div>
     </div>
-    <div id="daily-goal-widget">
-    <svg id="goal-ring-svg" viewBox="0 0 60 60" width="60" height="60">
-      <circle class="goal-ring-bg" cx="30" cy="30" r="24"/>
-      <circle class="goal-ring-fill" id="goal-ring-fill" cx="30" cy="30" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8"/>
-    </svg>
-    <div class="goal-ring-info">
-      <div class="goal-ring-count"><span id="goal-done">0</span>/<span id="goal-total">20</span></div>
-      <div class="goal-ring-label">günlük hedef</div>
-    </div>
-  </div>
-  <div class="today-banner" id="today-banner">
+
+    <!-- ░░░ BENTO GRID ░░░ -->
+    <div class="dash-bento">
+
+      <!-- Pomodoro — büyük kart -->
+      <div class="bento-card bento-pomo">
+        <div class="bento-label">POMODORO</div>
+        <div class="bento-pomo-inner">
+          <div class="pomo-ring-wrap">
+            <svg class="pomo-ring" viewBox="0 0 64 64">
+              <circle class="pomo-ring-bg" cx="32" cy="32" r="27"/>
+              <circle class="pomo-ring-fill" id="pomoRingFill" cx="32" cy="32" r="27" stroke="#c8f135" stroke-dasharray="169.6" stroke-dashoffset="0"/>
+            </svg>
+            <div class="pomo-display" id="pomoDisplay">25:00</div>
+          </div>
+          <div class="pomo-right">
+            <div class="pomo-mode" id="pomoMode">Çalışma · 0/4</div>
+            <div class="pomo-sessions" id="pomoDotsWrap">
+              <div class="pomo-dot" id="pd0"></div>
+              <div class="pomo-dot" id="pd1"></div>
+              <div class="pomo-dot" id="pd2"></div>
+              <div class="pomo-dot" id="pd3"></div>
+            </div>
+            <div class="pomo-controls">
+              <button class="pomo-btn ripple-container magnetic-btn" id="pomoStartBtn" onclick="pomoToggle()">▶ Başlat</button>
+              <button class="pomo-btn ripple-container magnetic-btn" onclick="pomoReset()">↺</button>
+            </div>
+          </div>
+        </div>
+        <!-- Ambient ses -->
+        <div class="bento-sound-row">
+          <button class="sound-opt active" data-sound="none" onclick="setSound(this)">🔇</button>
+          <button class="sound-opt" data-sound="rain" onclick="setSound(this)">🌧️</button>
+          <button class="sound-opt" data-sound="forest" onclick="setSound(this)">🐦</button>
+          <button class="sound-opt" data-sound="wind" onclick="setSound(this)">💨</button>
+          <button class="sound-opt" data-sound="fire" onclick="setSound(this)">🔥</button>
+          <button class="sound-opt" data-sound="piano" onclick="setSound(this)">🎹</button>
+          <button class="sound-opt" data-sound="ocean" onclick="setSound(this)">🌊</button>
+        </div>
+        <div id="sound-controls" style="display:none;align-items:center;gap:8px;margin-top:6px">
+          <span style="font-size:16px" id="sound-icon">🌧️</span>
+          <input type="range" id="sound-volume" min="0" max="100" value="40" oninput="setSoundVolume(this.value)" style="flex:1;accent-color:var(--theme-accent);cursor:pointer">
+          <span style="font-size:11px;color:var(--theme-muted);min-width:28px" id="sound-vol-label">40%</span>
+          <button onclick="toggleSoundMute()" id="sound-mute-btn" style="background:none;border:1px solid var(--theme-border);border-radius:6px;color:var(--theme-muted);font-size:11px;padding:3px 8px;cursor:pointer;">⏸</button>
+        </div>
+        <canvas class="wave-canvas" id="wave-canvas" height="28"></canvas>
+      </div>
+
+      <!-- Hedef ring + streak — küçük kart -->
+      <div class="bento-card bento-goal">
+        <div class="bento-label">GÜNLÜK HEDEF</div>
+        <div id="daily-goal-widget">
+          <svg id="goal-ring-svg" viewBox="0 0 60 60" width="60" height="60">
+            <circle class="goal-ring-bg" cx="30" cy="30" r="24"/>
+            <circle class="goal-ring-fill" id="goal-ring-fill" cx="30" cy="30" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8"/>
+          </svg>
+          <div class="goal-ring-info">
+            <div class="goal-ring-count"><span id="goal-done">0</span>/<span id="goal-total">20</span></div>
+            <div class="goal-ring-label">flashcard</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Günün terimi — orta kart -->
+      <div class="bento-card bento-wod" id="word-of-day-widget">
+        <div class="bento-label">GÜNÜN TERİMİ</div>
+        <div class="wod-term" id="wod-term"><span class="skeleton" style="display:inline-block;width:140px;height:20px"></span></div>
+        <div class="wod-def" id="wod-def"><span class="skeleton" style="display:inline-block;width:200px;height:13px;margin-top:6px"></span></div>
+      </div>
+
+      <!-- Sözlük — geniş kart -->
+      <div class="bento-card bento-dict">
+        <div class="bento-label">SÖZLÜK</div>
+        <div class="dict-input-row">
+          <input type="text" id="q-dict" class="dict-input" placeholder="Kelime ara…" onkeydown="if(event.key==='Enter') runDict()" autocomplete="off" spellcheck="false">
+          <button class="pomo-btn ripple-container" onclick="runDict()">ARA</button>
+        </div>
+        <div id="dict-result"></div>
+      </div>
+
+    </div><!-- /dash-bento -->
+
+    <!-- ░░░ BUGÜNÜN DERSLERİ ░░░ -->
+    <div class="today-banner" id="today-banner">
       <div>
         <div class="today-label">📅 Bugünün Dersleri</div>
         <div class="today-day" id="today-day-name">—</div>
@@ -271,87 +362,22 @@
       <div class="today-courses" id="today-courses"></div>
     </div>
 
-    <div class="dashboard-grid">
-      <div class="pomodoro-widget" style="margin:0;">
-        <svg class="pomo-ring" viewBox="0 0 64 64">
-          <circle class="pomo-ring-bg" cx="32" cy="32" r="27" />
-          <circle class="pomo-ring-fill" id="pomoRingFill" cx="32" cy="32" r="27" stroke="#c8f135"
-            stroke-dasharray="169.6" stroke-dashoffset="0" />
-        </svg>
-        <div class="pomo-info">
-          <div class="pomo-label">⏱ Pomodoro</div>
-          <div class="pomo-display" id="pomoDisplay">25:00</div>
-          <div class="pomo-mode" id="pomoMode">Çalışma · 0/4</div>
-        </div>
-        <div class="pomo-controls">
-          <button class="pomo-btn ripple-container magnetic-btn" id="pomoStartBtn" onclick="pomoToggle()">▶ Başlat</button>
-          <button class="pomo-btn ripple-container magnetic-btn" onclick="pomoReset()">↺ Sıfırla</button>
-        </div>
-        <div class="pomo-sessions" id="pomoDotsWrap">
-          <div class="pomo-dot" id="pd0"></div>
-          <div class="pomo-dot" id="pd1"></div>
-          <div class="pomo-dot" id="pd2"></div>
-          <div class="pomo-dot" id="pd3"></div>
-        </div>
-      </div>
-      <div class="tool-box" style="margin:0;">
-        <div class="tool-box-label">📖 Hızlı Sözlük</div>
-        <div class="dict-input-row">
-          <input
-            type="text"
-            id="q-dict"
-            class="dict-input"
-            placeholder="İngilizce kelime yaz, Enter'a bas..."
-            onkeydown="if(event.key==='Enter') runDict()"
-            autocomplete="off"
-            spellcheck="false"
-          >
-          <button class="pomo-btn" onclick="runDict()">ARA</button>
-        </div>
-        <div id="dict-result"></div>
-      </div>
-    </div>
-    <div class="pomo-sound-row-wrap" style="padding:0 40px 4px;display:flex;flex-direction:column;gap:4px;margin-top:12px">
-      <div class="pomo-sound-row">
-        <button class="sound-opt active" data-sound="none" onclick="setSound(this)">🔇 Kapalı</button>
-        <button class="sound-opt" data-sound="rain" onclick="setSound(this)">🌧️ Yağmur</button>
-        <button class="sound-opt" data-sound="forest" onclick="setSound(this)">🐦 Orman</button>
-        <button class="sound-opt" data-sound="wind" onclick="setSound(this)">💨 Rüzgar</button>
-        <button class="sound-opt" data-sound="fire" onclick="setSound(this)">🔥 Şömine</button>
-        <button class="sound-opt" data-sound="piano" onclick="setSound(this)">🎹 Piyano</button>
-        <button class="sound-opt" data-sound="ocean" onclick="setSound(this)">🌊 Okyanus</button>
-      </div>
-      <div id="sound-controls" style="display:none;align-items:center;gap:10px;margin-top:8px;padding:0 2px">
-        <span style="font-size:18px" id="sound-icon">🌧️</span>
-        <input type="range" id="sound-volume" min="0" max="100" value="40" oninput="setSoundVolume(this.value)"
-          style="flex:1;accent-color:var(--theme-accent);cursor:pointer">
-        <span style="font-size:11px;color:var(--theme-muted);font-family:'Syne',sans-serif;min-width:28px"
-          id="sound-vol-label">40%</span>
-        <button onclick="toggleSoundMute()" id="sound-mute-btn"
-          style="background:none;border:1px solid var(--theme-border);border-radius:8px;color:var(--theme-muted);font-size:13px;padding:4px 10px;cursor:pointer;transition:all 0.2s;font-family:'Syne',sans-serif">⏸</button>
-      </div>
-      <canvas class="wave-canvas" id="wave-canvas" height="36"></canvas>
-    </div>
-
-    <div class="word-of-day" id="word-of-day-widget">
-      <div class="wod-label">💡 Günün Terimi</div>
-      <div class="wod-term" id="wod-term"><span class="skeleton"
-          style="display:inline-block;width:160px;height:22px"></span></div>
-      <div class="wod-def" id="wod-def"><span class="skeleton"
-          style="display:inline-block;width:240px;height:14px;margin-top:6px"></span></div>
-    </div>
+    <!-- ░░░ TÜM DERSLER ░░░ -->
     <div class="dash-section-title">— TÜM DERSLER</div>
     <div class="course-grid" id="course-grid"></div>
+
+    <!-- ░░░ HAFTALIK PROGRAM ░░░ -->
     <div class="dash-section-title">— HAFTALIK PROGRAM</div>
     <div class="schedule-section">
       <div class="schedule-grid" id="schedule-grid"></div>
     </div>
+
     <div class="shortcuts-bar">
-      <div class="shortcut-hint"><kbd>⌘K</kbd> Global arama</div>
+      <div class="shortcut-hint"><kbd>⌘K</kbd> Komut</div>
       <div class="shortcut-hint"><kbd>D</kbd> Dashboard</div>
-      <div class="shortcut-hint"><kbd>1–7</kbd> Ders geçiş</div>
+      <div class="shortcut-hint"><kbd>1–8</kbd> Ders</div>
       <div class="shortcut-hint"><kbd>T</kbd> Tema</div>
-      <div class="shortcut-hint"><kbd>ESC</kbd> Kapat</div>
+      <div class="shortcut-hint"><kbd>?</kbd> Kısayollar</div>
     </div>
   </div>
 

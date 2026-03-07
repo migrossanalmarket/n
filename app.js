@@ -409,9 +409,11 @@ function initDashboard() {
   const todayCourses = SCHEDULE[showDay] || [];
   document.getElementById('today-day-name').textContent = showLabel;
   const tc = document.getElementById('today-courses');
+  const tcHero = document.getElementById('today-courses-hero');
   if (todayCourses.length === 0) {
     const msg = (isPersembe && hour >= 18) ? '🎉 Hafta sonu — iyi dinlenmeler!' : 'Bugün ders yok 🎉';
     tc.innerHTML = `<span style="font-size:13px;color:var(--theme-muted);font-family:DM Sans,sans-serif">${msg}</span>`;
+    if (tcHero) tcHero.innerHTML = tc.innerHTML;
   } else {
     todayCourses.forEach(c => {
       const pill = document.createElement('button');
@@ -420,6 +422,11 @@ function initDashboard() {
       pill.textContent = `${c.icon} ${c.name} · ${c.time}`;
       pill.onclick = () => { switchApp(c.panel, c.name, c.panel); };
       tc.appendChild(pill);
+      if (tcHero) {
+        const pill2 = pill.cloneNode(true);
+        pill2.onclick = () => { switchApp(c.panel, c.name, c.panel); };
+        tcHero.appendChild(pill2);
+      }
     });
   }
   const grid = document.getElementById('course-grid');
@@ -1409,6 +1416,10 @@ function initLiveClock() {
   const el = document.getElementById('live-clock');
   if (!el) return;
 
+  const heroDateEl = document.getElementById('hero-date');
+  const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+  const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+
   function tick() {
     const now = new Date();
     const h = String(now.getHours()).padStart(2, '0');
@@ -1422,6 +1433,10 @@ function initLiveClock() {
     else if (hour >= 6  && hour < 12) el.classList.add('morning');
     else if (hour >= 12 && hour < 18) el.classList.add('afternoon');
     else el.classList.add('evening');
+
+    if (heroDateEl) {
+      heroDateEl.textContent = dayNames[now.getDay()] + ', ' + now.getDate() + ' ' + monthNames[now.getMonth()] + ' ' + now.getFullYear();
+    }
   }
   tick();
   setInterval(tick, 1000);
