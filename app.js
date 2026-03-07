@@ -2131,3 +2131,680 @@ function initScrollRestore() {
   // _scrollPositions objesi global tanımlı, switchApp içinde kullanılıyor
 }
 
+
+// ════════════════════════════════════════════════
+// 🗂 SIDEBAR
+// ════════════════════════════════════════════════
+function sidebarSetActive(app) {
+  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('sb-' + app);
+  if (btn) btn.classList.add('active');
+}
+
+// ════════════════════════════════════════════════
+// 📊 İSTATİSTİK & HEATMAP
+// ════════════════════════════════════════════════
+function initStats() {
+  statsRenderSummary();
+  statsRenderHeatmap();
+  statsRenderWeekly();
+  statsRenderWeakTopics();
+  statsRenderRevisionPlan();
+}
+
+function statsGetPomodoroData() {
+  try {
+    const raw = localStorage.getItem('tariktanta-pomo-log');
+    return raw ? JSON.parse(raw) : {};
+  } catch(e) { return {}; }
+}
+
+function statsLogPomodoro() {
+  try {
+    const data = statsGetPomodoroData();
+    const today = new Date().toISOString().split('T')[0];
+    data[today] = (data[today] || 0) + 25;
+    localStorage.setItem('tariktanta-pomo-log', JSON.stringify(data));
+  } catch(e) {}
+}
+
+function statsGetQuizLog() {
+  try {
+    const raw = localStorage.getItem('tariktanta-quiz-log');
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function statsLogQuizAnswer(topic, correct) {
+  try {
+    const log = statsGetQuizLog();
+    log.push({ topic, correct, date: new Date().toISOString() });
+    if (log.length > 500) log.splice(0, log.length - 500);
+    localStorage.setItem('tariktanta-quiz-log', JSON.stringify(log));
+  } catch(e) {}
+}
+
+function statsRenderSummary() {
+  // Streak
+  const streakEl = document.getElementById('st-streak');
+  const streakCount = parseInt(localStorage.getItem('tariktanta-streak') || '0');
+  if (streakEl) streakEl.textContent = streakCount;
+
+  // Toplam dakika
+  const minEl = document.getElementById('st-totalmin');
+  if (minEl) {
+    const data = statsGetPomodoroData();
+    const total = Object.values(data).reduce((a, b) => a + b, 0);
+    minEl.textContent = total;
+  }
+
+  // Kart sayısı
+  const cardsEl = document.getElementById('st-cards');
+  if (cardsEl) {
+    const hCards = parseInt(localStorage.getItem('tariktanta-hcards-done') || '0');
+    const dCards = parseInt(localStorage.getItem('tariktanta-dcards-done') || '0');
+    cardsEl.textContent = hCards + dCards;
+  }
+
+  // Quiz skoru
+  const quizEl = document.getElementById('st-quizscore');
+  if (quizEl) {
+    const log = statsGetQuizLog();
+    if (log.length === 0) { quizEl.textContent = '—'; return; }
+    const correct = log.filter(x => x.correct).length;
+    quizEl.textContent = Math.round((correct / log.length) * 100) + '%';
+  }
+}
+
+function statsRenderHeatmap() {
+  const grid = document.getElementById('heatmap-grid');
+  const monthsEl = document.getElementById('heatmap-months');
+  if (!grid) return;
+
+  const data = statsGetPomodoroData();
+  const today = new Date();
+  const weeks = 16;
+  const days = weeks * 7;
+
+  // Başlangıç günü — haftanın pazartesisi
+  const start = new Date(today);
+  start.setDate(today.getDate() - days + 1);
+
+  grid.innerHTML = '';
+  monthsEl && (monthsEl.innerHTML = '');
+
+  let currentWeekEl = null;
+  let lastMonth = -1;
+
+  for (let i = 0; i < days; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const key = d.toISOString().split('T')[0];
+    const mins = data[key] || 0;
+
+    // Yeni hafta
+    if (i % 7 === 0) {
+      currentWeekEl = document.createElement('div');
+      currentWeekEl.className = 'heatmap-week';
+      grid.appendChild(currentWeekEl);
+
+      // Ay etiketi
+      if (monthsEl && d.getMonth() !== lastMonth) {
+        const span = document.createElement('span');
+        span.textContent = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'][d.getMonth()];
+        span.style.cssText = `width:${Math.ceil(days/weeks)*16}px;display:inline-block;`;
+        monthsEl.appendChild(span);
+        lastMonth = d.getMonth();
+      }
+    }
+
+    const cell = document.createElement('div');
+    cell.className = 'hm-cell';
+    const level = mins === 0 ? 0 : mins < 25 ? 1 : mins < 50 ? 2 : mins < 75 ? 3 : 4;
+    cell.dataset.level = level;
+    cell.title = key + (mins ? ` · ${mins} dk` : ' · Çalışılmadı');
+    currentWeekEl.appendChild(cell);
+  }
+}
+
+function statsRenderWeekly() {
+  const wrap = document.getElementById('weekly-bars');
+  if (!wrap) return;
+  const data = statsGetPomodoroData();
+  const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  const today = new Date();
+  // Bu haftanın pazartesisi
+  const mon = new Date(today);
+  mon.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+
+  const vals = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(mon);
+    d.setDate(mon.getDate() + i);
+    vals.push(data[d.toISOString().split('T')[0]] || 0);
+  }
+
+  const maxVal = Math.max(...vals, 1);
+  wrap.innerHTML = '';
+
+  days.forEach((day, i) => {
+    const pct = Math.round((vals[i] / maxVal) * 80);
+    const wrap2 = document.createElement('div');
+    wrap2.className = 'weekly-bar-wrap';
+    wrap2.innerHTML = `
+      <div class="weekly-bar-val">${vals[i] ? vals[i]+'dk' : ''}</div>
+      <div class="weekly-bar" style="height:${pct + 4}px" title="${day}: ${vals[i]} dk"></div>
+      <div class="weekly-bar-label">${day}</div>`;
+    wrap.appendChild(wrap2);
+  });
+}
+
+function statsRenderWeakTopics() {
+  const el = document.getElementById('weak-topics-list');
+  if (!el) return;
+  const log = statsGetQuizLog();
+  if (log.length === 0) return;
+
+  const topicMap = {};
+  log.forEach(x => {
+    if (!topicMap[x.topic]) topicMap[x.topic] = { correct: 0, total: 0 };
+    topicMap[x.topic].total++;
+    if (x.correct) topicMap[x.topic].correct++;
+  });
+
+  const weak = Object.entries(topicMap)
+    .map(([topic, s]) => ({ topic, pct: Math.round((s.correct / s.total) * 100), total: s.total }))
+    .filter(x => x.pct < 70)
+    .sort((a, b) => a.pct - b.pct)
+    .slice(0, 6);
+
+  if (weak.length === 0) {
+    el.innerHTML = '<div class="weak-empty">Henüz zayıf konu yok — harika! 🎉</div>';
+    return;
+  }
+
+  el.innerHTML = weak.map(w => `
+    <div class="weak-topic-item">
+      <span class="weak-topic-name">${w.topic}</span>
+      <span class="weak-topic-score">${w.pct}% doğru · ${w.total} soru</span>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════
+// 🔄 SM-2 SPACED REPETITION
+// ════════════════════════════════════════════════
+function sm2GetData() {
+  try {
+    const raw = localStorage.getItem('tariktanta-sm2');
+    return raw ? JSON.parse(raw) : {};
+  } catch(e) { return {}; }
+}
+
+function sm2Save(data) {
+  try { localStorage.setItem('tariktanta-sm2', JSON.stringify(data)); } catch(e) {}
+}
+
+// quality: 0-5 (0=tamamen yanlış, 5=mükemmel)
+function sm2Update(cardId, quality) {
+  const data = sm2GetData();
+  const now = new Date();
+  let card = data[cardId] || { ef: 2.5, interval: 1, reps: 0, nextReview: now.toISOString().split('T')[0] };
+
+  if (quality < 3) {
+    card.reps = 0;
+    card.interval = 1;
+  } else {
+    if (card.reps === 0) card.interval = 1;
+    else if (card.reps === 1) card.interval = 6;
+    else card.interval = Math.round(card.interval * card.ef);
+    card.reps++;
+  }
+
+  card.ef = Math.max(1.3, card.ef + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+  const next = new Date(now);
+  next.setDate(now.getDate() + card.interval);
+  card.nextReview = next.toISOString().split('T')[0];
+  card.lastQuality = quality;
+
+  data[cardId] = card;
+  sm2Save(data);
+  return card;
+}
+
+function sm2GetDueCards() {
+  const data = sm2GetData();
+  const today = new Date().toISOString().split('T')[0];
+  return Object.entries(data)
+    .filter(([, c]) => c.nextReview <= today)
+    .map(([id, c]) => ({ id, ...c }));
+}
+
+function statsRenderRevisionPlan() {
+  const el = document.getElementById('revision-plan');
+  if (!el) return;
+
+  const data = sm2GetData();
+  const today = new Date();
+  const items = [];
+
+  Object.entries(data).forEach(([id, c]) => {
+    const diff = Math.ceil((new Date(c.nextReview) - today) / 86400000);
+    items.push({ id, diff, nextReview: c.nextReview, ef: c.ef });
+  });
+
+  items.sort((a, b) => a.diff - b.diff);
+  const show = items.slice(0, 8);
+
+  if (show.length === 0) {
+    el.innerHTML = '<div class="weak-empty">Flashcard çalıştıkça tekrar planın otomatik oluşur.</div>';
+    return;
+  }
+
+  const days = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+  el.innerHTML = show.map(item => {
+    const d = new Date(item.nextReview);
+    const label = item.diff < 0 ? 'Gecikmiş' : item.diff === 0 ? 'Bugün' : item.diff === 1 ? 'Yarın' : days[d.getDay()] + ' ' + d.getDate();
+    const badge = item.diff <= 0 ? 'due' : item.diff <= 2 ? 'soon' : 'ok';
+    const shortId = item.id.replace('card-','').substring(0, 30);
+    return `<div class="revision-item">
+      <span class="revision-day">${label}</span>
+      <span class="revision-topic">${shortId}</span>
+      <span class="revision-badge ${badge}">${badge === 'due' ? 'Tekrar Et' : badge === 'soon' ? 'Yakında' : 'Tamam'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════
+// 📝 NOTES EDITÖRÜ
+// ════════════════════════════════════════════════
+let _notesActive = null;
+
+function notesGetAll() {
+  try {
+    const raw = localStorage.getItem('tariktanta-notes');
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function notesSaveAll(notes) {
+  try { localStorage.setItem('tariktanta-notes', JSON.stringify(notes)); } catch(e) {}
+}
+
+function notesInit() {
+  notesRenderList();
+  const notes = notesGetAll();
+  if (notes.length > 0) notesOpen(notes[0].id);
+  else notesShowEmpty();
+
+  const editor = document.getElementById('notes-editor');
+  if (editor) {
+    editor.addEventListener('input', () => {
+      notesSaveContent();
+      notesRenderList();
+      const status = document.getElementById('notes-save-status');
+      if (status) { status.textContent = 'Kaydedildi ✓'; status.style.color = 'var(--theme-accent)'; setTimeout(() => { status.textContent = 'Kaydedildi'; status.style.color = ''; }, 1500); }
+    });
+  }
+}
+
+function notesRenderList(filter = '') {
+  const list = document.getElementById('notes-list');
+  if (!list) return;
+  const notes = notesGetAll().filter(n => !filter || n.title.toLowerCase().includes(filter) || (n.content || '').toLowerCase().includes(filter));
+  list.innerHTML = notes.map(n => `
+    <div class="notes-list-item ${_notesActive === n.id ? 'active' : ''}" onclick="notesOpen('${n.id}')">
+      <div class="notes-list-title">${n.title || 'Başlıksız'}</div>
+      <div class="notes-list-preview">${(n.content || '').replace(/<[^>]+>/g,'').substring(0,50)}</div>
+    </div>`).join('') || '<div style="padding:16px;font-size:12px;color:var(--theme-muted);text-align:center">Not yok</div>';
+}
+
+function notesOpen(id) {
+  const notes = notesGetAll();
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+  _notesActive = id;
+  document.getElementById('notes-title-input').value = note.title || '';
+  document.getElementById('notes-editor').innerHTML = note.content || '';
+  const meta = document.getElementById('notes-meta');
+  if (meta) meta.textContent = new Date(note.updated || note.created).toLocaleString('tr-TR');
+  notesRenderList();
+}
+
+function notesNew() {
+  const notes = notesGetAll();
+  const note = { id: 'note-' + Date.now(), title: 'Yeni Not', content: '', created: new Date().toISOString(), updated: new Date().toISOString() };
+  notes.unshift(note);
+  notesSaveAll(notes);
+  notesOpen(note.id);
+  notesRenderList();
+  setTimeout(() => { const t = document.getElementById('notes-title-input'); if (t) { t.focus(); t.select(); } }, 50);
+}
+
+function notesShowEmpty() {
+  const editor = document.getElementById('notes-editor');
+  const title = document.getElementById('notes-title-input');
+  if (editor) editor.innerHTML = '';
+  if (title) title.value = '';
+}
+
+function notesSaveContent() {
+  if (!_notesActive) return;
+  const notes = notesGetAll();
+  const idx = notes.findIndex(n => n.id === _notesActive);
+  if (idx === -1) return;
+  notes[idx].content = document.getElementById('notes-editor').innerHTML;
+  notes[idx].updated = new Date().toISOString();
+  notesSaveAll(notes);
+}
+
+function notesSaveTitle(val) {
+  if (!_notesActive) return;
+  const notes = notesGetAll();
+  const idx = notes.findIndex(n => n.id === _notesActive);
+  if (idx === -1) return;
+  notes[idx].title = val;
+  notes[idx].updated = new Date().toISOString();
+  notesSaveAll(notes);
+  notesRenderList();
+}
+
+function notesDelete() {
+  if (!_notesActive) return;
+  if (!confirm('Bu notu silmek istiyor musun?')) return;
+  const notes = notesGetAll().filter(n => n.id !== _notesActive);
+  notesSaveAll(notes);
+  _notesActive = null;
+  notesRenderList();
+  if (notes.length > 0) notesOpen(notes[0].id);
+  else notesShowEmpty();
+}
+
+function notesFilter(val) {
+  notesRenderList(val.toLowerCase());
+}
+
+function notesFmt(cmd, val) {
+  document.getElementById('notes-editor').focus();
+  document.execCommand(cmd, false, val || null);
+  notesSaveContent();
+}
+
+// Highlight → Flashcard (notlar panelinden)
+function notesToFlashcard() {
+  const sel = window.getSelection();
+  const text = sel ? sel.toString().trim() : '';
+  const modal = document.getElementById('hfc-modal');
+  if (!modal) return;
+  document.getElementById('hfc-q').value = text.substring(0, 120);
+  document.getElementById('hfc-a').value = '';
+  modal.style.display = 'flex';
+  setTimeout(() => document.getElementById('hfc-a').focus(), 50);
+}
+
+// Global highlight popup (tüm panellerde seçim)
+function initHighlightPopup() {
+  const popup = document.getElementById('highlight-popup');
+  if (!popup) return;
+
+  document.addEventListener('mouseup', (e) => {
+    if (popup.contains(e.target)) return;
+    setTimeout(() => {
+      const sel = window.getSelection();
+      const text = sel ? sel.toString().trim() : '';
+      if (text.length > 3) {
+        const range = sel.getRangeAt(0).getBoundingClientRect();
+        popup.style.display = 'flex';
+        popup.style.top = (range.top + window.scrollY - 48) + 'px';
+        popup.style.left = Math.min(range.left, window.innerWidth - 200) + 'px';
+        window._highlightText = text;
+      } else {
+        popup.style.display = 'none';
+      }
+    }, 10);
+  });
+
+  document.addEventListener('mousedown', (e) => {
+    if (!popup.contains(e.target)) popup.style.display = 'none';
+  });
+}
+
+function highlightToFlashcard() {
+  const text = window._highlightText || '';
+  const modal = document.getElementById('hfc-modal');
+  if (!modal) return;
+  document.getElementById('highlight-popup').style.display = 'none';
+  document.getElementById('hfc-q').value = text.substring(0, 120);
+  document.getElementById('hfc-a').value = '';
+  modal.style.display = 'flex';
+  setTimeout(() => document.getElementById('hfc-a').focus(), 50);
+}
+
+function highlightCopy() {
+  const text = window._highlightText || '';
+  navigator.clipboard.writeText(text).catch(() => {});
+  document.getElementById('highlight-popup').style.display = 'none';
+  showToast && showToast('📋 Kopyalandı', 'success', 1500);
+}
+
+function hfcSave() {
+  const q = document.getElementById('hfc-q').value.trim();
+  const a = document.getElementById('hfc-a').value.trim();
+  const cat = document.getElementById('hfc-cat').value;
+  if (!q || !a) { showToast && showToast('Soru ve cevap gerekli', 'error', 2000); return; }
+
+  // localStorage'a custom flashcard olarak kaydet
+  try {
+    const raw = localStorage.getItem('tariktanta-custom-fc');
+    const cards = raw ? JSON.parse(raw) : [];
+    const id = 'card-' + cat + '-' + Date.now();
+    cards.push({ id, q, a, cat, created: new Date().toISOString() });
+    localStorage.setItem('tariktanta-custom-fc', JSON.stringify(cards));
+    // SM-2'ye ekle
+    sm2Update(id, 3);
+  } catch(e) {}
+
+  document.getElementById('hfc-modal').style.display = 'none';
+  showToast && showToast('✅ Flashcard eklendi! · ' + cat, 'success', 2000);
+}
+
+// ════════════════════════════════════════════════
+// 🕸 BİLGİ GRAFİĞİ
+// ════════════════════════════════════════════════
+const GRAPH_DATA = {
+  all: {
+    nodes: [
+      { id: 'ceviribilim', label: 'Çeviribilim', group: 'genel', desc: 'Çeviriyi bilimsel olarak inceleyen disiplin' },
+      { id: 'skopos', label: 'Skopos Teorisi', group: 'genel', desc: 'Çevirinin amacını ön plana çıkaran teori (Reiss & Vermeer)' },
+      { id: 'functionalism', label: 'Fonksiyonalizm', group: 'genel', desc: 'Metnin işlevini esas alan çeviri yaklaşımı' },
+      { id: 'eqivalence', label: 'Eşdeğerlik', group: 'genel', desc: 'Kaynak ve hedef metin arasındaki denklik' },
+      { id: 'dynamic-eq', label: 'Dinamik Eşdeğerlik', group: 'genel', desc: 'Nida\'nın alıcı odaklı eşdeğerlik kavramı' },
+      { id: 'formal-eq', label: 'Biçimsel Eşdeğerlik', group: 'genel', desc: 'Kaynak metne yapısal bağlılık' },
+      { id: 'domestication', label: 'Evcilleştirme', group: 'genel', desc: 'Metni hedef kültüre uyarlama (Venuti)' },
+      { id: 'foreignization', label: 'Yabancılaştırma', group: 'genel', desc: 'Kaynak kültürü koruma stratejisi (Venuti)' },
+      { id: 'geopolitik', label: 'Jeopolitik', group: 'davos', desc: 'Coğrafyanın siyaset üzerindeki etkisi' },
+      { id: 'multilateralism', label: 'Multilateralizm', group: 'davos', desc: 'Çok taraflı uluslararası iş birliği' },
+      { id: 'sovereignty', label: 'Egemenlik', group: 'davos', desc: 'Devletin bağımsız yönetim hakkı' },
+      { id: 'soft-power', label: 'Soft Power', group: 'davos', desc: 'Caydırıcı olmayan etki gücü (Nye)' },
+      { id: 'hukuk-cevirisi', label: 'Hukuki Çeviri', group: 'hukuk', desc: 'Hukuki metinlerin çevirisi' },
+      { id: 'terminoloji', label: 'Terminoloji', group: 'hukuk', desc: 'Teknik terimlerin sistematik incelenmesi' },
+      { id: 'legalization', label: 'Legalizasyon', group: 'hukuk', desc: 'Resmi belge onaylama süreci' },
+      { id: 'feminist-trans', label: 'Feminist Çeviri', group: 'genel', desc: 'Toplumsal cinsiyeti göz önünde bulunduran çeviri' },
+    ],
+    edges: [
+      ['ceviribilim','skopos'],['ceviribilim','eqivalence'],['ceviribilim','functionalism'],
+      ['skopos','functionalism'],['eqivalence','dynamic-eq'],['eqivalence','formal-eq'],
+      ['domestication','functionalism'],['foreignization','functionalism'],
+      ['domestication','eqivalence'],['geopolitik','multilateralism'],
+      ['geopolitik','sovereignty'],['multilateralism','soft-power'],
+      ['hukuk-cevirisi','terminoloji'],['hukuk-cevirisi','legalization'],
+      ['terminoloji','ceviribilim'],['feminist-trans','ceviribilim'],
+      ['skopos','hukuk-cevirisi'],
+    ]
+  }
+};
+
+let _graphNodes = [];
+let _graphEdges = [];
+let _graphDrag = null;
+let _graphOffset = { x: 0, y: 0 };
+let _graphAnimFrame = null;
+
+function graphRender() {
+  const canvas = document.getElementById('graph-canvas');
+  if (!canvas) return;
+  cancelAnimationFrame(_graphAnimFrame);
+
+  const filter = document.getElementById('graph-filter')?.value || 'all';
+  const allData = GRAPH_DATA.all;
+  const nodes = filter === 'all' ? allData.nodes : allData.nodes.filter(n => n.group === filter || n.group === 'genel');
+  const nodeIds = new Set(nodes.map(n => n.id));
+  const edges = allData.edges.filter(([a, b]) => nodeIds.has(a) && nodeIds.has(b));
+
+  const W = canvas.offsetWidth || 800;
+  const H = canvas.offsetHeight || 500;
+  canvas.width = W;
+  canvas.height = H;
+
+  const colorMap = { genel: '#c8f135', davos: '#38bdf8', hukuk: '#f472b6' };
+
+  // Force-directed layout init
+  _graphNodes = nodes.map((n, i) => ({
+    ...n,
+    x: W / 2 + Math.cos((i / nodes.length) * Math.PI * 2) * (W * 0.3),
+    y: H / 2 + Math.sin((i / nodes.length) * Math.PI * 2) * (H * 0.3),
+    vx: 0, vy: 0,
+    color: colorMap[n.group] || '#888'
+  }));
+  _graphEdges = edges.map(([a, b]) => ({
+    src: _graphNodes.find(n => n.id === a),
+    tgt: _graphNodes.find(n => n.id === b)
+  })).filter(e => e.src && e.tgt);
+
+  function simulate() {
+    // Repulsion
+    for (let i = 0; i < _graphNodes.length; i++) {
+      for (let j = i + 1; j < _graphNodes.length; j++) {
+        const a = _graphNodes[i], b = _graphNodes[j];
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const dist = Math.max(Math.sqrt(dx*dx + dy*dy), 1);
+        const force = 3000 / (dist * dist);
+        const fx = (dx / dist) * force, fy = (dy / dist) * force;
+        a.vx -= fx; a.vy -= fy;
+        b.vx += fx; b.vy += fy;
+      }
+    }
+    // Attraction (edges)
+    _graphEdges.forEach(e => {
+      const dx = e.tgt.x - e.src.x, dy = e.tgt.y - e.src.y;
+      const dist = Math.max(Math.sqrt(dx*dx + dy*dy), 1);
+      const force = (dist - 120) * 0.03;
+      const fx = (dx / dist) * force, fy = (dy / dist) * force;
+      e.src.vx += fx; e.src.vy += fy;
+      e.tgt.vx -= fx; e.tgt.vy -= fy;
+    });
+    // Center gravity
+    _graphNodes.forEach(n => {
+      n.vx += (W/2 - n.x) * 0.005;
+      n.vy += (H/2 - n.y) * 0.005;
+      // Damping
+      n.vx *= 0.85; n.vy *= 0.85;
+      if (n !== _graphDrag) {
+        n.x += n.vx; n.y += n.vy;
+      }
+      // Bounds
+      n.x = Math.max(50, Math.min(W - 50, n.x));
+      n.y = Math.max(30, Math.min(H - 30, n.y));
+    });
+  }
+
+  function draw() {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+
+    // Edges
+    _graphEdges.forEach(e => {
+      ctx.beginPath();
+      ctx.moveTo(e.src.x, e.src.y);
+      ctx.lineTo(e.tgt.x, e.tgt.y);
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+
+    // Nodes
+    _graphNodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, 8, 0, Math.PI * 2);
+      ctx.fillStyle = n.color;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = n.color;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#fff';
+      ctx.font = '11px IBM Plex Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(n.label, n.x, n.y - 13);
+    });
+  }
+
+  let tick = 0;
+  function loop() {
+    if (tick < 200) { simulate(); tick++; }
+    draw();
+    _graphAnimFrame = requestAnimationFrame(loop);
+  }
+  loop();
+
+  // Drag
+  canvas.onmousedown = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    _graphDrag = _graphNodes.find(n => Math.hypot(n.x - mx, n.y - my) < 14) || null;
+    if (_graphDrag) { _graphOffset = { x: mx - _graphDrag.x, y: my - _graphDrag.y }; }
+  };
+  canvas.onmousemove = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    if (_graphDrag) { _graphDrag.x = mx - _graphOffset.x; _graphDrag.y = my - _graphOffset.y; }
+
+    // Tooltip
+    const tooltip = document.getElementById('graph-tooltip');
+    if (!tooltip) return;
+    const hovered = _graphNodes.find(n => Math.hypot(n.x - mx, n.y - my) < 14);
+    if (hovered) {
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.clientX + 12) + 'px';
+      tooltip.style.top = (e.clientY - 10) + 'px';
+      tooltip.innerHTML = `<strong>${hovered.label}</strong><br><span style="font-size:11px;opacity:0.7">${hovered.desc}</span>`;
+    } else {
+      tooltip.style.display = 'none';
+    }
+  };
+  canvas.onmouseup = () => { _graphDrag = null; };
+  canvas.onmouseleave = () => {
+    _graphDrag = null;
+    const tooltip = document.getElementById('graph-tooltip');
+    if (tooltip) tooltip.style.display = 'none';
+  };
+}
+
+// ════════════════════════════════════════════════
+// switchApp'e yeni paneller için hook
+// ════════════════════════════════════════════════
+const _origSwitchApp = switchApp;
+window.switchApp = function(app, label, dropId, fromPopState) {
+  _origSwitchApp(app, label, dropId, fromPopState);
+  sidebarSetActive(app);
+  if (app === 'stats') setTimeout(initStats, 50);
+  if (app === 'notes') setTimeout(notesInit, 50);
+  if (app === 'graph') setTimeout(graphRender, 50);
+};
+
+// initPremium'a highlight popup ekle
+const _origInitPremium = initPremium;
+window.initPremium = function() {
+  _origInitPremium();
+  initHighlightPopup();
+};
+

@@ -113,6 +113,35 @@
     </div>
   </div>
 
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo" onclick="switchApp('dashboard','','')">TT</div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-btn active" id="sb-dashboard" onclick="switchApp('dashboard','','');sidebarSetActive('dashboard')" title="Dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="sidebar-btn" id="sb-stats" onclick="switchApp('stats','İstatistik','stats');sidebarSetActive('stats')" title="İstatistik">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>İstatistik</span>
+      </button>
+      <button class="sidebar-btn" id="sb-notes" onclick="switchApp('notes','Notlar','notes');sidebarSetActive('notes')" title="Notlar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Notlar</span>
+      </button>
+      <button class="sidebar-btn" id="sb-graph" onclick="switchApp('graph','Bilgi Grafiği','graph');sidebarSetActive('graph')" title="Bilgi Grafiği">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><line x1="12" y1="7" x2="5" y2="17"/><line x1="12" y1="7" x2="19" y2="17"/><line x1="5" y1="19" x2="19" y2="19"/></svg>
+        <span>Graf</span>
+      </button>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="sidebar-btn" onclick="toggleTheme()" title="Tema">
+        <span id="sb-theme-icon">🌙</span>
+        <span>Tema</span>
+      </button>
+    </div>
+  </div>
+
   <div class="app-switcher">
     <div class="app-logo-fixed" id="app-logo-fixed" onclick="switchApp('dashboard','','')">Tariktanta</div>
     <div class="app-switcher-scroll">
@@ -1066,6 +1095,12 @@
   <div id="session-timer">⏱ <span id="session-time">00:00</span></div>
 
   <!-- Command Palette -->
+  <!-- HIGHLIGHT → FLASHCARD POPUP -->
+  <div id="highlight-popup" style="display:none;position:fixed;z-index:99980;background:#1a1d26;border:1px solid #c8f135;border-radius:10px;padding:6px 4px;gap:4px;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+    <button onclick="highlightToFlashcard()" style="background:none;border:none;color:#c8f135;font-size:11px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;padding:4px 10px;cursor:pointer;white-space:nowrap;">➕ Flashcard</button>
+    <button onclick="highlightCopy()" style="background:none;border:none;color:#7a8090;font-size:11px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;padding:4px 10px;cursor:pointer;white-space:nowrap;">📋 Kopyala</button>
+  </div>
+
   <div id="command-palette-overlay" style="display:none;position:fixed;inset:0;z-index:99995;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);">
     <div id="command-palette">
       <div class="cmd-search-wrap">
